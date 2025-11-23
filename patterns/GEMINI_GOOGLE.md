@@ -247,6 +247,40 @@ def topo_sort(n, edges):
     return result if len(result) == n else [] # Cycle detection
 ```
 **The Battleground:** 207, 210, 269, 310
+### Short Notes: Topological Sort (Kahn’s Algorithm)
+
+**Edge `u → v`**  
+- Means: **u must finish before v** starts  
+- v depends on u → **only v’s indegree increases**
+
+**Indegree[v]**  
+- Number of incoming edges to v  
+- Meaning: **“How many nodes must finish before v can start?”**  
+- indegree = 0 → node is ready (no dependency)
+
+**Why separate indegree map?**  
+- Fast O(1) access & update  
+- Needed for real-time decrement when a prerequisite finishes  
+- Counting from graph each time would be O(n²) → too slow
+
+**Queue (q)**  
+- Initially contains all nodes with indegree == 0 (independent nodes)  
+- While processing a node, reduce indegree of its neighbors  
+- When any neighbor’s indegree becomes 0 → add to queue
+
+**Result list**  
+- Stores nodes in valid topological order
+
+**Cycle Detection**  
+```python
+return result if len(result) == n else []
+```
+- If graph has a cycle → some nodes never get indegree 0  
+- len(result) < n → cycle exists → return empty list  
+- len(result) == n → valid DAG → return the order
+
+**Summary in one line**  
+Start with nodes having zero dependencies, keep freeing dependent nodes as their prerequisites finish. If all nodes get processed → valid order, else → cycle.
 
 ### 12. Union Find (Disjoint Set Union)
 **The Signal:** "Connected components", "Number of Islands 2", "Redundant Connection", "Graph Valid Tree".
@@ -368,5 +402,6 @@ def grid_dp(grid):
     *   Week 3: Patterns 5, 6 (Search) + 7 (Heaps)
     *   Week 4: The rest.
 3.  **The "Stuck" Rule:** If you can't solve a problem in 20 minutes, **STOP**. Look at the solution, identify which of the 16 patterns it uses, and write that down.
+
 
 You now have the source code for the interview. Good luck.
