@@ -323,7 +323,7 @@ Here's a shortened version with all important details preserved:
 class UnionFind:
     def __init__(self, n):
         # Each node is initially its own parent (isolated trees)
-        self.parent = list(range(n))
+        self.parent = list(range(n))  # index: child and the value at that index: parent 
         # Rank tracks tree depth for balancing
         self.rank = [1] * n
         
@@ -472,5 +472,6 @@ def grid_dp(grid):
 
 
 You now have the source code for the interview. Good luck.
+
 
 
