@@ -293,7 +293,7 @@ class UnionFind:
     def find(self, n):
         p = self.parent[n]
         while p != self.parent[p]:
-            self.parent[p] = self.parent[self.parent[p]] # Path compression
+            self.parent[p] = self.parent[self.parent[p]] 
             p = self.parent[p]
         return p
         
@@ -327,18 +327,18 @@ class UnionFind:
         # Rank tracks tree depth for balancing
         self.rank = [1] * n
         
-    def find(self, n):
+    def find(self, n):  # root of the node 
         # Find the root representative of n's set
         p = self.parent[n]
         
         # Traverse up until finding a node that is its own parent (root)
-        while p != self.parent[p]:
+        while p != self.parent[p]:                        # keep going until we reach the root
             # PATH COMPRESSION: Point to grandparent to shorten path
-            self.parent[p] = self.parent[self.parent[p]] 
-            p = self.parent[p]
+            self.parent[p] = self.parent[self.parent[p]]  # path compression step (kind of like linkedlist where connection index is connected to next value)
+            p = self.parent[p]                            # move one step forward
         return p
         
-    def union(self, n1, n2):
+    def union(self, n1, n2):  # if both nodes in same set or NOT
         # Merge sets containing n1 and n2
         p1, p2 = self.find(n1), self.find(n2)
         
@@ -472,6 +472,7 @@ def grid_dp(grid):
 
 
 You now have the source code for the interview. Good luck.
+
 
 
 
