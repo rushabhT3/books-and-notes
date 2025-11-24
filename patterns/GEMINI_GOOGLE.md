@@ -312,6 +312,72 @@ class UnionFind:
 ```
 **The Battleground:** 547, 684, 200, 305, 721
 
+Here's a shortened version with all important details preserved:
+
+---
+
+**Union-Find Code Explained**
+
+```python
+class UnionFind:
+    def __init__(self, n):
+        # Each node is initially its own parent (isolated trees)
+        self.parent = list(range(n))
+        # Rank tracks tree depth for balancing
+        self.rank = [1] * n
+        
+    def find(self, n):
+        # Find the root representative of n's set
+        p = self.parent[n]
+        
+        # Traverse up until finding a node that is its own parent (root)
+        while p != self.parent[p]:
+            # PATH COMPRESSION: Point to grandparent to shorten path
+            self.parent[p] = self.parent[self.parent[p]] 
+            p = self.parent[p]
+        return p
+        
+    def union(self, n1, n2):
+        # Merge sets containing n1 and n2
+        p1, p2 = self.find(n1), self.find(n2)
+        
+        # Already in same set
+        if p1 == p2: return False
+        
+        # UNION BY RANK: Attach shorter tree to taller tree
+        if self.rank[p1] > self.rank[p2]:
+            self.parent[p2] = p1
+        elif self.rank[p1] < self.rank[p2]:
+            self.parent[p1] = p2
+        else:
+            self.parent[p2] = p1
+            self.rank[p1] += 1
+        return True
+```
+
+**Key Optimizations:**
+
+1. **Path Compression** (`self.parent[p] = self.parent[self.parent[p]]`):
+   - Skips intermediate nodes by pointing to grandparent
+   - Flattens tree structure over time through repeated applications
+   - Reduces future lookups from O(N) to nearly O(1)
+   - Works via while loop - doesn't need grandparent to be root, just closer to it
+
+2. **Union by Rank**:
+   - Attaches shorter tree to taller tree
+   - Keeps maximum height logarithmic O(log N)
+   - Prevents long linked-list structures
+
+**Why Path Compression Works:**
+- Even if grandparent isn't the root, the while loop continues climbing
+- Example: Chain 0→1→2→3→4 (root)
+  - Iteration 1: 0 points to 2 (skips 1)
+  - Iteration 2: 2 points to 4 (skips 3)
+  - Result: Path reduced from 4 to 2 hops
+- Can't miss the root - worst case is pointing to root itself. Since the root's parent is the root itself (`parent[root] == root`), the while loop condition `p != self.parent[p]` will stop exactly at the root, ensuring we never skip past it.
+
+**Complexity:** O(α(N)) where α is the Inverse Ackermann function - effectively O(1) constant time for all practical purposes.
+
 ---
 
 ## PART 4: ADVANCED DATA STRUCTURES & DP
@@ -405,3 +471,4 @@ def grid_dp(grid):
 
 
 You now have the source code for the interview. Good luck.
+
