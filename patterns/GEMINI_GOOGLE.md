@@ -388,7 +388,7 @@ class UnionFind:
 **The Signal:** "Next Greater Element", "Next Smaller Element", "Largest Rectangle in Histogram", "Daily Temperatures".
 ```python
 def next_greater_element(nums):
-    stack = [] # Stores indices
+    stack = [] # Stores indices (here, it's like decreasing array element indices)
     res = [-1] * len(nums)
     
     for i, num in enumerate(nums):
@@ -647,6 +647,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
