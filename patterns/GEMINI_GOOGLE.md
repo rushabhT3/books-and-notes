@@ -447,22 +447,68 @@ def insert(self, word):
     curr.is_end = True           # Mark: a word ends here!
 ```
 
-### 15. DP: 0/1 Knapsack (Subsets)
+### 15. DP: 0/1 Knapsack (Subsets: following solution is NOT real KnapSack problem: but it's special version)
 **The Signal:** "Partition Equal Subset Sum", "Target Sum", "Coin Change 2".
 ```python
 def knapsack(nums, target):
     # dp[i] = can we sum to 'i'?
-    dp = [False] * (target + 1)
+    dp = [False] * (target + 1)       # target + 1: because we care about upto target values NOT len(nums)
     dp[0] = True # Base case
     
     for num in nums:
         # Iterate BACKWARDS to avoid using same item twice
-        for i in range(target, num - 1, -1):
+        for i in range(target, num - 1, -1):      # target to num range as going further down would be less than 0 
             if dp[i - num]:
                 dp[i] = True
     return dp[target]
 ```
 **The Battleground:** 416, 494, 322, 518
+
+The knapsack problem is a `classic optimization problem where you must choose items with a certain weight and profit to include in a knapsack with a limited weight capacity, with the goal of maximizing the total profit`. It involves deciding which items to pack to get the most value without exceeding the weight limit. Common variations include the 0-1 knapsack problem, where each item can either be included or not, and the fractional knapsack problem, where you can take parts of items. 
+
+## Why Reverse Iteration (“Inverse Propagation”) in 0/1 Knapsack Prevents Duplicate Use (but in unbounded it's different way)
+
+1. **DP State Setup**
+
+   * Suppose you use a 1D dp array: `dp[w]` = maximum value you can get with capacity exactly `w`.
+   * You iterate through each item `i` and for each capacity `w`, you consider whether to take that item or not.
+
+2. **Risk if You Iterate Forwards**
+
+   * If you do:
+
+     ```
+     for each item i:  
+       for w = wt[i] to W:  
+         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
+     ```
+   * Here, when you compute `dp[w]`, `dp[w - wt[i]]` **might have already been updated in the same iteration** of item `i`. That means you could be reusing the same item `i` more than once in this item’s iteration → Leading to duplicate usage, which is **not allowed** in 0/1 knapsack.
+   * This is precisely why for 0/1 knapsack, you should loop capacity in reverse.
+
+3. **Reverse Loop Fixes This**
+
+   * Instead, do:
+
+     ```
+     for each item i:  
+       for (w = W; w >= wt[i]; w--) {  
+         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
+       }  
+     ```
+   * Because you're going from high `w` down to `wt[i]`, when you refer to `dp[w - wt[i]]`, that value is from **before** this iteration of `i` (i.e., from the “previous item state”), not something you may have just modified.
+   * This ensures **each item is used at most once** in that iteration, thereby correctly implementing 0/1 knapsack. ([thealgorists.com][1])
+
+4. **In Unbounded Knapsack (Duplicates Allowed)**
+
+   * When duplicates are allowed (unbounded knapsack), you can (and do) iterate forwards:
+
+     ```
+     for each item i:  
+       for (w = wt[i]; w <= W; w++) {  
+         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
+       }  
+     ```
+   * Here, using `dp[w - wt[i]]` is okay because you **want** to be able to reuse the same item multiple times — forward iteration helps “propagate” the value, allowing multiple picks. ([Astik Anand][2])
 
 ### 16. DP: Grid Paths
 **The Signal:** "Unique Paths", "Min Path Sum", "Gold Miner".
@@ -670,6 +716,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
