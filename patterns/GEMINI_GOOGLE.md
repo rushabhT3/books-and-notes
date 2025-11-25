@@ -460,18 +460,194 @@ def grid_dp(grid):
 
 ***
 
-# THE PLAN OF ATTACK
+## PART 5: THE "GOOGLE" GAPS
+*Patterns specifically for optimization, scheduling, and system design components.*
 
-1.  **Don't memorize problems.** Memorize the **Signals** (When to use) and the **Templates** (Code skeletons above).
-2.  **Order of Operations:**
-    *   Week 1: Patterns 1, 2, 3 (Arrays)
-    *   Week 2: Patterns 8, 9, 10 (Trees/Graphs)
-    *   Week 3: Patterns 5, 6 (Search) + 7 (Heaps)
-    *   Week 4: The rest.
-3.  **The "Stuck" Rule:** If you can't solve a problem in 20 minutes, **STOP**. Look at the solution, identify which of the 16 patterns it uses, and write that down.
+### 17. Dijkstra’s Algorithm (Weighted Shortest Path)
+**The Signal:** "Shortest path" in a graph with **weights** (time, cost, distance). BFS only works for unweighted graphs.
+**Note:** If weights are negative, you need Bellman-Ford (rare).
+```python
+import heapq
 
+def dijkstra(n, edges, start_node):
+    # 1. Build Graph: u -> (v, weight)
+    graph = defaultdict(list)
+    for u, v, w in edges:
+        graph[u].append((v, w))
+        
+    # 2. Min-Heap: (current_dist, node)
+    min_heap = [(0, start_node)]
+    
+    # 3. Track shortest distances
+    shortest = {} # or [float('inf')] * n
+    
+    while min_heap:
+        w1, n1 = heapq.heappop(min_heap)
+        
+        if n1 in shortest: continue # Already processed
+        shortest[n1] = w1
+        
+        for n2, w2 in graph[n1]:
+            if n2 not in shortest:
+                heapq.heappush(min_heap, (w1 + w2, n2))
+                
+    return shortest
+```
+**The Battleground:** 743 (Network Delay), 787 (Cheapest Flights), 1631, 1514
 
-You now have the source code for the interview. Good luck.
+### 18. Merge Intervals (Sweeping Line)
+**The Signal:** "Meeting Rooms," "Calendar conflicts," "Merge overlapping intervals."
+**Key:** Always sort by start time first.
+```python
+def merge_intervals(intervals):
+    # 1. Sort by start time
+    intervals.sort(key=lambda x: x[0])
+    
+    merged = [intervals[0]]
+    
+    for current in intervals[1:]:
+        last_end = merged[-1][1]
+        current_start, current_end = current
+        
+        # 2. Overlap detected -> Merge
+        if current_start <= last_end:
+            merged[-1][1] = max(last_end, current_end)
+        else:
+            # 3. No overlap -> Add new interval
+            merged.append(current)
+            
+    return merged
+```
+**The Battleground:** 56, 57, 435, 252 (Premium), 253 (Premium)
+
+### 19. Design Data Structures (LRU Cache)
+**The Signal:** "Design a data structure that supports..." (Usually O(1) get and put).
+**Key:** Combine a **Hash Map** (for lookup) with a **Doubly Linked List** (for ordering).
+```python
+class Node:
+    def __init__(self, key, val):
+        self.key, self.val = key, val
+        self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.cap = capacity
+        self.cache = {} # Map key -> Node
+        # Dummy head and tail to avoid edge cases
+        self.left, self.right = Node(0, 0), Node(0, 0)
+        self.left.next, self.right.prev = self.right, self.left
+
+    # Helper: Remove node from List
+    def remove(self, node):
+        prev, nxt = node.prev, node.next
+        prev.next, nxt.prev = nxt, prev
+
+    # Helper: Insert at Right (Most Recent)
+    def insert(self, node):
+        prev, nxt = self.right.prev, self.right
+        prev.next = nxt.prev = node
+        node.next, node.prev = nxt, prev
+
+    def get(self, key):
+        if key in self.cache:
+            self.remove(self.cache[key])
+            self.insert(self.cache[key])
+            return self.cache[key].val
+        return -1
+
+    def put(self, key, value):
+        if key in self.cache:
+            self.remove(self.cache[key])
+        self.cache[key] = Node(key, value)
+        self.insert(self.cache[key])
+        
+        if len(self.cache) > self.cap:
+            # Evict LRU (Left-most real node)
+            lru = self.left.next
+            self.remove(lru)
+            del self.cache[lru.key]
+```
+**The Battleground:** 146 (LRU), 460 (LFU), 380 (Insert Delete GetRandom), 155 (Min Stack)
+
+---
+
+## PART 6: SPECIALIST TRICKS
+*Math, Bits, and Queues. High ROI for low code volume.*
+
+### 20. Bit Manipulation (XOR Tricks)
+**The Signal:** "Find the single number in array of duplicates," "Missing number," "Sum of two integers without +".
+**Concept:** `n ^ n = 0` and `n ^ 0 = n`.
+```python
+def find_single_number(nums):
+    xor = 0
+    for n in nums:
+        xor ^= n
+    return xor
+```
+**The Battleground:** 136, 268, 371, 191, 338
+
+### 21. Monotonic Queue (Sliding Window Max)
+**The Signal:** "Maximum value in a sliding window of size K." (Note: Standard sliding window finds sums/counts; this finds Max/Min).
+```python
+from collections import deque
+
+def max_sliding_window(nums, k):
+    output = []
+    q = deque() # Stores INDICES
+    
+    for r in range(len(nums)):
+        # 1. Pop smaller values from back (they are useless now)
+        while q and nums[q[-1]] < nums[r]:
+            q.pop()
+        q.append(r)
+        
+        # 2. Remove value from front if it's out of window
+        if q[0] < r - k + 1:
+            q.popleft()
+            
+        # 3. Add to output (front is always the max)
+        if r + 1 >= k:
+            output.append(nums[q[0]])
+            
+    return output
+```
+**The Battleground:** 239, 1438, 862
+
+### 22. Reservoir Sampling (Probabilistic)
+**The Signal:** "Select K random elements from a stream," "Linked List too large for memory," "Random Pick Index."
+```python
+import random
+
+def pick_random(head):
+    scope = 1
+    chosen_value = 0
+    curr = head
+    
+    while curr:
+        # Probability of picking current node is 1/scope
+        if random.random() < (1 / scope):
+            chosen_value = curr.val
+        curr = curr.next
+        scope += 1
+    return chosen_value
+```
+**The Battleground:** 382, 398
+
+***
+
+### UPDATED STUDY PLAN (The "Complete" 22)
+
+To be "Google Ready," you must rearrange the study order slightly to prioritize these new patterns:
+
+1.  **Phase 1 (Core):** Arrays & Two Pointers (Patterns 1, 2, 3, 13)
+2.  **Phase 2 (Structure):** Trees, Graphs & **Design** (Patterns 8, 9, 10, 19)
+3.  **Phase 3 (Search):** Binary Search & Heaps & **Dijkstra** (Patterns 5, 6, 7, 17)
+4.  **Phase 4 (Optimization):** DP, Greedy & **Intervals** (Patterns 15, 16, 18)
+5.  **Phase 5 (Niche):** Bit Manipulation & Reservoir Sampling (Patterns 20, 22)
+
+**Final Warning:**
+If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
