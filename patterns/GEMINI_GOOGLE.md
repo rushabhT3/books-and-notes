@@ -477,7 +477,7 @@ The knapsack problem is a `classic optimization problem where you must choose it
 
    * If you do:
 
-     ```
+     ```python
      for each item i:  
        for w = wt[i] to W:  
          dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
@@ -489,7 +489,7 @@ The knapsack problem is a `classic optimization problem where you must choose it
 
    * Instead, do:
 
-     ```
+     ```python
      for each item i:  
        for (w = W; w >= wt[i]; w--) {  
          dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
@@ -502,7 +502,7 @@ The knapsack problem is a `classic optimization problem where you must choose it
 
    * When duplicates are allowed (unbounded knapsack), you can (and do) iterate forwards:
 
-     ```
+     ```python
      for each item i:  
        for (w = wt[i]; w <= W; w++) {  
          dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
@@ -670,7 +670,8 @@ class LRUCache:
 
 ### 20. Bit Manipulation (XOR Tricks)
 **The Signal:** "Find the single number in array of duplicates," "Missing number," "Sum of two integers without +".
-**Concept:** `n ^ n = 0` and `n ^ 0 = n`.
+
+**Concept:** `n ^ n = 0` and `n ^ 0 = n` (since, $n \oplus 0 = n \cdot 1 + \overline{n} \cdot 0$ so, $\overline{n} \cdot 0$ becomes 0)
 ```python
 def find_single_number(nums):
     xor = 0
@@ -741,6 +742,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
