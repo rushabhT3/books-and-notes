@@ -527,6 +527,31 @@ def grid_dp(grid):
 ```
 **The Battleground:** 62, 63, 64, 120, 221
 
+**More Generic Template:**
+```python
+def solve_grid(grid):
+    m, n = len(grid), len(grid[0])
+    dp = [[0] * n for _ in range(m)]
+    
+    # STEP 1: BASE CASE
+    # (Initialize the starting point)
+    dp[0][0] = ... 
+
+    # STEP 2: HANDLE EDGES 
+    # (The first row and first column usually have restricted movement)
+    for i in range(1, m): ...
+    for j in range(1, n): ...
+
+    # STEP 3: THE CORE LOGIC
+    # (The generic formula for the rest of the grid)
+    for i in range(1, m):
+        for j in range(1, n):
+             # This is the only line that changes based on the problem
+             dp[i][j] = ... 
+             
+    return dp[-1][-1]
+```
+
 ***
 
 ## PART 5: THE "GOOGLE" GAPS
@@ -716,6 +741,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
