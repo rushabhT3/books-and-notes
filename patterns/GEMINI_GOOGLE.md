@@ -424,6 +424,29 @@ class Trie:
 ```
 **The Battleground:** 208, 211, 212, 1268
 
+**Explanation:**
+*Trie structure (shares common prefixes):*
+```text
+root
+ ├── c
+ │    ├── a
+ │    │    ├── t → (end of "cat")
+ │    │    └── r → (end of "car")
+ │    │         └── t → (end of "cart")
+ └── d
+      └── o
+           └── g → (end of "dog")
+```
+```python
+def insert(self, word):
+    curr = self.root             # Start from root
+    for char in word:            # Go letter by letter
+        if char not in curr.children:
+            curr.children[char] = TrieNode()  # Create new branch
+        curr = curr.children[char]            # Move down
+    curr.is_end = True           # Mark: a word ends here!
+```
+
 ### 15. DP: 0/1 Knapsack (Subsets)
 **The Signal:** "Partition Equal Subset Sum", "Target Sum", "Coin Change 2".
 ```python
@@ -647,6 +670,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
