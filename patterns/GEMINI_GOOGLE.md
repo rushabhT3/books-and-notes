@@ -697,16 +697,36 @@ def max_sliding_window(nums, k):
         q.append(r)
         
         # 2. Remove value from front if it's out of window
-        if q[0] < r - k + 1:
+        if q[0] < r - k + 1:   
             q.popleft()
             
         # 3. Add to output (front is always the max)
-        if r + 1 >= k:
+        if r + 1 >= k:                # "Have we seen at least k elements yet?"
             output.append(nums[q[0]])
             
     return output
 ```
 **The Battleground:** 239, 1438, 862
+
+### why use r - k + 1 and NOT r - k for the block space: Suppose `k = 3`, and we’re at index `r = 4`
+
+The current window should be indices: **2, 3, 4**
+
+Now answer this:
+
+| Formula             | Result | Is this the correct left index? |
+
+|---------------------|--------|---------------------------------|
+
+| `r - k`   → 4 - 3   | 1      | No! Index 1 is **not** in the current window anymore |
+
+| `r - k + 1` → 4 - 3 + 1 | 2  | Yes! This is exactly the first index of the current window |
+
+So:
+
+- `r - k`     → gives **one index too early** (the one that just slid out)
+
+- `r - k + 1` → gives the **correct start** of the current window
 
 ### 22. Reservoir Sampling (Probabilistic)
 **The Signal:** "Select K random elements from a stream," "Linked List too large for memory," "Random Pick Index."
@@ -742,6 +762,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
