@@ -150,6 +150,16 @@ def solve():
 ```
 **The Battleground:** 875, 1011, 410, 1482, 1283
 
+**📝Note:** 
+- Finding a specific number? → `while l <= r`  
+- Finding minimum possible value? → `while l < r` → return `l`  
+
+That’s it. 2 rules. Forever. Done.
+
+**THE ONE SENTENCE THAT ENDS ALL CONFUSION FOREVER:**  
+> If `mid` could be the final answer → you do `r = mid`  
+> If `mid` is definitely NOT the answer → you do `mid - 1` or `mid + 1`
+
 **TC: O(log N)** × (cost of `feasible`)  
 **SC: O(1)**
 
@@ -175,6 +185,9 @@ def search_rotated(nums, target):
 ```
 **The Battleground:** 33, 81, 153, 162 (Peak Element)
 
+**TC: O(log N)**
+**SC: O(1)**
+
 ### 7. Top 'K' Elements (Heaps)
 **The Signal:** "Find K largest/smallest", "Top K frequent", "Merge K sorted lists".
 ```python
@@ -190,6 +203,9 @@ def find_k_largest(nums, k):
     return heap[0] # The Kth largest
 ```
 **The Battleground:** 215, 347, 23, 973, 692
+
+⚠️ Inside a min-heap, only one thing is guaranteed: heap[0] is the smallest element. Everything else has no guaranteed order.  
+That is why we cannot simply return heap[k]❌ after filling the heap.
 
 ---
 
@@ -801,6 +817,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
