@@ -740,13 +740,16 @@ def pick_random(head):
     
     while curr:
         # Probability of picking current node is 1/scope
-        if random.random() < (1 / scope):
+        if random.random() < (1 / scope): 
             chosen_value = curr.val
         curr = curr.next
         scope += 1
     return chosen_value
 ```
 **The Battleground:** 382, 398
+
+For this line: `if random.random() < (1 / scope):`  
+The trick is that we keep one candidate, and as we walk through the list, we give the current node a chance to replace the candidate.
 
 ***
 
@@ -762,6 +765,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
