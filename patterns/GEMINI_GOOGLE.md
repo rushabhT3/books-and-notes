@@ -61,6 +61,7 @@ def two_pointers(nums, target):
     return []
 ```
 **The Battleground:** 167, 15, 11, 125, 344, 977
+
 **Time: O(n), Space: O(1)** — one pointer moves per iteration, at most n−1 moves total, using only two indices.
 
 ### 3. Sliding Window (Variable Size)
@@ -87,6 +88,18 @@ def sliding_window(s):
 ```
 **The Battleground:** 3, 76, 424, 209, 1004, 904
 
+**TC (Time Complexity):**  
+**O(n)** → each element is visited at most twice (once by `r`, once by `l`)
+
+**SC (Space Complexity):**  
+**O(k)** → where `k` is the size of the sliding window dictionary (at most `min(n, alphabet_size)`)
+
+**Note (for dictionary):**
+O(k): (k = max distinct chars allowed or alphabet size) (if we change [k] * 5 to dict it would be O(1) like that even though it's {k: 5})
+
+Short form:  
+**TC: O(n) | SC: O(k)**
+
 ### 4. Prefix Sum + Hash Map
 **The Signal:** "Subarray sum equals K", "Number of subarrays with sum...", continuous subarray problems.
 ```python
@@ -94,18 +107,23 @@ def subarray_sum(nums, k):
     prefix_map = {0: 1} # Base case: sum 0 happens once
     curr_sum = 0
     count = 0
-    
+
     for num in nums:
         curr_sum += num
         # If (curr_sum - k) exists, we found a valid subarray ending here
         if (curr_sum - k) in prefix_map:
             count += prefix_map[curr_sum - k]
-        
+
         prefix_map[curr_sum] = prefix_map.get(curr_sum, 0) + 1
-        
+
     return count
 ```
 **The Battleground:** 560, 974, 525, 930, 437 (Tree version)
+
+**Core Idea:** If two prefix sums differ by exactly k, the elements between those two points add up to k.
+
+**TC: O(n)** – one pass, hashmap ops are O(1)  
+**SC: O(n)** – worst-case stores n different prefix sums
 
 ---
 
@@ -131,6 +149,9 @@ def solve():
     return l
 ```
 **The Battleground:** 875, 1011, 410, 1482, 1283
+
+**TC: O(log N)** × (cost of `feasible`)  
+**SC: O(1)**
 
 ### 6. Modified Binary Search (Rotated/Tricky)
 **The Signal:** Sorted array that was rotated, searching in a mountain array.
@@ -780,6 +801,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
