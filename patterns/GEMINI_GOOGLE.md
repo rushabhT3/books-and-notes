@@ -30,6 +30,20 @@ def fast_slow(head):
 ```
 **The Battleground:** 141, 142, 287, 876, 202
 
+**Time and Space Complexity:** 
+You're absolutely right in the **no-cycle** case — here's the short truth:
+
+- **Without cycle** (e.g. finding middle - LeetCode 876):  
+  They meet (or fast reaches end) when slow has moved **~n/2 steps** → fast moved **~n steps** → visited **~n nodes** (not 2n). So actually **O(n)** total work.
+
+- **With cycle** (e.g. cycle detection - LeetCode 141/142):  
+  In the **worst case**, slow enters the cycle and they meet only after slow traveled almost the full cycle length → fast may have lapped multiple times → in rare cases fast can visit up to **~2n nodes** before meeting.
+
+**Bottom line (2 lines):**  
+In the average/no-cycle case, fast visits ~n nodes → O(n).  
+But the proven **worst-case upper bound** across all inputs is ≤ 2n node visits → we safely say **O(n)** time.  
+
+
 ### 2. Two Pointers (Opposite Ends)
 **The Signal:** Sorted arrays, "Two Sum" in sorted array, reversing strings, checking palindromes.
 ```python
@@ -47,6 +61,7 @@ def two_pointers(nums, target):
     return []
 ```
 **The Battleground:** 167, 15, 11, 125, 344, 977
+**Time: O(n), Space: O(1)** — one pointer moves per iteration, at most n−1 moves total, using only two indices.
 
 ### 3. Sliding Window (Variable Size)
 **The Signal:** "Longest substring/subarray with condition", "Max consecutive ones", "Fruit into baskets".
@@ -765,6 +780,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
