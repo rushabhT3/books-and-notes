@@ -197,15 +197,24 @@ def find_k_largest(nums, k):
     heap = [] # Min-heap by default
     for n in nums:
         heapq.heappush(heap, n)
-        if len(heap) > k:
+        if len(heap) > k:  # clever trick to heapq to have particular length
             heapq.heappop(heap) # Remove smallest of the bunch
             
     return heap[0] # The Kth largest
 ```
 **The Battleground:** 215, 347, 23, 973, 692
 
+Note:
+(here, k: numbers already inside the heapq, n: total number about to entered or pop)
+- Every `heappush` → **O(log k)**   (because current `n ≤ k+1`)
+- Every `heappop`  → **O(log k)**
+That’s why we confidently say:
+> **Time Complexity = O(N log k)** for entering N elements in the heapq
 ⚠️ Inside a min-heap, only one thing is guaranteed: heap[0] is the smallest element. Everything else has no guaranteed order.  
 That is why we cannot simply return heap[k]❌ after filling the heap.
+
+**Time Complexity  :** O(n log k)
+**Space Complexity :** O(k)
 
 ---
 
@@ -233,6 +242,12 @@ def bfs(root):
     return result
 ```
 **The Battleground:** 102, 107, 994 (Rotting Oranges), 127 (Word Ladder)
+📝 Reason to use `for _ in range(len(q)):`
+You’ll process nodes in correct order, but you won’t know where one level ends and the next begins, because children are added while you're still processing the current level.
+so, basically where the for loop ends is the boundary for that row
+
+**Time Complexity:** O(N)
+**Space Complexity:** O(W) → where W is the maximum width of the tree (maximum number of nodes at any level)
 
 ### 9. DFS (Recursive Backtracking)
 **The Signal:** "Generate all subsets", "Permutations", "Combination Sum", "Sudoku".
@@ -817,6 +832,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
