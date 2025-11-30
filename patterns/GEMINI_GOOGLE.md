@@ -427,11 +427,11 @@ def topo_sort(n, edges):
 **The Signal:** "Connected components", "Number of Islands 2", "Redundant Connection", "Graph Valid Tree".
 ```python
 class UnionFind:
-    def __init__(self, n):
+    def __init__(self, n): # here, n: number of nodes
         self.parent = list(range(n))
         self.rank = [1] * n
         
-    def find(self, n):
+    def find(self, n):  # here, n: node whose parent has to be found
         p = self.parent[n]
         while p != self.parent[p]:
             self.parent[p] = self.parent[self.parent[p]] 
@@ -460,6 +460,11 @@ Here's a shortened version with all important details preserved:
 **Union-Find Code Explained**
 [https://youtu.be/ayW5B2W9hfo](url)
 
+| Line                                           | What it does                                                  | Result                  |
+|------------------------------------------------|---------------------------------------------------------------|-------------------------|
+| `self.parent[p] = self.parent[self.parent[p]]` | Changes where node `p` points → **skip one middleman**        | `parent[2]` becomes `0` |
+| `p = self.parent[p]`                           | Now move `p` to the **new place** (grandparent)               | `p` jumps from `2 → 0`  |
+
 ```python
 class UnionFind:
     def __init__(self, n):
@@ -477,6 +482,7 @@ class UnionFind:
             # PATH COMPRESSION: Point to grandparent to shorten path
             self.parent[p] = self.parent[self.parent[p]]  # path compression step (kind of like linkedlist where connection index is connected to next value)
             p = self.parent[p]                            # move one step forward
+            # ⚠️ confusion: p = self.parent[p] so it should stop as it became it's parent but in next loop it'll check if it's currently it's own parent so this is how it's getting forwarded
         return p
         
     def union(self, n1, n2):  # if both nodes in same set or NOT
@@ -518,7 +524,7 @@ class UnionFind:
   - Result: Path reduced from 4 to 2 hops
 - Can't miss the root - worst case is pointing to root itself. Since the root's parent is the root itself (`parent[root] == root`), the while loop condition `p != self.parent[p]` will stop exactly at the root, ensuring we never skip past it.
 
-**Complexity:** O(α(N)) where α is the Inverse Ackermann function - effectively O(1) constant time for all practical purposes.
+**Time and Space Complexity:** O(α(N)) where α is the Inverse Ackermann function - effectively O(1) constant time for all practical purposes.
 
 ---
 
@@ -906,6 +912,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
