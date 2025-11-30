@@ -313,6 +313,13 @@ def max_path_sum(root):
 ```
 **The Battleground:** 124, 543, 110, 104
 
+### Time Complexity: O(n)
+- **Every node is visited exactly once** during the DFS traversal.
+
+### Space Complexity: O(h) where h = height of tree
+- The recursion uses the **call stack**.
+- The maximum depth of the recursion stack is equal to the **height of the tree**.
+
 ### 11. Topological Sort (Kahn's Algorithm)
 **The Signal:** "Course Schedule", "Project Dependencies", "Build order", "Alien Dictionary".
 ```python
@@ -372,6 +379,49 @@ return result if len(result) == n else []
 
 **Summary in one line**  
 Start with nodes having zero dependencies, keep freeing dependent nodes as their prerequisites finish. If all nodes get processed → valid order, else → cycle.
+
+```python
+def topo_sort(n, edges):
+    graph = defaultdict(list)
+    indegree = {i: 0 for i in range(n)}    # O(V) space
+    
+    # Building graph and indegree → O(E) time, O(E) space
+    for u, v in edges:                     # loops E times
+        graph[u].append(v)                 # total edges stored = E
+        indegree[v] += 1                   # each edge increases one count
+    
+    # Queue starts with all nodes having indegree 0 → O(V) time to scan
+    q = deque([node for node in indegree if indegree[node] == 0])
+    result = []
+    
+    # Main BFS loop
+    while q:
+        node = q.popleft()                 # each node processed once → O(V)
+        result.append(node)
+        
+        for nei in graph[node]:            # total times this runs = E (all edges)
+            indegree[nei] -= 1
+            if indegree[nei] == 0:
+                q.append(nei)              # each node added to queue once → O(V)
+    
+    # Final check: if cycle exists, not all nodes were visited
+    return result if len(result) == n else []   # O(1)
+```
+```python
+# Time Complexity  : O(V + E)
+#   → Every vertex is processed exactly once        → O(V)
+#   → Every edge is looked at exactly once           → O(E)
+#   → Total = O(V + E)
+
+# Space Complexity : O(V + E)
+#   → graph stores all edges                         → O(E)
+#   → indegree dictionary has one entry per node     → O(V)
+#   → queue can hold up to V nodes in worst case     → O(V)
+#   → Total = O(V + E)
+```
+**Time Complexity**  **O(V + E)**  Each vertex and edge processed exactly once 
+
+**Space Complexity** **O(V + E)**  Adjacency list dominates 
 
 ### 12. Union Find (Disjoint Set Union)
 **The Signal:** "Connected components", "Number of Islands 2", "Redundant Connection", "Graph Valid Tree".
@@ -856,6 +906,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
