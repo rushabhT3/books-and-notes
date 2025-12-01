@@ -598,6 +598,19 @@ def insert(self, word):
         curr = curr.children[char]            # Move down
     curr.is_end = True           # Mark: a word ends here!
 ```
+```python
+curr = curr.children['a']
+```
+→ curr now points to the 'a' node.
+search and startwith functions NOT so different.
+
+### Trie Complexity Analysis
+| Operation          | Time Complexity          | Space Complexity                  | Notes |
+|--------------------|--------------------------|-----------------------------------|-------|
+| `insert(word)`     | **O(L)**                 | **O(L)** (worst case)             | L = length of the word <br> No new nodes if word already exists (O(1) space in that case) |
+| `search(word)`     | **O(L)**                 | **O(1)**                          | Only traverses existing nodes |
+| `startsWith(prefix)` | **O(P)**               | **O(1)**                          | P = length of prefix |
+| Overall storage (N words, avg length L) | -              | **O(N × L)**                      | Total nodes ≈ total characters across all words |
 
 ### 15. DP: 0/1 Knapsack (Subsets: following solution is NOT real KnapSack problem: but it's special version)
 **The Signal:** "Partition Equal Subset Sum", "Target Sum", "Coin Change 2".
@@ -917,6 +930,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
