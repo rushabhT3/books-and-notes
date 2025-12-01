@@ -623,11 +623,13 @@ def knapsack(nums, target):
     for num in nums:
         # Iterate BACKWARDS to avoid using same item twice
         for i in range(target, num - 1, -1):      # target to num range as going further down would be less than 0 
-            if dp[i - num]:
-                dp[i] = True
+            dp[i] = dp[i] or dp[i - num]  
     return dp[target]
 ```
 **The Battleground:** 416, 494, 322, 518
+
+ **dp[i] also in the RHS as it could be possible that say 4th term is there but 2nd term is not we don't want to make the 4th which is already true as false**
+`dp[i] = dp[i] or dp[i - num]`
 
 The knapsack problem is a `classic optimization problem where you must choose items with a certain weight and profit to include in a knapsack with a limited weight capacity, with the goal of maximizing the total profit`. It involves deciding which items to pack to get the most value without exceeding the weight limit. Common variations include the 0-1 knapsack problem, where each item can either be included or not, and the fractional knapsack problem, where you can take parts of items. 
 
@@ -716,6 +718,9 @@ def solve_grid(grid):
              
     return dp[-1][-1]
 ```
+**Time Complexity: O(m × n)
+Space Complexity: O(m × n)**
+We visit each cell exactly once → m rows × n columns = O(mn) operations.
 
 ***
 
@@ -930,6 +935,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
