@@ -783,6 +783,9 @@ def merge_intervals(intervals):
     return merged
 ```
 **The Battleground:** 56, 57, 435, 252 (Premium), 253 (Premium)
+**Time Complexity: O(n log n)  # sorting the interval
+Space Complexity: O(n)**
+
 
 ### 19. Design Data Structures (LRU Cache)
 **The Signal:** "Design a data structure that supports..." (Usually O(1) get and put).
@@ -850,6 +853,8 @@ def find_single_number(nums):
     return xor
 ```
 **The Battleground:** 136, 268, 371, 191, 338
+Time Complexity: O(n)
+Space Complexity: O(1)
 
 ### 21. Monotonic Queue (Sliding Window Max)
 **The Signal:** "Maximum value in a sliding window of size K." (Note: Standard sliding window finds sums/counts; this finds Max/Min).
@@ -882,21 +887,16 @@ def max_sliding_window(nums, k):
 
 The current window should be indices: **2, 3, 4**
 
-Now answer this:
+### How to Compute the Left Index of a Sliding Window of Size `k`
 
-| Formula             | Result | Is this the correct left index? |
+| Formula       | Example (`r=4`, `k=3`) | Result | Is this the correct left index?                       |
+|---------------|-------------------------|--------|-------------------------------------------------------|
+| `r - k`       | 4 - 3                   | 1      | No! Index 1 is **not** in the current window anymore  |
+| `r - k + 1`   | 4 - 3 + 1               | 2      | Yes! This is exactly the first index of the window    |
 
-|---------------------|--------|---------------------------------|
-
-| `r - k`   → 4 - 3   | 1      | No! Index 1 is **not** in the current window anymore |
-
-| `r - k + 1` → 4 - 3 + 1 | 2  | Yes! This is exactly the first index of the current window |
-
-So:
-
-- `r - k`     → gives **one index too early** (the one that just slid out)
-
-- `r - k + 1` → gives the **correct start** of the current window
+**Summary:**
+- `r - k` → gives **one index too early** (the one that just slid out)
+- `r - k + 1` → gives the **correct start** of the current window of size `k`
 
 ### 22. Reservoir Sampling (Probabilistic)
 **The Signal:** "Select K random elements from a stream," "Linked List too large for memory," "Random Pick Index."
@@ -935,6 +935,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
