@@ -536,7 +536,7 @@ class UnionFind:
 ```python
 def next_greater_element(nums):
     stack = [] # Stores indices (here, it's like decreasing array element indices)
-    res = [-1] * len(nums)
+    res = [-1] * len(nums)  # stores value of next greater element
     
     for i, num in enumerate(nums):
         # While current num is greater than stack top
@@ -548,6 +548,11 @@ def next_greater_element(nums):
     return res
 ```
 **The Battleground:** 739, 496, 503, 84, 42 (Trapping Rain Water)
+
+| Aspect            | Complexity | Reason                                                            |
+|-------------------|------------|-------------------------------------------------------------------|
+| Time Complexity   | O(n)       | Each element is pushed and popped from the stack at most once     |
+| Space Complexity  | O(n)       | Output array + stack (worst case: all elements stored in stack)  |
 
 ### 14. Trie (Prefix Tree)
 **The Signal:** "Autocomplete", "Word Search II", "Prefix matching".
@@ -912,6 +917,7 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
+
 
 
 
