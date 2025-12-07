@@ -936,6 +936,274 @@ To be "Google Ready," you must rearrange the study order slightly to prioritize 
 **Final Warning:**
 If you see a problem involving **"Range Sum Updates"** (where values in the array change and you need the sum of a range repeatedly), you need a **Segment Tree**. This is Pattern #23. It is rare. If you have time, look up `LeetCode 307`. If you are short on time, skip it—you can pass without it, but you cannot pass without the 22 above.
 
+Here is the **Tier 2 (The Google/Uber Standard)** and **Tier 3 (The Specialist/Niche)** extension.
+
+If you are aiming for L4/L5 at Google or SDE-2 at Uber, **Tier 2 is mandatory**. You cannot skip it. Tier 3 is your insurance policy.
+
+---
+
+# TIER 2: THE "HARD" STANDARD
+*Used in Google, Uber, and High-Frequency Trading (HFT) interviews. These solve problems where $N$ is huge or constraints are weird.*
+
+### 23. Segment Tree (Range Queries & Updates)
+**The Signal:** "Find sum/max of range `[L, R]`" AND "Update value at index `i`".
+**Why Prefix Sum Fails:** Prefix sum is $O(N)$ to update. Segment Tree is $O(\log N)$ for both.
+```python
+class SegmentTree:
+    def __init__(self, data, func=sum):
+        self.n = len(data)
+        self.func = func # sum, max, min, etc.
+        self.tree = [0] * (2 * self.n)
+        # Build tree
+        for i in range(self.n):
+            self.tree[self.n + i] = data[i]
+        for i in range(self.n - 1, 0, -1):
+            self.tree[i] = self.func([self.tree[2 * i], self.tree[2 * i + 1]])
+
+    def update(self, i, val):
+        i += self.n
+        self.tree[i] = val
+        while i > 1:
+            i //= 2
+            self.tree[i] = self.func([self.tree[2 * i], self.tree[2 * i + 1]])
+
+    def query(self, l, r): # Range [l, r)
+        l += self.n; r += self.n
+        res = None
+        while l < r:
+            if l % 2 == 1:
+                res = self.tree[l] if res is None else self.func([res, self.tree[l]])
+                l += 1
+            if r % 2 == 1:
+                r -= 1
+                res = self.tree[r] if res is None else self.func([res, self.tree[r]])
+            l //= 2; r //= 2
+        return res
+```
+**The Battleground:** 307 (Range Sum Mutable), 315, 327
+**Time:** $O(\log N)$ for query and update.
+**Space:** $O(N)$.
+
+### 24. Bitmask Dynamic Programming
+**The Signal:** $N$ is extremely small ($N \le 20$). "Assign N workers to N jobs." "Visit all cities (TSP)."
+**Concept:** Use an integer (e.g., `10110`) to represent a set `{1, 2, 4}`.
+```python
+def solve_bitmask(n, costs):
+    # dp[mask] = min cost to assign workers represented by mask
+    memo = {}
+    target = (1 << n) - 1 # All 1s (everyone assigned)
+
+    def dfs(i, mask):
+        if i == n: return 0 # All workers assigned
+        if mask in memo: return memo[mask]
+        
+        res = float('inf')
+        for job in range(n):
+            # Check if 'job' bit is NOT set in mask
+            if not (mask & (1 << job)):
+                res = min(res, costs[i][job] + dfs(i + 1, mask | (1 << job)))
+        
+        memo[mask] = res
+        return res
+
+    return dfs(0, 0)
+```
+**The Battleground:** 1879, 698, 473, 847
+**Time:** $O(N \cdot 2^N)$. This is why $N$ must be small.
+
+### 25. Advanced Graphs: Kruskal’s (MST) & Union-Find
+**The Signal:** "Connect all points with minimum cost." "Min Cost to Connect Points."
+**Concept:** Sort all edges by weight. Add them if they don't form a cycle (using Union-Find).
+```python
+def min_cost_connect_points(points):
+    n = len(points)
+    edges = []
+    # 1. Build all edges (dist, u, v)
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
+            edges.append((dist, i, j))
+    
+    edges.sort() # Key step: Process smallest edges first
+    
+    uf = UnionFind(n) # Use standard UnionFind class
+    cost = 0
+    edges_used = 0
+    
+    for w, u, v in edges:
+        if uf.union(u, v):
+            cost += w
+            edges_used += 1
+            if edges_used == n - 1: break
+            
+    return cost
+```
+**The Battleground:** 1584, 1135
+**Time:** $O(E \log E)$.
+
+### 26. Trie with XOR Logic
+**The Signal:** "Find maximum XOR of two numbers in an array."
+**Concept:** To maximize XOR, you want opposite bits ($0 \oplus 1 = 1$). Walk the Trie; if current bit is `1`, try to go to `0` child.
+```python
+def find_max_xor(nums):
+    # Standard Trie Insert omitted for brevity
+    # Logic for query:
+    max_xor = 0
+    for num in nums:
+        curr = root
+        curr_xor = 0
+        for i in range(31, -1, -1):
+            bit = (num >> i) & 1
+            # Want opposite bit
+            if 1 - bit in curr.children:
+                curr_xor |= (1 << i)
+                curr = curr.children[1 - bit]
+            else:
+                curr = curr.children[bit]
+        max_xor = max(max_xor, curr_xor)
+    return max_xor
+```
+**The Battleground:** 421 (Max XOR of Two Numbers), 1707
+
+---
+
+# TIER 3: THE "NICHE" SPECIALISTS
+*Study these only after mastering Tier 2. These appear in specific hard rounds or at Uber/Google when they want to filter candidates.*
+
+### 27. Digit DP
+**The Signal:** "Count numbers between range `L` and `R` that satisfy property X." (e.g., no consecutive ones).
+**Concept:** Build the number digit by digit.
+**State:** `dp(index, tight_constraint, is_leading_zero, state_variable)`
+*   `tight`: Are we restricted by the digits of R?
+*   `leading_zero`: Can we place a 0 here?
+```python
+def count_numbers(s): # s is string of R
+    @cache
+    def dfs(i, tight, leading_zero, prev_digit):
+        if i == len(s): return 1
+        
+        limit = int(s[i]) if tight else 9
+        res = 0
+        
+        for digit in range(limit + 1):
+            new_tight = tight and (digit == limit)
+            new_leading = leading_zero and (digit == 0)
+            
+            # Custom Logic (Example: No consecutive ones)
+            if not new_leading and prev_digit == 1 and digit == 1:
+                continue 
+                
+            res += dfs(i + 1, new_tight, new_leading, digit)
+        return res
+    return dfs(0, True, True, -1)
+```
+**The Battleground:** 233, 902, 600, 1012
+
+### 28. Rolling Hash (Rabin-Karp)
+**The Signal:** "Longest Duplicate Substring." Standard KMP is too complex to implement quickly.
+**Concept:** Treat a string as a number in base 26 (or 31). Slide the window, update hash in $O(1)$.
+```python
+def rolling_hash(s, length):
+    base = 26
+    mod = 2**63 - 1 # Large prime helps avoid collision
+    current_hash = 0
+    
+    # Initial window
+    for i in range(length):
+        current_hash = (current_hash * base + ord(s[i])) % mod
+    
+    seen = {current_hash}
+    power = pow(base, length, mod) # Precompute removal factor
+    
+    for i in range(1, len(s) - length + 1):
+        # Remove leading char, Shift left, Add new char
+        current_hash = (current_hash * base - ord(s[i-1]) * power + ord(s[i+length-1])) % mod
+        if current_hash in seen:
+            return s[i : i+length]
+        seen.add(current_hash)
+    return None
+```
+**The Battleground:** 1044, 187, 718
+
+### 29. Critical Connections (Tarjan’s Bridge Finding)
+**The Signal:** "Find edge which, if removed, disconnects the graph." "Critical network connections."
+**Concept:** Track `discovery_time` and `low_link` value. If `low[child] > disc[parent]`, the edge `parent-child` is a bridge.
+```python
+def find_bridges(n, connections):
+    graph = defaultdict(list)
+    for u, v in connections:
+        graph[u].append(v); graph[v].append(u)
+        
+    disc = [-1] * n; low = [-1] * n
+    time = 0
+    res = []
+    
+    def dfs(u, p=-1):
+        nonlocal time
+        disc[u] = low[u] = time
+        time += 1
+        
+        for v in graph[u]:
+            if v == p: continue
+            if disc[v] != -1:
+                low[u] = min(low[u], disc[v])
+            else:
+                dfs(v, u)
+                low[u] = min(low[u], low[v])
+                if low[v] > disc[u]:
+                    res.append([u, v])
+                    
+    dfs(0)
+    return res
+```
+**The Battleground:** 1192 (Critical Connections)
+
+### 30. Convex Hull (Monotone Chain)
+**The Signal:** "Erect the fence," "Enclose all trees." Geometry problems.
+**Concept:** Sort points by X. Build upper hull, build lower hull using "Cross Product" to check turn direction.
+```python
+def outerTrees(points):
+    points.sort()
+    
+    def cross(o, a, b):
+        return (a[0]-o[0])*(b[1]-o[1]) - (a[1]-o[1])*(b[0]-o[0])
+
+    lower = []
+    for p in points:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) < 0:
+            lower.pop()
+        lower.append(p)
+        
+    upper = []
+    for p in reversed(points):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) < 0:
+            upper.pop()
+        upper.append(p)
+        
+    return list(set(map(tuple, lower + upper)))
+```
+**The Battleground:** 587 (Erect the Fence)
+
+---
+
+### Final "Cheat Sheet" Summary for FAANG
+
+1.  **If the problem asks for Range Sums:**
+    *   Static Array → Prefix Sum.
+    *   Mutable Array (Updates) → **Segment Tree (Tier 2)**.
+2.  **If N is tiny (< 20):**
+    *   **Bitmask DP (Tier 2)**.
+3.  **If it's about connecting things cheaply:**
+    *   Graph → **Kruskal's / Union Find (Tier 2)**.
+4.  **If it's about Numbers/Digits:**
+    *   Count in range → **Digit DP (Tier 3)**.
+    *   Max XOR → **Trie (Tier 2)**.
+5.  **If it's String Matching:**
+    *   Simple → Two Pointers.
+    *   Longest Duplicate → **Rolling Hash (Tier 3)**.
+
+Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
