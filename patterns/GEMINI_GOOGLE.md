@@ -258,15 +258,22 @@ So, basically where the for loop ends is the boundary for that row.
 ### 9. DFS (Recursive Backtracking)
 **The Signal:** "Generate all subsets", "Permutations", "Combination Sum", "Sudoku".
 ```python
-def backtrack(start, path):
-    if is_solution(path):
-        res.append(path[:]) # Copy path
-        return
+def subsets(nums):
+    res = []
+    
+    def backtrack(start, path):
+        print(f"path id: {id(path)}, content: {path}")  # Same id every time!
+        res.append(path[:])  # Must copy! Otherwise all reference same list
+        
+        for i in range(start, len(nums)):
+            path.append(nums[i])   # Modify the ONE path # 1. Choose
+            backtrack(i + 1, path) # Pass same path deeper  # 2. Explore
+            path.pop()             # Undo modification # 3. Un-choose (Backtrack)
+    
+    backtrack(0, [])
+    return res
 
-    for i in range(start, len(nums)):
-        path.append(nums[i]) # 1. Choose
-        backtrack(i + 1, path) # 2. Explore
-        path.pop() # 3. Un-choose (Backtrack)
+subsets([1, 2, 3])
 ```
 **The Battleground:** 46, 78, 39, 79 (Word Search), 51 (N-Queens)
 
@@ -1203,6 +1210,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
