@@ -262,8 +262,30 @@ def subsets(nums):
     res = []
     
     def backtrack(start, path):
-        print(f"path id: {id(path)}, content: {path}")  # Same id every time!
-        res.append(path[:])  # Must copy! Otherwise all reference same list
+        if is_solution(path):
+            res.append(path[:]) 
+            return
+        
+        for i in range(start, len(nums)):
+            path.append(nums[i])   
+            backtrack(i + 1, path)
+            path.pop()             
+    
+    backtrack(0, [])
+    return res
+
+subsets([1, 2, 3])
+```
+**The Battleground:** 46, 78, 39, 79 (Word Search), 51 (N-Queens)
+
+```python
+def subsets(nums):
+    res = []
+    
+    def backtrack(start, path):
+        if is_solution(path):
+            res.append(path[:]) # Must copy! Otherwise all reference same list
+            return
         
         for i in range(start, len(nums)):
             path.append(nums[i])   # Modify the ONE path # 1. Choose
@@ -275,7 +297,6 @@ def subsets(nums):
 
 subsets([1, 2, 3])
 ```
-**The Battleground:** 46, 78, 39, 79 (Word Search), 51 (N-Queens)
 
 📝**Note:**
 From n elements you can form **2ⁿ** subsets.
@@ -1210,6 +1231,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
