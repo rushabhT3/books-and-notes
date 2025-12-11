@@ -120,7 +120,20 @@ def subarray_sum(nums, k):
 ```
 **The Battleground:** 560, 974, 525, 930, 437 (Tree version)
 
-**Core Idea:** If two prefix sums differ by exactly k, the elements between those two points add up to k.
+**Core Idea:** 
+### The Analogy: The "Road Trip"
+Imagine you are driving down a long highway. You want to find specific sections of the road that are exactly **100 miles long** ($k=100$).
+
+You don't measure every single section. Instead, you just keep track of the **total distance** you have driven from the start (this is your `curr_sum`).
+
+*   At 1:00 PM, your odometer reads **50 miles**. You write this down.
+*   At 3:00 PM, your odometer reads **150 miles**.
+
+You stop and think: *"I am at mile 150 now. If I look at my notebook, was I ever at mile 50?"*
+Yes, you were!
+Since $150 - 50 = 100$, that means the distance you drove **between** those two points is exactly 100 miles.
+
+So `curr_sum - prev_sum = k` becomes the `curr_sum - k` and hence something must exist.
 
 **TC: O(n)** – one pass, hashmap ops are O(1)  
 **SC: O(n)** – worst-case stores n different prefix sums
@@ -1231,6 +1244,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
