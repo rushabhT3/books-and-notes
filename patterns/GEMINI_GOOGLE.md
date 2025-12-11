@@ -669,55 +669,38 @@ def knapsack(nums, target):
 ```
 **The Battleground:** 416, 494, 322, 518
 
- **dp[i] also in the RHS as it could be possible that say 4th term is there but 2nd term is not we don't want to make the 4th which is already true as false**
-`dp[i] = dp[i] or dp[i - num]`
+ **Why `dp[i]` is in the RHS (`dp[i] = dp[i] or ...`)**: This preserves existing "True" values. If a sum was already possible using previous items, we don't want to overwrite it with False just because the current item can't form it.
 
-The knapsack problem is a `classic optimization problem where you must choose items with a certain weight and profit to include in a knapsack with a limited weight capacity, with the goal of maximizing the total profit`. It involves deciding which items to pack to get the most value without exceeding the weight limit. Common variations include the 0-1 knapsack problem, where each item can either be included or not, and the fractional knapsack problem, where you can take parts of items. 
+The **Knapsack problem** maximizes value within a weight limit. **0/1 Knapsack** allows taking an item once or not at all, while **Unbounded Knapsack** allows using an item infinite times.
 
-## Why Reverse Iteration (“Inverse Propagation”) in 0/1 Knapsack Prevents Duplicate Use (but in unbounded it's different way)
+## Why Reverse Iteration Prevents Duplicates (0/1 Knapsack)
 
-1. **DP State Setup**
+1.  **Forward Iteration Risk (Unbounded)**:
+    If you loop `w` from `wt[i]` to `W`, the check `dp[w - wt[i]]` accesses the value you *just updated* earlier in the same loop. This creates a "chain reaction" where item `i` is used repeatedly to build larger sums. This effectively solves the **Unbounded Knapsack** problem.
 
-   * Suppose you use a 1D dp array: `dp[w]` = maximum value you can get with capacity exactly `w`.
-   * You iterate through each item `i` and for each capacity `w`, you consider whether to take that item or not.
+2.  **Reverse Loop Fix (0/1)**:
+    Looping `w` from `W` down to `wt[i]` guarantees that `dp[w - wt[i]]` reads the state from the **previous** item's iteration (before the current item was touched). This ensures the item is added at most once.
 
-2. **Risk if You Iterate Forwards**
+### Scenario A: The Mistake (Looping Forwards)
+Let's look at what happens if we write `for i in range(2, 5)`:
 
-   * If you do:
+1.  **i = 2**:
+    *   Code: `dp[2] = dp[2] or dp[2 - 2]`
+    *   Check: `dp[0]` is **True**.
+    *   Result: `dp[2]` becomes **True**.
+    *   *Meaning: "We have used the number 2 to make sum 2."*
 
-     ```python
-     for each item i:  
-       for w = wt[i] to W:  
-         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
-     ```
-   * Here, when you compute `dp[w]`, `dp[w - wt[i]]` **might have already been updated in the same iteration** of item `i`. That means you could be reusing the same item `i` more than once in this item’s iteration → Leading to duplicate usage, which is **not allowed** in 0/1 knapsack.
-   * This is precisely why for 0/1 knapsack, you should loop capacity in reverse.
+2.  **i = 3**:
+    *   Code: `dp[3] = dp[3] or dp[3 - 2]`
+    *   Check: `dp[1]` is False.
+    *   Result: `dp[3]` stays False.
 
-3. **Reverse Loop Fixes This**
-
-   * Instead, do:
-
-     ```python
-     for each item i:  
-       for (w = W; w >= wt[i]; w--) {  
-         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
-       }  
-     ```
-   * Because you're going from high `w` down to `wt[i]`, when you refer to `dp[w - wt[i]]`, that value is from **before** this iteration of `i` (i.e., from the “previous item state”), not something you may have just modified.
-   * This ensures **each item is used at most once** in that iteration, thereby correctly implementing 0/1 knapsack. ([thealgorists.com][1])
-
-4. **In Unbounded Knapsack (Duplicates Allowed)**
-
-   * When duplicates are allowed (unbounded knapsack), you can (and do) iterate forwards:
-
-     ```python
-     for each item i:  
-       for (w = wt[i]; w <= W; w++) {  
-         dp[w] = max(dp[w], dp[w - wt[i]] + val[i]);  
-       }  
-     ```
-   * Here, using `dp[w - wt[i]]` is okay because you **want** to be able to reuse the same item multiple times — forward iteration helps “propagate” the value, allowing multiple picks. ([Astik Anand][2])
-
+3.  **i = 4**:
+    *   Code: `dp[4] = dp[4] or dp[4 - 2]`
+    *   **THE BUG:** It looks at `dp[2]`. We **just made** `dp[2]` True in step 1!
+    *   Result: `dp[4]` becomes **True**.
+  
+      
 ### 16. DP: Grid Paths
 **The Signal:** "Unique Paths", "Min Path Sum", "Gold Miner".
 ```python
@@ -1244,6 +1227,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
