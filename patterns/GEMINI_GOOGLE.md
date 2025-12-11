@@ -472,8 +472,8 @@ class UnionFind:
         self.parent = list(range(n))
         self.rank = [1] * n
         
-    def find(self, n):  # here, n: node whose parent has to be found
-        p = self.parent[n]
+    def find(self, n1):  # here, n1: node whose parent has to be found
+        p = self.parent[n1]
         while p != self.parent[p]:
             self.parent[p] = self.parent[self.parent[p]] 
             p = self.parent[p]
@@ -1244,6 +1244,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
