@@ -154,7 +154,7 @@ def solve():
 
     l, r = 1, 10**9 
     while l < r:
-        mid = (l + r) // 2
+        mid = l + (r - l) // 2
         if feasible(mid):
             r = mid # Try smaller
         else:
@@ -172,6 +172,22 @@ That’s it. 2 rules. Forever. Done.
 **THE ONE SENTENCE THAT ENDS ALL CONFUSION FOREVER:**  
 > If `mid` could be the final answer → you do `r = mid`  
 > If `mid` is definitely NOT the answer → you do `mid - 1` or `mid + 1`
+
+**The Essential Binary Search "Muscle Memory"**
+
+In interviews, prefer `mid = low + (high - low) / 2` over `mid = (low + high) / 2`.
+
+**1. The Bug: Integer Overflow (Java/C++)**
+Languages like Java and C++ have fixed integer limits (~2.14 Billion).
+*   **Scenario:** If `low` = 2B and `high` = 2.1B, `low + high` = 4.1B. This overflows to a negative number, causing a crash.
+
+**2. The Fix: The Safe Formula**
+`mid = low + (high - low) / 2` calculates the distance first.
+*   `high - low` is small (0.1B), avoiding overflow.
+*   **Python Note:** Python handles arbitrarily large integers automatically, so it will **not** overflow or crash with the "bad" formula. However, using the "safe" formula is still recommended to show you understand low-level constraints.
+
+**3. Math vs. Computers**
+Algebraically identical, but computationally distinct. The "safe" formula respects hardware limits.
 
 **TC: O(log N)** × (cost of `feasible`)  
 **SC: O(1)**
@@ -782,6 +798,7 @@ def dijkstra(n, edges, start_node):
     return shortest
 ```
 **The Battleground:** 743 (Network Delay), 787 (Cheapest Flights), 1631, 1514
+Visualize Dijkshtra's Algo: [https://youtu.be/bZkzH5x0SKU](https://youtu.be/bZkzH5x0SKU ) 
 
 ### 18. Merge Intervals (Sweeping Line)
 **The Signal:** "Meeting Rooms," "Calendar conflicts," "Merge overlapping intervals."
@@ -1227,6 +1244,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
