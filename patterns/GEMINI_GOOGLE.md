@@ -1068,7 +1068,132 @@ Step 4:  If random() < 0.25 → D kicks A out! GAME OVER for A
          If random() >= 0.25→ A stays in box ✓
 ```
 ***
+# Can We Use `>` Instead of `<`?
 
+## Short Answer: NOT directly, but with modification YES
+
+---
+
+## Let's See What Happens with Direct Change
+
+### Original: `random.random() < (1/scope)`
+
+```
+scope=1:  random() < 1.0   →  100% chance to pick  ✓
+scope=2:  random() < 0.5   →  50% chance to pick   ✓
+scope=3:  random() < 0.33  →  33% chance to pick   ✓
+scope=4:  random() < 0.25  →  25% chance to pick   ✓
+```
+
+### Changed: `random.random() > (1/scope)`
+
+```
+scope=1:  random() > 1.0   →  0% chance to pick    ✗ NEVER PICKS FIRST!
+scope=2:  random() > 0.5   →  50% chance to pick
+scope=3:  random() > 0.33  →  67% chance to pick   ✗ WRONG!
+scope=4:  random() > 0.25  →  75% chance to pick   ✗ WRONG!
+```
+
+**This is COMPLETELY BROKEN!**
+
+---
+
+## The Fix: Change the Threshold
+
+To use `>`, we need to flip the threshold:
+
+```
+Original:    random() < (1/scope)
+Equivalent:  random() > (1 - 1/scope)
+             random() > ((scope - 1) / scope)
+```
+
+### Verify the Math
+
+```
+scope=1:  random() > (1-1)/1 = 0    →  ~100% chance  ✓
+scope=2:  random() > (2-1)/2 = 0.5  →  50% chance    ✓
+scope=3:  random() > (3-1)/3 = 0.67 →  33% chance    ✓
+scope=4:  random() > (4-1)/4 = 0.75 →  25% chance    ✓
+```
+
+---
+
+## Working Code with `>`
+
+```python
+import random
+
+def pick_random(head):
+    scope = 1
+    chosen_value = 0
+    curr = head
+    
+    while curr:
+        # Changed: using > with flipped threshold
+        if random.random() > ((scope - 1) / scope): 
+            chosen_value = curr.val
+        curr = curr.next
+        scope += 1
+    return chosen_value
+```
+
+---
+
+## Side-by-Side Comparison
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ORIGINAL                    EQUIVALENT WITH >              │
+├─────────────────────────────────────────────────────────────┤
+│  random() < (1/scope)   ═══  random() > ((scope-1)/scope)  │
+├─────────────────────────────────────────────────────────────┤
+│  scope=1: < 1.0              scope=1: > 0.0                 │
+│  scope=2: < 0.5              scope=2: > 0.5                 │
+│  scope=3: < 0.33             scope=3: > 0.67                │
+│  scope=4: < 0.25             scope=4: > 0.75                │
+├─────────────────────────────────────────────────────────────┤
+│  SAME PROBABILITIES!                                        │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Visual Proof
+
+```
+random() returns value in [0, 1)
+
+Using < (1/scope):
+    |████████|          |  scope=1: 100% (all values work)
+    |████|              |  scope=2: 50%  
+    |███|               |  scope=3: 33%
+    |██|                |  scope=4: 25%
+    0        0.5        1
+
+Using > ((scope-1)/scope):
+    |████████|          |  scope=1: 100% (all values work)  
+    |        |████|     |  scope=2: 50%
+    |            |███|  |  scope=3: 33%
+    |              |██| |  scope=4: 25%
+    0        0.5        1
+    
+Different regions, SAME sizes!
+```
+
+---
+
+## Summary
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  ✗  random() > (1/scope)         →  BROKEN                 │
+│                                                             │
+│  ✓  random() > ((scope-1)/scope) →  WORKS (equivalent)     │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
 </details>
 
 ### UPDATED STUDY PLAN (The "Complete" 22)
@@ -1351,6 +1476,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
