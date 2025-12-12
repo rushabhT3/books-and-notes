@@ -1025,7 +1025,6 @@ Element   PICK prob    SURVIVAL prob           FINAL prob
 ────────────────────────────────────────────────────────────
                                     ALL EQUAL! ✓
 ```
-***
 
 ## Even without explicit multiplication like above how it's working?
 ### Now Focus on Just Element A
@@ -1044,6 +1043,7 @@ Step 3:  If random() < 0.33 → C kicks A out! GAME OVER for A
 Step 4:  If random() < 0.25 → D kicks A out! GAME OVER for A
          If random() >= 0.25→ A stays in box ✓
 ```
+***
 
 </details>
 
@@ -1327,6 +1327,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
