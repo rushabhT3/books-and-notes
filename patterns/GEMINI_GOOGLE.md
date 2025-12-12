@@ -1011,6 +1011,30 @@ P(D is final) = P(pick D)    ← No future steps to survive!
              = 1/4  ✓
 ```
 
+### why choosing 1 - 1/n as the survivor of the probability?
+
+Think only like this (super simple):
+
+You have 4 elements: A B C D
+
+For A to win in the end, A must survive 3 attacks:
+
+- When B comes → B must NOT kick A out → probability = 1 - 1/2 = 1/2  
+  (B gets only 50% chance to replace)
+
+- When C comes → C must NOT kick A out → probability = 1 - 1/3 = 2/3  
+  (C gets only ~33% chance)
+
+- When D comes → D must NOT kick A out → probability = 1 - 1/4 = 3/4  
+  (D gets only 25% chance)
+
+So A’s total chance = 1 × (1/2) × (2/3) × (3/4) = 1/4
+
+The “1 - 1/scope” is just “chance the new guy fails to kick out the current champion”.
+
+Every element gets exactly the same fair 1/n chance because the later elements have higher chance to get picked first but lower chance to survive the remaining attacks — everything cancels out perfectly.
+
+the old one is not going to change but individually they only have power like 1/n to remove is that why?
 ---
 
 ## Visual Summary
@@ -1327,6 +1351,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
