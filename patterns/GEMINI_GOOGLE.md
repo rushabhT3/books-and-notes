@@ -962,7 +962,71 @@ def pick_random(head):
 For this line: `if random.random() < (1 / scope):`  
 The trick is that we keep one candidate, and as we walk through the list, we give the current node a chance to replace the candidate.
 
+<details>
+    <summary> <h3>↕️ Show/Hide Probability Explanation </h3></summary>
+
+## Calculate Final Probability for Each Element
+
+### Element A (position 1)
+
+```
+P(A is final) = P(pick A) × P(survive step 2) × P(survive step 3) × P(survive step 4)
+
+             = 1/1 × (1 - 1/2) × (1 - 1/3) × (1 - 1/4)
+               ↓        ↓           ↓           ↓
+             = 1   ×   1/2    ×    2/3    ×    3/4
+             
+             = 1/4  ✓
+```
+
+### Element B (position 2)
+
+```
+P(B is final) = P(pick B) × P(survive step 3) × P(survive step 4)
+
+             = 1/2 × (1 - 1/3) × (1 - 1/4)
+               ↓        ↓           ↓
+             = 1/2  ×  2/3    ×    3/4
+             
+             = 1/4  ✓
+```
+
+### Element C (position 3)
+
+```
+P(C is final) = P(pick C) × P(survive step 4)
+
+             = 1/3 × (1 - 1/4)
+               ↓        ↓
+             = 1/3  ×  3/4
+             
+             = 1/4  ✓
+```
+
+### Element D (position 4)
+
+```
+P(D is final) = P(pick D)    ← No future steps to survive!
+
+             = 1/4  ✓
+```
+
+---
+
+## Visual Summary
+
+```
+Element   PICK prob    SURVIVAL prob           FINAL prob
+────────────────────────────────────────────────────────────
+   A        1/1    ×   1/2 × 2/3 × 3/4    =      1/4
+   B        1/2    ×   2/3 × 3/4          =      1/4
+   C        1/3    ×   3/4                =      1/4
+   D        1/4    ×   (nothing)          =      1/4
+────────────────────────────────────────────────────────────
+                                    ALL EQUAL! ✓
+```
 ***
+</details>
 
 ### UPDATED STUDY PLAN (The "Complete" 22)
 
@@ -1244,6 +1308,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
