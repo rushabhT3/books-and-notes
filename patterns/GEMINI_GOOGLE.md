@@ -797,6 +797,78 @@ def dijkstra(n, edges, start_node):
                 
     return shortest
 ```
+<details>
+<summary><h3>↕️ Show/Hide Dijkstra’s Algorithm Explanation</h3></summary>
+
+```python
+import heapq
+from collections import defaultdict
+
+def dijkstra(n, edges, start_node):
+    """
+    Implements Dijkstra's algorithm to find the shortest path distances
+    from a single start_node to all other nodes in a graph with non-negative weights.
+    
+    Parameters:
+        n:          Number of nodes (usually 0 to n-1 or 1 to n, depending on input)
+        edges:      List of tuples (u, v, w) meaning there is a directed edge from u to v with weight w
+        start_node: The node from which to start computing shortest paths
+    
+    Returns:
+        shortest:   Dictionary {node: distance} containing the shortest distance from start_node
+                    to each reachable node. Unreachable nodes are not included.
+    """
+    
+    # Step 1: Build the adjacency list representation of the graph
+    # graph[u] will contain a list of tuples (v, w) meaning "from u you can go to v with cost w"
+    graph = defaultdict(list)
+    for u, v, w in edges:
+        graph[u].append((v, w))  # Directed edge: u -> v with weight w
+        # If the graph is undirected, you would also add: graph[v].append((u, w))
+    
+    # Step 2: Initialize the priority queue (min-heap)
+    # We store tuples (current_known_distance, node)
+    # heapq will always give us the node with the smallest known distance first
+    min_heap = [(0, start_node)]  # Distance to start_node is 0
+    
+    # Step 3: Dictionary to store the final shortest distance to each node
+    # Once a node is added here, we know its shortest distance has been found
+    shortest = {}  # Will map node -> shortest distance from start_node
+    # Alternative: you could use a list of size n initialized with float('inf')
+    
+    # Main loop: continue until we have processed all reachable nodes
+    while min_heap:
+        # Pop the node with the smallest current known distance
+        w1, n1 = heapq.heappop(min_heap)  # w1 = distance to n1, n1 = current node
+        
+        # Optimization: if we already found a better (or equal) path to n1 earlier,
+        # we can skip processing this outdated entry
+        if n1 in shortest:
+            continue  # This entry is obsolete; we already processed this node
+        
+        # We have now found the true shortest distance to n1
+        # Record it (this node is now "settled")
+        shortest[n1] = w1
+        
+        # Explore all neighbors of the current node n1
+        for n2, w2 in graph[n1]:  # n2 = neighbor, w2 = edge weight from n1 to n2
+            # Only consider neighbors that haven't been settled yet
+            if n2 not in shortest:
+                # New candidate distance to n2: distance to n1 + edge weight
+                new_distance = w1 + w2
+                # Push this possibility into the heap
+                # Note: we may push multiple entries for the same node with different distances
+                # That's okay — the first time we pop the best one, we settle it and ignore later worse ones
+                heapq.heappush(min_heap, (new_distance, n2))
+    
+    # At the end, shortest contains the minimal distance from start_node to every reachable node
+    return shortest
+```
+
+Oh so it's kind of greedy algorithm; since we are choosing the least ones it is not possible to that point have the shortest in future.
+
+</details>
+
 **The Battleground:** 743 (Network Delay), 787 (Cheapest Flights), 1631, 1514
 Visualize Dijkshtra's Algo: [https://youtu.be/bZkzH5x0SKU](https://youtu.be/bZkzH5x0SKU ) 
 
@@ -1476,6 +1548,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
