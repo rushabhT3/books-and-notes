@@ -1067,12 +1067,12 @@ class LRUCache:
         self.left, self.right = Node(0, 0), Node(0, 0)
         self.left.next, self.right.prev = self.right, self.left
 
-    # Helper: Remove node from List
+    # Helper: Remove node from List (just in the linked list not the cache dictionary)
     def remove(self, node):
         prev, nxt = node.prev, node.next
         prev.next, nxt.prev = nxt, prev
 
-    # Helper: Insert at Right (Most Recent)
+    # Helper: Insert at Right (Most Recent) (just in the linked list not the cache dictionary)
     def insert(self, node):
         prev, nxt = self.right.prev, self.right
         prev.next = nxt.prev = node
@@ -1098,6 +1098,19 @@ class LRUCache:
             del self.cache[lru.key]
 ```
 **The Battleground:** 146 (LRU), 460 (LFU), 380 (Insert Delete GetRandom), 155 (Min Stack)
+
+### Explanation: 
+**The dictionary answers “WHERE is the node?”**
+
+**The linked list answers “IN WHAT ORDER is the node?”**
+
+<img width="975" height="789" alt="Screenshot 2025-12-14 181547" src="https://github.com/user-attachments/assets/1cf10cb5-9980-4e56-a4ae-ba050c5450e3" />
+
+| | Time Complexity | Space Complexity |
+|--|-----------------|------------------|
+| `get()` | **O(1)** | - |
+| `put()` | **O(1)** | - |
+| Overall | - | **O(n)** where n = capacity |
 
 ---
 
@@ -1698,6 +1711,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
