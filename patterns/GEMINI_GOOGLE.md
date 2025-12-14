@@ -1448,12 +1448,99 @@ Here is the **Tier 2 (The Google/Uber Standard)** and **Tier 3 (The Specialist/N
 
 If you are aiming for L4/L5 at Google or SDE-2 at Uber, **Tier 2 is mandatory**. You cannot skip it. Tier 3 is your insurance policy.
 
+
+### 23. Advanced Graphs: Kruskal’s (MST) & Union-Find
+**The Signal:** "Connect all points with minimum cost." "Min Cost to Connect Points."
+**Concept:** Sort all edges by weight. Add them if they don't form a cycle (using Union-Find).
+```python
+def min_cost_connect_points(points):
+    n = len(points)
+    edges = []
+    # 1. Build all edges (dist, u, v)
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
+            edges.append((dist, i, j))
+    
+    edges.sort() # Key step: Process smallest edges first
+    
+    uf = UnionFind(n) # Use standard UnionFind class
+    cost = 0
+    edges_used = 0
+    
+    for w, u, v in edges:
+        if uf.union(u, v):
+            cost += w
+            edges_used += 1
+            if edges_used == n - 1: break
+            
+    return cost
+```
+**The Battleground:** 1584, 1135
+**Time:** $O(E \log E)$.
+
 ---
 
 # TIER 2: THE "HARD" STANDARD
 *Used in Google, Uber, and High-Frequency Trading (HFT) interviews. These solve problems where $N$ is huge or constraints are weird.*
 
-### 23. Segment Tree (Range Queries & Updates)
+### 24. Bitmask Dynamic Programming
+**The Signal:** $N$ is extremely small ($N \le 20$). "Assign N workers to N jobs." "Visit all cities (TSP)."
+**Concept:** Use an integer (e.g., `10110`) to represent a set `{1, 2, 4}`.
+```python
+def solve_bitmask(n, costs):
+    # dp[mask] = min cost to assign workers represented by mask
+    memo = {}
+    target = (1 << n) - 1 # All 1s (everyone assigned)
+
+    def dfs(i, mask):
+        if i == n: return 0 # All workers assigned
+        if mask in memo: return memo[mask]
+        
+        res = float('inf')
+        for job in range(n):
+            # Check if 'job' bit is NOT set in mask
+            if not (mask & (1 << job)):
+                res = min(res, costs[i][job] + dfs(i + 1, mask | (1 << job)))
+        
+        memo[mask] = res
+        return res
+
+    return dfs(0, 0)
+```
+**The Battleground:** 1879, 698, 473, 847
+**Time:** $O(N \cdot 2^N)$. This is why $N$ must be small.
+
+### 25. Trie with XOR Logic
+**The Signal:** "Find maximum XOR of two numbers in an array."
+**Concept:** To maximize XOR, you want opposite bits ($0 \oplus 1 = 1$). Walk the Trie; if current bit is `1`, try to go to `0` child.
+```python
+def find_max_xor(nums):
+    # Standard Trie Insert omitted for brevity
+    # Logic for query:
+    max_xor = 0
+    for num in nums:
+        curr = root
+        curr_xor = 0
+        for i in range(31, -1, -1):
+            bit = (num >> i) & 1
+            # Want opposite bit
+            if 1 - bit in curr.children:
+                curr_xor |= (1 << i)
+                curr = curr.children[1 - bit]
+            else:
+                curr = curr.children[bit]
+        max_xor = max(max_xor, curr_xor)
+    return max_xor
+```
+**The Battleground:** 421 (Max XOR of Two Numbers), 1707
+
+---
+
+# TIER 3: THE "NICHE" SPECIALISTS
+*Study these only after mastering Tier 2. These appear in specific hard rounds or at Uber/Google when they want to filter candidates. OA rounds rarely in the face to face interviews*
+
+### 26. Segment Tree (Range Queries & Updates)
 **The Signal:** "Find sum/max of range `[L, R]`" AND "Update value at index `i`".
 **Why Prefix Sum Fails:** Prefix sum is $O(N)$ to update. Segment Tree is $O(\log N)$ for both.
 ```python
@@ -1492,91 +1579,6 @@ class SegmentTree:
 **Time:** $O(\log N)$ for query and update.
 **Space:** $O(N)$.
 
-### 24. Bitmask Dynamic Programming
-**The Signal:** $N$ is extremely small ($N \le 20$). "Assign N workers to N jobs." "Visit all cities (TSP)."
-**Concept:** Use an integer (e.g., `10110`) to represent a set `{1, 2, 4}`.
-```python
-def solve_bitmask(n, costs):
-    # dp[mask] = min cost to assign workers represented by mask
-    memo = {}
-    target = (1 << n) - 1 # All 1s (everyone assigned)
-
-    def dfs(i, mask):
-        if i == n: return 0 # All workers assigned
-        if mask in memo: return memo[mask]
-        
-        res = float('inf')
-        for job in range(n):
-            # Check if 'job' bit is NOT set in mask
-            if not (mask & (1 << job)):
-                res = min(res, costs[i][job] + dfs(i + 1, mask | (1 << job)))
-        
-        memo[mask] = res
-        return res
-
-    return dfs(0, 0)
-```
-**The Battleground:** 1879, 698, 473, 847
-**Time:** $O(N \cdot 2^N)$. This is why $N$ must be small.
-
-### 25. Advanced Graphs: Kruskal’s (MST) & Union-Find
-**The Signal:** "Connect all points with minimum cost." "Min Cost to Connect Points."
-**Concept:** Sort all edges by weight. Add them if they don't form a cycle (using Union-Find).
-```python
-def min_cost_connect_points(points):
-    n = len(points)
-    edges = []
-    # 1. Build all edges (dist, u, v)
-    for i in range(n):
-        for j in range(i + 1, n):
-            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
-            edges.append((dist, i, j))
-    
-    edges.sort() # Key step: Process smallest edges first
-    
-    uf = UnionFind(n) # Use standard UnionFind class
-    cost = 0
-    edges_used = 0
-    
-    for w, u, v in edges:
-        if uf.union(u, v):
-            cost += w
-            edges_used += 1
-            if edges_used == n - 1: break
-            
-    return cost
-```
-**The Battleground:** 1584, 1135
-**Time:** $O(E \log E)$.
-
-### 26. Trie with XOR Logic
-**The Signal:** "Find maximum XOR of two numbers in an array."
-**Concept:** To maximize XOR, you want opposite bits ($0 \oplus 1 = 1$). Walk the Trie; if current bit is `1`, try to go to `0` child.
-```python
-def find_max_xor(nums):
-    # Standard Trie Insert omitted for brevity
-    # Logic for query:
-    max_xor = 0
-    for num in nums:
-        curr = root
-        curr_xor = 0
-        for i in range(31, -1, -1):
-            bit = (num >> i) & 1
-            # Want opposite bit
-            if 1 - bit in curr.children:
-                curr_xor |= (1 << i)
-                curr = curr.children[1 - bit]
-            else:
-                curr = curr.children[bit]
-        max_xor = max(max_xor, curr_xor)
-    return max_xor
-```
-**The Battleground:** 421 (Max XOR of Two Numbers), 1707
-
----
-
-# TIER 3: THE "NICHE" SPECIALISTS
-*Study these only after mastering Tier 2. These appear in specific hard rounds or at Uber/Google when they want to filter candidates.*
 
 ### 27. Digit DP
 **The Signal:** "Count numbers between range `L` and `R` that satisfy property X." (e.g., no consecutive ones).
@@ -1711,6 +1713,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
