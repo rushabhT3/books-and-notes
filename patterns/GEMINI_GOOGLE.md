@@ -793,7 +793,8 @@ def dijkstra(n, edges, start_node):
         
         for n2, w2 in graph[n1]:
             if n2 not in shortest:
-                heapq.heappush(min_heap, (w1 + w2, n2))
+                new_dist = w1 + w2
+                heapq.heappush(min_heap, (new_dist, n2))
                 
     return shortest
 ```
@@ -870,7 +871,156 @@ Oh so it's kind of greedy algorithm; since we are choosing the least ones it is 
 </details>
 
 **The Battleground:** 743 (Network Delay), 787 (Cheapest Flights), 1631, 1514
-Visualize Dijkshtra's Algo: [https://youtu.be/bZkzH5x0SKU](https://youtu.be/bZkzH5x0SKU ) 
+
+**TC and SC:**
+The complexity depends on which data structure you use to find the nearest vertex. Let $V$ be the number of vertices and $E$ be the number of edges.
+
+| Implementation Type | Time Complexity | Space Complexity | Best For |
+| :--- | :--- | :--- | :--- |
+| **Priority Queue (Binary Heap)** | **$O(E \log V)$** | **$O(V + E)$** | **Sparse Graphs** |
+| **Linear Array (No Heap)** | **$O(V^2)$** | **$O(V + E)$** | **Dense Graphs** |
+| **Fibonacci Heap** (Theoretical) | $O(E + V \log V)$ | $O(V + E)$ | Extremely Large/Complex |
+
+<details>
+    <summary>
+        <h3>↕️ Show/Hide Dijkstra’s Algorithm TC and SC</h3>
+    </summary>
+
+Here are the Time Complexity (TC) and Space Complexity (SC) for Dijkstra’s Algorithm, followed by an explanation of why your intuition regarding the Priority Queue and dense graphs is correct.
+
+### 1. Complexities
+
+The complexity depends on which data structure you use to find the nearest vertex. Let $V$ be the number of vertices and $E$ be the number of edges.
+
+| Implementation Type | Time Complexity | Space Complexity | Best For |
+| :--- | :--- | :--- | :--- |
+| **Priority Queue (Binary Heap)** | **$O(E \log V)$** | **$O(V + E)$** | **Sparse Graphs** |
+| **Linear Array (No Heap)** | **$O(V^2)$** | **$O(V + E)$** | **Dense Graphs** |
+| **Fibonacci Heap** (Theoretical) | $O(E + V \log V)$ | $O(V + E)$ | Extremely Large/Complex |
+
+*(Note: In most standard libraries like C++ STL or Python `heapq`, the actual time is $O(E \log E)$, but since $E \le V^2$, $\log E \approx 2 \log V$, so it simplifies to $O(E \log V)$. Space is $O(V+E)$ because we store the graph ($V+E$) and the distance array/queue ($V$ or $E$ depending on implementation).)*
+
+---
+
+### 2. Is the Priority Queue (PQ) only good when it's not dense?
+
+**Yes, you are absolutely correct.**
+
+Using a Priority Queue (Binary Heap) is actually **slower** than a simple array if the graph is very dense.
+
+#### Here is the math behind why:
+
+A **Dense Graph** is one where the number of edges is close to the maximum possible number of edges ($E \approx V^2$).
+
+Let's compare the operations:
+
+**A. Using a Simple Array (Linear Scan):**
+*   **Logic:** For every vertex, we iterate through all other vertices to find the minimum distance.
+*   **Math:** $O(V^2)$
+*   **Result:** Even if $E = V^2$, the complexity remains **$O(V^2)$**.
+
+**B. Using a Priority Queue (Binary Heap):**
+*   **Logic:** Every time we relax an edge, we push/update the heap. A heap operation costs logarithmic time.
+*   **Math:** $O(E \log V)$
+*   **Result in a Dense Graph ($E \approx V^2$):**
+    Substitute $V^2$ for $E$:
+    $$O(V^2 \log V)$$
+
+#### The Comparison:
+*   **Linear Array:** $V^2$
+*   **Priority Queue:** $V^2 \times \log V$
+
+Since $\log V \ge 1$, **$V^2 \log V$ is greater than $V^2$**.
+
+### Summary
+*   **Sparse Graph ($E \approx V$):** The Priority Queue is much faster ($V \log V$ vs $V^2$).
+*   **Dense Graph ($E \approx V^2$):** The Priority Queue is slower because of the overhead of sorting/maintaining the heap structure for so many edges. The simple array scan wins here.
+---
+This is the standard **"Lazy" Dijkstra** implementation using a Priority Queue. This is the most common version you will write in an interview.
+
+Here is the line-by-line breakdown of the **Time Complexity (TC)** and **Space Complexity (SC)**.
+
+### Summary
+*   **Time Complexity:** $O(E \log E)$ which simplifies to **$O(E \log V)$**
+*   **Space Complexity:** **$O(V + E)$**
+
+---
+
+### Detailed Breakdown
+
+#### 1. Building the Graph
+```python
+# 1. Build Graph
+graph = defaultdict(list)
+for u, v, w in edges:       # Loops E times
+    graph[u].append((v, w)) # O(1) operation
+```
+*   **TC:** **$O(E)$**. We iterate through the list of edges once.
+*   **SC:** **$O(V + E)$**. We store $V$ keys (nodes) and a total of $E$ items inside the lists.
+
+#### 2. The Main Loop (The Heavy Lifter)
+```python
+while min_heap:  # Can run up to E times (Worst case)
+    w1, n1 = heapq.heappop(min_heap)
+```
+*   **TC:** **$O(E \log E)$**
+    *   In this "Lazy" implementation, we don't update priorities inside the heap; we just add duplicates.
+    *   Worst case: The heap contains every edge ($E$) in the graph.
+    *   `heappop` takes logarithmic time relative to the size of the heap: $O(\log E)$.
+    *   We might pop up to $E$ times. Total: $E \times \log E$.
+
+*(Note: Since $E \le V^2$, mathematically $\log E$ is effectively the same as $2 \log V$. So we usually write $O(E \log V)$. Both are correct.)*
+
+#### 3. The Lazy Check
+```python
+    if n1 in shortest: continue # O(1) average lookup
+    shortest[n1] = w1           # O(1)
+```
+*   **TC:** $O(1)$.
+*   **Logic:** This is crucial. This line ensures we don't process the same node twice. Even if the heap has duplicates, we skip them here.
+
+#### 4. The Neighbors Loop
+```python
+    for n2, w2 in graph[n1]:    # Iterates over neighbors
+        if n2 not in shortest:
+            new_dist = w1 + w2
+            heapq.heappush(min_heap, (new_dist, n2))
+```
+*   **TC:** **$O(E \log E)$**
+    *   **The Loop:** Across the entire lifespan of the algorithm, this inner loop runs exactly **$E$** times (once for every edge in the graph).
+    *   **The Push:** `heapq.heappush` takes $O(\log E)$ (log of current heap size).
+    *   **Total:** We push into the heap at most $E$ times. Total: $E \times \log E$.
+
+---
+
+### Space Complexity Analysis
+
+1.  **`graph` Dictionary:**
+    *   Holds all nodes and edges.
+    *   **$O(V + E)$**
+
+2.  **`shortest` Dictionary:**
+    *   Holds the final distance for every node.
+    *   **$O(V)$**
+
+3.  **`min_heap`:**
+    *   This is the tricky one. In a "perfect" theoretical Dijkstra, the heap size is $V$.
+    *   But in this **Python "Lazy" Dijkstra**, we do not delete old paths. If we find a shorter path to a node, we just add a *new* entry to the heap.
+    *   Therefore, the heap can grow to store every edge in the graph in the worst case.
+    *   **$O(E)$**
+
+**Total Space:** $O(V + E + V + E) \approx$ **$O(V + E)$**.
+
+### Why is this efficient?
+Even though the heap grows to size $E$ (making it slightly larger than the theoretical $V$), the logic `if n1 in shortest: continue` ensures we ignore the "bad" duplicates instantly. The ease of writing this code outweighs the minor space overhead compared to writing a complex Indexed Priority Queue.
+
+
+</details>
+
+[Visualize Dijkshtra's Algo](https://youtu.be/bZkzH5x0SKU ) 
+
+[Dijkstra's Algorithm - Why PQ and not Q](https://www.youtube.com/watch?v=3dINsjyfooY)
+
 
 ### 18. Merge Intervals (Sweeping Line)
 **The Signal:** "Meeting Rooms," "Calendar conflicts," "Merge overlapping intervals."
@@ -1548,6 +1698,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
