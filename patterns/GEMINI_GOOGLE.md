@@ -1477,7 +1477,127 @@ def min_cost_connect_points(points):
     return cost
 ```
 **The Battleground:** 1584, 1135
-**Time:** $O(E \log E)$.
+
+<details>
+  <summary><h3>↕️ Show/Hide Explanation</h3></summary>
+
+```python
+def min_cost_connect_points(points):
+    """
+    Returns the minimum cost to connect all points using Manhattan distance.
+    This is a classic Minimum Spanning Tree (MST) problem solved using Kruskal's algorithm.
+    
+    Args:
+        points: List of [x, y] coordinates (list of lists)
+    
+    Returns:
+        Minimum total cost to connect all points
+    """
+    n = len(points)
+    if n == 1:
+        return 0  # Edge case: single point needs no connections
+    
+    edges = []
+    
+    # Step 1: Generate all possible edges between points
+    # For every pair of points (i, j), compute Manhattan distance and store as (distance, i, j)
+    for i in range(n):
+        for j in range(i + 1, n):  # Avoid duplicates and self-loops
+            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
+            edges.append((dist, i, j))  # Tuple: (weight, vertex1, vertex2)
+    
+    # Step 2: Sort edges by weight (distance) in ascending order
+    # This is crucial for Kruskal's algorithm — we always consider cheapest edges first
+    edges.sort()
+    
+    # Step 3: Initialize Union-Find (Disjoint Set Union) data structure
+    # Helps detect cycles efficiently and merge connected components
+    uf = UnionFind(n)
+    
+    cost = 0           # Total cost of the MST
+    edges_used = 0     # Number of edges added to the MST
+    
+    # Step 4: Iterate through sorted edges and add them if they don't form a cycle
+    for weight, u, v in edges:
+        # Try to union the two points (connect them)
+        if uf.union(u, v):  # Returns True only if u and v were NOT already connected
+            cost += weight         # Add this edge's cost to total
+            edges_used += 1         # One more valid edge in MST
+            
+            # Early termination: MST for n nodes has exactly n-1 edges
+            if edges_used == n - 1:
+                break
+    
+    return cost
+```
+</details>
+
+**Time:** $O(E \log E)$ = $O(n^2 \log n)$  
+**Space:** $O(E)$ = $O(n^2)$
+
+<details>
+  <summary><h3>↕️ Show/Hide TC, SC Explanation</h3></summary>
+
+```python
+def min_cost_connect_points(points):
+    """
+    Solves "Min Cost to Connect Points" using Kruskal's algorithm with Manhattan distance.
+    
+    Time Complexity:  O(n² log n)
+    Space Complexity: O(n²)
+    """
+    n = len(points)
+    
+    # Edge case: If 0 or 1 point, no connections needed → cost is 0
+    # TC: O(1) | SC: O(1)
+    if n <= 1:
+        return 0
+    
+    edges = []  # Will store all possible unique edges as (distance, i, j)
+    
+    # Step 1: Generate all possible UNIQUE edges between pairs of points
+    # Since the graph is undirected, we use i < j to avoid duplicates
+    # Exact number of edges: n(n-1)/2 → This is quadratic in n
+    # In Big-O notation: O(n²) edges generated and stored
+    # TC: O(n²) [nested loops + O(1) Manhattan distance calculation per pair]
+    # SC: O(n²) [we store all n(n-1)/2 edges in the list]
+    for i in range(n):
+        for j in range(i + 1, n):
+            dist = abs(points[i][0] - points[j][0]) + abs(points[i][1] - points[j][1])
+            edges.append((dist, i, j))  # (weight, vertex_u, vertex_v)
+    
+    # Step 2: Sort all edges by distance (weight) in ascending order
+    # This is the key greedy step in Kruskal's algorithm
+    # Number of edges E = n(n-1)/2 = O(n²)
+    # Sorting cost: O(E log E) = O(n² log n) ← Dominates overall time complexity
+    # SC: O(1) extra
+    edges.sort()
+    
+    # Step 3: Initialize Union-Find (Disjoint Set Union) for efficient cycle detection
+    # SC: O(n) [parent and rank/size arrays of size n]
+    uf = UnionFind(n)
+    
+    cost = 0         # Total minimum cost of the MST
+    edges_used = 0   # Number of edges added to the MST
+    
+    # Step 4: Process edges in order of increasing weight
+    # Add an edge only if it connects two different components (no cycle)
+    # In worst case we may check all edges → O(n²) iterations
+    # Each union/find is amortized nearly O(1) → total Union-Find cost nearly O(n)
+    # Overall TC remains O(n² log n) due to sorting
+    for weight, u, v in edges:
+        if uf.union(u, v):  # Returns True only if u and v were not already connected
+            cost += weight
+            edges_used += 1
+            
+            # MST is complete when we have exactly (n-1) edges → early exit
+            if edges_used == n - 1:
+                break
+    
+    return cost
+```
+
+</details>
 
 ---
 
@@ -1713,6 +1833,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
