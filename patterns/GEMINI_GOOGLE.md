@@ -1477,6 +1477,7 @@ def min_cost_connect_points(points):
     return cost
 ```
 **The Battleground:** 1584, 1135
+<img width="1100" height="778" alt="Producer" src="https://github.com/user-attachments/assets/cfb234c4-2b00-4e03-99cd-e871ca8ffc8b" />
 
 <details>
   <summary><h3>↕️ Show/Hide Explanation</h3></summary>
@@ -1833,6 +1834,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
