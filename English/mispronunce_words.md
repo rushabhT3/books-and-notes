@@ -1,5 +1,10 @@
 Here is a comprehensive list of **< 100 commonly mispronounced words** in India. I have categorized them to help you understand the patterns (Silent letters, Vowel shifts, Stress patterns, etc.).
 
+| # | Word | Common Indian Pronunciation | Correct Pronunciation | The Fix / Trick |
+| --- | --- | --- | --- | --- |
+|  | **Exercise** | *Eg-zer-sa-yees* | **ek-suh-saiz** | Start with a crisp **"ks"** sound (like 'exit'). End with **"size"**, not "sa-yees." |
+
+
 ### **Part 1: The W vs. V & Consonant Confusion**
 | # | Word | Common Indian Pronunciation | Correct Pronunciation | The Fix / Trick |
 | :--- | :--- | :--- | :--- | :--- |
