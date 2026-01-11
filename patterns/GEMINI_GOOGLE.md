@@ -6,11 +6,30 @@ Each card contains the **Signal** (when to use it), the **Code Skeleton** (memor
 ***
 
 # THE ULTIMATE DSA PATTERNS CHEAT SHEET
-**Python Edition • 2025 Final Version**
+**Python Edition • 2026 Final Version**
 
 ---
 
 ## PART 1: ARRAYS & POINTERS
+
+### Reverse Linked List:
+```python
+prev, curr = None, head
+while curr:
+    next_temp = curr.next   # save the curr.next point as that will be eliminated
+    curr.next = prev
+    prev = curr
+    curr = next_temp
+return prev
+```
+or,
+```python
+prev, curr = None, head
+while curr:
+    curr.next, prev, curr = prev, curr, curr.next  #⚠️DON'T change the sequence
+return prev
+```
+
 *The bread and butter of interviews. Master these first.*
 
 ### 1. Fast & Slow Pointers (The Tortoise & Hare)
@@ -122,16 +141,15 @@ def subarray_sum(nums, k):
 
 **Core Idea:** 
 ### The Analogy: The "Road Trip"
-Imagine you are driving down a long highway. You want to find specific sections of the road that are exactly **100 miles long** ($k=100$).
+<img width="593" height="286" alt="image" src="https://github.com/user-attachments/assets/72106273-b1f6-4dc3-b519-ec5b01f8cab5" />
 
-You don't measure every single section. Instead, you just keep track of the **total distance** you have driven from the start (this is your `curr_sum`).
+Imagine driving down a highway and wanting to find sections that are exactly **100 miles long**. 
 
-*   At 1:00 PM, your odometer reads **50 miles**. You write this down.
-*   At 3:00 PM, your odometer reads **150 miles**.
+Instead of measuring each section, you track your total distance from the start using `curr_sum`. 
 
-You stop and think: *"I am at mile 150 now. If I look at my notebook, was I ever at mile 50?"*
-Yes, you were!
-Since $150 - 50 = 100$, that means the distance you drove **between** those two points is exactly 100 miles.
+At 1:00 PM, your odometer reads 50 miles. At 3:00 PM, it reads 150 miles. 
+
+Since 150 - 50 = 100, you've found a section that is exactly 100 miles long.
 
 So `curr_sum - prev_sum = k` becomes the `curr_sum - k` and hence something must exist.
 
@@ -248,9 +266,65 @@ That is why we cannot simply return `heap[k]`❌ after filling the heap.
 
 **Time Complexity:** O(n log k)  
 **Space Complexity:** O(k)
+
+### Median from Data Stream (Two Heaps Pattern)
+
+Signal phrases:
+
+* **"Find median"**
+* **"Middle element in stream"**
+* **"Balance two halves"**
+* **"Kth largest in stream"** (variation)
+
+```python
+import heapq
+
+class MedianFinder:
+    def __init__(self):
+        self.small = []  # Max heap (stores smaller half, negate values)
+        self.large = []  # Min heap (stores larger half)
+    
+    def addNum(self, num):
+        # Step 1: Add to max heap (small half)
+        heapq.heappush(self.small, -num)
+        
+        # Step 2: Balance - move largest of small to large
+        heapq.heappush(self.large, -heapq.heappop(self.small))
+        
+        # Step 3: Keep sizes balanced (small >= large)
+        if len(self.large) > len(self.small):
+            heapq.heappush(self.small, -heapq.heappop(self.large))
+    
+    def findMedian(self):
+        if len(self.small) > len(self.large):
+            return -self.small[0]
+        return (-self.small[0] + self.large[0]) / 2.0
+
+```
+
+### Complexity Analysis
+
+| Operation | Time Complexity | Reason |
+| --- | --- | --- |
+| **addNum** | $O(\log n)$ | Multiple heap pushes/pops. |
+| **findMedian** | $O(1)$ | Accessing top elements `self.small[0]` or `self.large[0]`. |
+| **Space** | $O(n)$ | Storing all  elements from the stream. |
+
 ---
 
 ## PART 3: TREES & GRAPHS
+
+### Validate BST:
+```python
+def isValidBST(root, left=float('-inf'), right=float('inf')):
+    if not root:
+        return True
+    if not (left < root.val < right):
+        return False
+    return (isValidBST(root.left, left, root.val) and 
+            isValidBST(root.right, root.val, right))
+```
+
 *The most common "Hard" patterns.*
 
 ### 8. BFS (Level Order Traversal)
@@ -1834,6 +1908,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
