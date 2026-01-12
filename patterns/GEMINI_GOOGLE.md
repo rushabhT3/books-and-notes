@@ -83,7 +83,7 @@ def two_pointers(nums, target):
 **Time: O(n), Space: O(1)** — one pointer moves per iteration, at most n−1 moves total, using only two indices.
 
 ### 3. Sliding Window (Variable Size)
-**The Signal:** "Longest substring/subarray with condition", "Max consecutive ones", "Fruit into baskets".
+**The Signal:** "Longest substring/subarray with condition", "Max consecutive ones", "Fruit into baskets". The Goal: Finding "Extreme Limits" (The Longest, The Shortest, The Maximum).
 ```python
 def sliding_window(s):
     l = 0
@@ -119,7 +119,7 @@ Short form:
 **TC: O(n) | SC: O(k)**
 
 ### 4. Prefix Sum + Hash Map
-**The Signal:** "Subarray sum equals K", "Number of subarrays with sum...", continuous subarray problems.
+**The Signal:** "Subarray sum equals K", "Number of subarrays with sum...", continuous subarray problems. The Goal: Finding "Exact Targets" (Count how many, or find a specific sum).
 ```python
 def subarray_sum(nums, k):
     prefix_map = {0: 1} # Base case: sum 0 happens once
@@ -274,6 +274,8 @@ Signal phrases:
 * **"Middle element in stream"**
 * **"Balance two halves"**
 * **"Kth largest in stream"** (variation)
+
+📝 **Imagine:** Min-heap stores the "Top Half" ($> \text{median}$), Max-heap stores the "Bottom Half" ($\le \text{median}$); keep Small size $\ge$ Large size.
 
 ```python
 import heapq
@@ -1907,6 +1909,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
