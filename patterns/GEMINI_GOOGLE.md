@@ -122,7 +122,7 @@ Short form:
 **The Signal:** "Subarray sum equals K", "Number of subarrays with sum...", continuous subarray problems. The Goal: Finding "Exact Targets" (Count how many, or find a specific sum).
 ```python
 def subarray_sum(nums, k):
-    prefix_map = {0: 1} # Base case: sum 0 happens once: This handles the base case where a subarray starting from index 0 has the required sum `k`.
+    prefix_map = {0: 1} # This handles the base case where a subarray starting from index 0 has the required sum `k`.
     curr_sum = 0
     count = 0
 
@@ -1909,6 +1909,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
