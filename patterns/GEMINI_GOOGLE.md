@@ -18,8 +18,7 @@ prev, curr = None, head
 while curr:
     next_temp = curr.next   # save the curr.next point as that will be eliminated
     curr.next = prev
-    prev = curr
-    curr = next_temp
+    prev, curr = curr, next_temp
 return prev
 ```
 or,
@@ -1908,6 +1907,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
