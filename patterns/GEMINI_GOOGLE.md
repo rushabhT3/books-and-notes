@@ -3,7 +3,7 @@ This format is designed for **study and memorization**. I have broken the 16 pat
 
 Each card contains the **Signal** (when to use it), the **Code Skeleton** (memorize this), and the **Battleground** (problems to practice).
 
-***
+## Flashcards: [Notebook llm](https://notebooklm.google.com/notebook/980f76e7-a7da-4b8d-b842-99d54549447b)
 
 # THE ULTIMATE DSA PATTERNS CHEAT SHEET
 **Python Edition • 2026 Final Version**
@@ -1909,6 +1909,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
