@@ -316,6 +316,9 @@ class MedianFinder:
 ## PART 3: TREES & GRAPHS
 
 ### Validate BST:
+
+> left: boundary (minimum), root: (the middle), right: boundary (maximum)
+
 ```python
 # ⚠️ In Python, you cannot put a "regular" argument (like root) after an argument with a default value (like left=float('-inf')).
 # => def isValidBST(left=float('-inf'), root, right=float('inf')): is WRONG ❌
@@ -1912,6 +1915,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
