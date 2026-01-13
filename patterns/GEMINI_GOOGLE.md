@@ -140,6 +140,7 @@ def subarray_sum(nums, k):
 
 **Core Idea:** 
 ### The Analogy: The "Road Trip"
+
 <img width="593" height="286" alt="image" src="https://github.com/user-attachments/assets/72106273-b1f6-4dc3-b519-ec5b01f8cab5" />
 
 Imagine driving down a highway and wanting to find sections that are exactly **100 miles long**. 
@@ -155,6 +156,7 @@ So `curr_sum - prev_sum = k` becomes the `curr_sum - k` and hence something must
 **TC: O(n)** – one pass, hashmap ops are O(1)  
 **SC: O(n)** – worst-case stores n different prefix sums
 
+📝 Note: **Sliding Window finds the optimal *range* (Max/Min), whereas Prefix Sum uses a historical *map* to count every instance where the exact "gap" to your target (k) exists.**
 ---
 
 ## PART 2: SEARCHING & SORTING
@@ -324,10 +326,13 @@ class MedianFinder:
 # => def isValidBST(left=float('-inf'), root, right=float('inf')): is WRONG ❌
 
 def isValidBST(root, left=float('-inf'), right=float('inf')):
+    # 1️⃣ base condition 
     if not root:
         return True
+    # 2️⃣ for that particular node/level condition 
     if not (left < root.val < right):
         return False
+    # 3️⃣ propogate it further
     return (isValidBST(root.left, left, root.val) and 
             isValidBST(root.right, root.val, right))
 ```
@@ -366,21 +371,28 @@ So, basically where the for loop ends is the boundary for that row.
 **Space Complexity:** O(W) → where W is the maximum width of the tree (maximum number of nodes at any level)
 
 ### 9. DFS (Recursive Backtracking)
-**The Signal:** "Generate all subsets", "Permutations", "Combination Sum", "Sudoku".
+**The Signal:** "Generate all subsets", "Combination Sum", "Sudoku".
+Example: Input: [1, 2, 3] → Output: [[], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3]]
+
 ```python
 def subsets(nums):
     res = []
     
     def backtrack(start, path):
+        # 1️⃣ base condition
         if is_solution(path):
             res.append(path[:]) 
             return
         
         for i in range(start, len(nums)):
-            path.append(nums[i])   
+            # 2️⃣ Choose 
+            path.append(nums[i])
+            # 3️⃣ Explore: Move to the next index
             backtrack(i + 1, path)
+            # 4️⃣ Unchoose: Backtrack to try the next number at this position
             path.pop()             
-    
+
+    # 📝 start from the empty array or the 0 index
     backtrack(0, [])
     return res
 
@@ -397,7 +409,7 @@ def subsets(nums):
             res.append(path[:]) # Must copy! Otherwise all reference same list
             return
         
-        for i in range(start, len(nums)):
+        for i in range(start, len(nums)): # start to prevent going backward
             path.append(nums[i])   # Modify the ONE path # 1. Choose
             backtrack(i + 1, path) # Pass same path deeper  # 2. Explore
             path.pop()             # Undo modification # 3. Un-choose (Backtrack)
@@ -425,6 +437,47 @@ backtrack(i + 1, path)       # This is going deep and deep → that is why we ar
 
 **Space complexity: O(n)**  
 The path list can grow to a maximum size of n (if the subset includes all elements from nums). The recursion depth is also at most n.
+
+### Permutations: 
+**The Signal**: "All possible arrangements", "Rankings".
+Example: Input: [1, 2, 3] → Output: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
+
+```python
+def permutations(nums):
+    result = []
+    used = [False] * len(nums)
+
+    def backtrack(path):
+        if is_satisfied():
+            result.append(path[:])
+            return
+
+        for i in range(len(nums)):
+            # since we start from the start only we can repeat and this is for so that it won't repeat
+            if used[i]:
+                continue
+
+            used[i] = True
+            path.append(nums[i])
+
+            backtrack(path)
+
+            path.pop()
+            used[i] = False
+
+    # ⚠️ backtrack from start NOT backtrack from nums we gotta build the result from start
+    backtrack([])
+    return result
+```
+1. **Time Complexity (TC)**: $O(n \cdot n!)$
+   $n!$: There are $n$ factorial total permutations. For example, if $n=3$, there are $3 \times 2 \times 1 = 6$ results.
+   
+   $n$: For each of those $n!$ results, you perform a path[:] copy, which takes $O(n)$ time.
+   
+   Total: $O(n \cdot n!)$. This grows much faster than $O(2^n)$.
+3. **Space Complexity (SC)**: $O(n)$ Recursion Stack: The maximum depth of the "tree" is $n$
+
+
 
 ### 10. DFS on Trees (Bottom-Up State)
 **The Signal:** "Diameter of tree", "Is Balanced", "Max Path Sum".
@@ -1915,6 +1968,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
