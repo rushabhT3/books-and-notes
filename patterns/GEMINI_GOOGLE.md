@@ -486,20 +486,20 @@ def permutations(nums):
 def max_path_sum(root):
     global_max = float('-inf')
     
-    def dfs(node):
+    def dfs(node): # dfs: for get_weighted_height
         nonlocal global_max
         if not node: return 0
         
-        left = max(dfs(node.left), 0) # Ignore negative paths
+        left = max(dfs(node.left), 0) # Ignore negative paths 
         right = max(dfs(node.right), 0)
         
         # Update global maximum (the "Split" point)
-        global_max = max(global_max, node.val + left + right)
+        global_max = max(global_max, node.val + left + right) # when it not weighted we use 1 instead of node.val
         
         # Return max path extending down ONE side
         return node.val + max(left, right)
         
-    dfs(root)
+    get_weighted_height(root)
     return global_max
 ```
 **The Battleground:** 124, 543, 110, 104
@@ -1968,6 +1968,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
