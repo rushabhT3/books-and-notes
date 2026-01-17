@@ -371,6 +371,8 @@ So, basically where the for loop ends is the boundary for that row.
 **Space Complexity:** O(W) → where W is the maximum width of the tree (maximum number of nodes at any level)
 
 ### 9. DFS (Recursive Backtracking)
+
+### Combinations: 
 **The Signal:** "Generate all subsets", "Combination Sum", "Sudoku".
 Example: Input: [1, 2, 3] → Output: [[], [1], [2], [3], [1,2], [1,3], [2,3], [1,2,3]]
 
@@ -438,6 +440,8 @@ backtrack(i + 1, path)       # This is going deep and deep → that is why we ar
 **Space complexity: O(n)**  
 The path list can grow to a maximum size of n (if the subset includes all elements from nums). The recursion depth is also at most n.
 
+---
+
 ### Permutations: 
 **The Signal**: "All possible arrangements", "Rankings".
 Example: Input: [1, 2, 3] → Output: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,1,2], [3,2,1]]
@@ -477,7 +481,66 @@ def permutations(nums):
    Total: $O(n \cdot n!)$. This grows much faster than $O(2^n)$.
 3. **Space Complexity (SC)**: $O(n)$ Recursion Stack: The maximum depth of the "tree" is $n$
 
+---
 
+### Grid Pattern:
+
+**The Signal:** "Word Search", "Number of Islands", "Unique Paths", "Snake/Maze".
+**Example:** Can you find "ABCCED" in the 2D matrix?
+
+```python
+def grid_search(grid, word):
+    rows, cols = len(grid), len(grid[0])
+    
+    def backtrack(r, c, index):
+        # 1️⃣ Success Base Case: We found all characters
+        if index == len(word):
+            return True
+            
+        # 2️⃣ Constraint Base Case: Out of bounds, wrong char, or already visited
+        if (r < 0 or r >= rows or 
+            c < 0 or c >= cols or 
+            grid[r][c] != word[index]):
+            return False
+        
+        # 3️⃣ Choose: Mark as visited so we don't use the same cell twice in one path
+        temp = grid[r][c]
+        grid[r][c] = "#" 
+        
+        # 4️⃣ Explore: Move in 4 directions (Down, Up, Right, Left)
+        # In grid patterns, we usually use 'or' to stop early if we find the path
+        found = (backtrack(r + 1, c, index + 1) or 
+                 backtrack(r - 1, c, index + 1) or 
+                 backtrack(r, c + 1, index + 1) or 
+                 backtrack(r, c - 1, index + 1))
+        
+        # 5️⃣ Un-choose: Backtrack by restoring the cell for other starting points
+        grid[r][c] = temp
+        
+        return found
+
+    # Start the search from every possible cell in the grid
+    for r in range(rows):
+        for c in range(cols):
+            if backtrack(r, c, 0):
+                return True
+    return False
+```
+
+### 📊 Complexity Analysis for Grid
+
+1. **Time Complexity (TC): $O(N \cdot M \cdot 3^L)$**
+
+- $N \cdot M$: We start a search from every cell in the grid.
+- $3^L$: From each cell, we explore 4 directions initially, then 3 directions (since we don't go back to where we just came from) up to length $L$ of the word.
+
+2. **Space Complexity (SC): $O(L)$**
+
+- $L$: The maximum depth of the recursion stack is the length of the word/path. If you use a separate visited matrix, it would be $O(N \cdot M)$, but the "in-place mark" (#) keeps it at $O(L)$.
+
+### 📝 Note: In backtracking, the arguments placed in the functions are those which changes like index and path in combinations, the path in the permutations and the (r,c) and the index or current_word_length in the grid pattern.
+
+---
 
 ### 10. DFS on Trees (Bottom-Up State)
 **The Signal:** "Diameter of tree", "Is Balanced", "Max Path Sum".
@@ -1968,6 +2031,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
