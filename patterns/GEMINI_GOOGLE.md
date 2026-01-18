@@ -562,7 +562,7 @@ def max_path_sum(root):
         # Return max path extending down ONE side
         return node.val + max(left, right)
         
-    get_weighted_height(root)
+    dfs(root)
     return global_max
 ```
 **The Battleground:** 124, 543, 110, 104
@@ -573,6 +573,17 @@ def max_path_sum(root):
 ### Space Complexity: O(h) where h = height of tree
 - The recursion uses the **call stack**.
 - The maximum depth of the recursion stack is equal to the **height of the tree**.
+
+---
+
+### Python Scoping: Reassignment vs. Mutation
+
+In Python, you can **read** any variable from an outer scope. However, if you want to **modify** it, the rules change based on the data type:
+
+* **Primitives (Immutable):** For types like `int`, `float`, `str`, or `tuple`, you must use the `nonlocal` keyword. Without it, using the `=` operator creates a new **local** variable instead of updating the one outside.
+* **Non-Primitives (Mutable):** For types like `list` or `dict`, you do **not** need `nonlocal` to modify their contents. Since you are **mutating** the object (e.g., `arr[0] = val`) rather than **reassigning** the variable name itself, Python allows the change directly.
+
+---
 
 ### 11. Topological Sort (Kahn's Algorithm)
 **The Signal:** "Course Schedule", "Project Dependencies", "Build order", "Alien Dictionary".
@@ -2031,6 +2042,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
