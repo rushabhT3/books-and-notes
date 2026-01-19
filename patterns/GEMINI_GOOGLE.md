@@ -697,11 +697,10 @@ class UnionFind:
         self.rank = [1] * n
         
     def find(self, n1):  # here, n1: node whose parent has to be found
-        p = self.parent[n1]
-        while p != self.parent[p]:
-            self.parent[p] = self.parent[self.parent[p]] 
-            p = self.parent[p]
-        return p
+        while n1 != self.parent[n1]:
+            self.parent[n1] = self.parent[self.parent[n1]] 
+            n1 = self.parent[n1]
+        return n1
         
     def union(self, n1, n2):
         p1, p2 = self.find(n1), self.find(n2)
@@ -740,15 +739,13 @@ class UnionFind:
         
     def find(self, n):  # root of the node 
         # Find the root representative of n's set
-        p = self.parent[n]
-        
         # Traverse up until finding a node that is its own parent (root)
-        while p != self.parent[p]:                        # keep going until we reach the root
+        while n1 != self.parent[n1]:                        # keep going until we reach the root
             # PATH COMPRESSION: Point to grandparent to shorten path
-            self.parent[p] = self.parent[self.parent[p]]  # path compression step (kind of like linkedlist where connection index is connected to next value)
-            p = self.parent[p]                            # move one step forward
-            # ⚠️ confusion: p = self.parent[p] so it should stop as it became it's parent but in next loop it'll check if it's currently it's own parent so this is how it's getting forwarded
-        return p
+            self.parent[n1] = self.parent[self.parent[n1]]  # path compression step (kind of like linkedlist where connection index is connected to next value)
+            n1 = self.parent[n1]                            # move one step forward
+            # ⚠️ confusion: n1 = self.parent[n1] so it should stop as it became it's parent but in next loop it'll check if it's currently it's own parent so this is how it's getting forwarded
+        return n1
         
     def union(self, n1, n2):  # if both nodes in same set or NOT
         # Merge sets containing n1 and n2
@@ -770,7 +767,7 @@ class UnionFind:
 
 **Key Optimizations:**
 
-1. **Path Compression** (`self.parent[p] = self.parent[self.parent[p]]`):
+1. **Path Compression** (`self.parent[n1] = self.parent[self.parent[n1]]`):
    - Skips intermediate nodes by pointing to grandparent
    - Flattens tree structure over time through repeated applications
    - Reduces future lookups from O(N) to nearly O(1)
@@ -2042,6 +2039,7 @@ def outerTrees(points):
     *   Longest Duplicate → **Rolling Hash (Tier 3)**.
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
+
 
 
 
