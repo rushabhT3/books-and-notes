@@ -2040,6 +2040,1175 @@ def outerTrees(points):
 
 Memorize Tier 2. Keep Tier 3 codes handy in your brain just in case.
 
+---
+
+# PART 7: POST-GRIND 75 PATTERNS
+*The patterns that separate "good enough" from "actually ready." These appear in backend, platform, and data-heavy interviews.*
+
+---
+
+## SECTION A: ADVANCED TREE PATTERNS
+
+### 31. Tree Flattening (Euler Tour)
+**The Signal:** "Subtree queries," "Count nodes in subtree with property X," "Subtree sum updates."
+**Concept:** Convert a tree to an array using DFS. Each subtree becomes a **contiguous range**.
+```python
+def euler_tour(root, adj):
+    """
+    Flatten tree into array where each subtree is a contiguous range.
+    tin[node] = entry time (start of subtree range)
+    tout[node] = exit time (end of subtree range)
+    """
+    tin = {}    # Entry time for each node
+    tout = {}   # Exit time for each node
+    euler = []  # The flattened array
+    timer = 0
+    
+    def dfs(node, parent):
+        nonlocal timer
+        tin[node] = timer
+        euler.append(node)
+        timer += 1
+        
+        for child in adj[node]:
+            if child != parent:
+                dfs(child, node)
+        
+        tout[node] = timer - 1  # Last index in subtree
+    
+    dfs(root, -1)
+    return tin, tout, euler
+
+# Usage: Check if 'a' is ancestor of 'b'
+def is_ancestor(a, b, tin, tout):
+    return tin[a] <= tin[b] <= tout[a]
+
+# Usage: Get subtree range for range queries
+def get_subtree_range(node, tin, tout):
+    return (tin[node], tout[node])  # Use with prefix sum or segment tree
+```
+**The Battleground:** 1022, 1026, 508, 1339
+
+**Key Insight:** After flattening:
+- Subtree of node `X` = `euler[tin[X] : tout[X] + 1]`
+- Ancestor check = O(1)
+- Subtree queries become **range queries** on array
+
+**Time:** O(N) to build | O(1) for ancestor check
+**Space:** O(N)
+
+---
+
+### 32. Binary Lifting (LCA & Kth Ancestor)
+**The Signal:** "Lowest Common Ancestor," "Kth ancestor of node," "Distance between two nodes in tree."
+**Concept:** Precompute 2^i-th ancestors for each node. Jump in powers of 2.
+```python
+import math
+
+class BinaryLifting:
+    def __init__(self, n, parent):
+        """
+        n: number of nodes (0-indexed)
+        parent: parent[i] = parent of node i (-1 for root)
+        """
+        self.n = n
+        self.LOG = max(1, int(math.log2(n)) + 1)
+        self.depth = [0] * n
+        
+        # up[i][j] = 2^j-th ancestor of node i
+        self.up = [[-1] * self.LOG for _ in range(n)]
+        
+        # Build sparse table
+        for i in range(n):
+            self.up[i][0] = parent[i]
+        
+        for j in range(1, self.LOG):
+            for i in range(n):
+                if self.up[i][j-1] != -1:
+                    self.up[i][j] = self.up[self.up[i][j-1]][j-1]
+    
+    def kth_ancestor(self, node, k):
+        """Return k-th ancestor of node, or -1 if doesn't exist."""
+        for j in range(self.LOG):
+            if k & (1 << j):
+                node = self.up[node][j]
+                if node == -1:
+                    return -1
+        return node
+    
+    def lca(self, a, b):
+        """Return Lowest Common Ancestor of nodes a and b."""
+        # First, bring both to same depth
+        if self.depth[a] < self.depth[b]:
+            a, b = b, a
+        
+        diff = self.depth[a] - self.depth[b]
+        a = self.kth_ancestor(a, diff)
+        
+        if a == b:
+            return a
+        
+        # Binary search for LCA
+        for j in range(self.LOG - 1, -1, -1):
+            if self.up[a][j] != self.up[b][j]:
+                a = self.up[a][j]
+                b = self.up[b][j]
+        
+        return self.up[a][0]
+```
+**The Battleground:** 1483 (Kth Ancestor), 236 (LCA), 1740, 2846
+
+**Time:** O(N log N) preprocess | O(log N) per query
+**Space:** O(N log N)
+
+---
+
+### 33. Tree DP (Subtree DP)
+**The Signal:** "Maximum independent set on tree," "Count paths with property," "Best assignment in tree structure."
+**Concept:** Process children first, then combine results at parent.
+```python
+def tree_dp(root, adj):
+    """
+    Example: Maximum Independent Set
+    dp[node][0] = max size NOT including node
+    dp[node][1] = max size INCLUDING node
+    """
+    n = len(adj)
+    dp = [[0, 0] for _ in range(n)]
+    
+    def dfs(node, parent):
+        dp[node][1] = 1  # Include this node
+        
+        for child in adj[node]:
+            if child != parent:
+                dfs(child, node)
+                
+                # If we DON'T take node, children can be taken or not
+                dp[node][0] += max(dp[child][0], dp[child][1])
+                
+                # If we TAKE node, children must NOT be taken
+                dp[node][1] += dp[child][0]
+    
+    dfs(root, -1)
+    return max(dp[root][0], dp[root][1])
+```
+
+**Common Tree DP Patterns:**
+```python
+# Pattern 1: Path counting
+def count_paths(node, parent, adj, target):
+    """Count paths that sum to target."""
+    count = defaultdict(int)
+    count[0] = 1
+    result = 0
+    
+    def dfs(node, parent, curr_sum):
+        nonlocal result
+        curr_sum += values[node]
+        result += count[curr_sum - target]
+        count[curr_sum] += 1
+        
+        for child in adj[node]:
+            if child != parent:
+                dfs(child, node, curr_sum)
+        
+        count[curr_sum] -= 1  # Backtrack
+    
+    dfs(node, parent, 0)
+    return result
+
+# Pattern 2: Diameter
+def diameter(root, adj):
+    ans = 0
+    def dfs(node, parent):
+        nonlocal ans
+        max1 = max2 = 0
+        for child in adj[node]:
+            if child != parent:
+                d = dfs(child, node) + 1
+                if d > max1:
+                    max1, max2 = d, max1
+                elif d > max2:
+                    max2 = d
+        ans = max(ans, max1 + max2)
+        return max1
+    dfs(root, -1)
+    return ans
+```
+**The Battleground:** 337 (House Robber III), 543, 124, 1372, 968
+
+**Time:** O(N) 
+**Space:** O(N) for DP table + O(H) recursion stack
+
+---
+
+### 34. Re-rooting DP
+**The Signal:** "Answer for every node as root," "Sum of distances to all nodes," "Find best root."
+**Concept:** Compute answer for one root, then "shift" the root to neighbors in O(1).
+```python
+def reroot_dp(n, adj):
+    """
+    Example: Sum of distances from each node to all other nodes (LC 834)
+    
+    Phase 1: Root at node 0, compute subtree sizes and distance sum
+    Phase 2: Shift root to each node using the formula
+    """
+    # Phase 1: DFS from node 0
+    subtree_size = [1] * n
+    dist_sum = [0] * n  # dist_sum[0] = sum of distances from 0 to all nodes
+    
+    def dfs1(node, parent, depth):
+        dist_sum[0] += depth
+        for child in adj[node]:
+            if child != parent:
+                dfs1(child, node, depth + 1)
+                subtree_size[node] += subtree_size[child]
+    
+    dfs1(0, -1, 0)
+    
+    # Phase 2: Re-root
+    # When moving root from parent to child:
+    # - subtree_size[child] nodes get 1 closer
+    # - (n - subtree_size[child]) nodes get 1 farther
+    def dfs2(node, parent):
+        for child in adj[node]:
+            if child != parent:
+                dist_sum[child] = dist_sum[node] - subtree_size[child] + (n - subtree_size[child])
+                dfs2(child, node)
+    
+    dfs2(0, -1)
+    return dist_sum
+```
+**The Battleground:** 834 (Sum of Distances), 310, 2581
+
+**Time:** O(N)
+**Space:** O(N)
+
+---
+
+## SECTION B: ADVANCED GRAPH PATTERNS
+
+### 35. Multi-Source BFS
+**The Signal:** "Nearest distance from any of K sources," "Spreading from multiple starting points," "01 Matrix."
+**Concept:** Start BFS from ALL sources simultaneously.
+```python
+from collections import deque
+
+def multi_source_bfs(grid, sources):
+    """
+    Find shortest distance from any source to every cell.
+    Sources: list of (row, col) starting points
+    """
+    rows, cols = len(grid), len(grid[0])
+    dist = [[float('inf')] * cols for _ in range(rows)]
+    q = deque()
+    
+    # Add ALL sources to queue at once
+    for r, c in sources:
+        dist[r][c] = 0
+        q.append((r, c))
+    
+    directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+    
+    while q:
+        r, c = q.popleft()
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < rows and 0 <= nc < cols:
+                if dist[nr][nc] > dist[r][c] + 1:
+                    dist[nr][nc] = dist[r][c] + 1
+                    q.append((nr, nc))
+    
+    return dist
+```
+**The Battleground:** 542 (01 Matrix), 994 (Rotting Oranges), 286, 1162
+
+**Time:** O(M × N)
+**Space:** O(M × N)
+
+---
+
+### 36. Topological DP
+**The Signal:** "Minimum cost to complete all tasks with dependencies," "Longest path in DAG," "Count paths in DAG."
+**Concept:** Process nodes in topological order. DP depends only on already-processed nodes.
+```python
+from collections import deque, defaultdict
+
+def topo_dp(n, edges, values):
+    """
+    Example: Longest path in DAG with node values
+    """
+    graph = defaultdict(list)
+    indegree = [0] * n
+    
+    for u, v in edges:
+        graph[u].append(v)
+        indegree[v] += 1
+    
+    # dp[i] = longest path ending at node i
+    dp = [values[i] for i in range(n)]
+    
+    q = deque([i for i in range(n) if indegree[i] == 0])
+    topo_order = []
+    
+    while q:
+        node = q.popleft()
+        topo_order.append(node)
+        for nei in graph[node]:
+            # Relaxation: update dp before reducing indegree
+            dp[nei] = max(dp[nei], dp[node] + values[nei])
+            indegree[nei] -= 1
+            if indegree[nei] == 0:
+                q.append(nei)
+    
+    return max(dp) if len(topo_order) == n else -1  # -1 if cycle
+```
+
+**Count Paths Variant:**
+```python
+def count_paths_dag(n, edges, start, end):
+    """Count all paths from start to end in DAG."""
+    graph = defaultdict(list)
+    indegree = [0] * n
+    
+    for u, v in edges:
+        graph[u].append(v)
+        indegree[v] += 1
+    
+    # paths[i] = number of paths from start to node i
+    paths = [0] * n
+    paths[start] = 1
+    
+    q = deque([i for i in range(n) if indegree[i] == 0])
+    
+    while q:
+        node = q.popleft()
+        for nei in graph[node]:
+            paths[nei] += paths[node]
+            indegree[nei] -= 1
+            if indegree[nei] == 0:
+                q.append(nei)
+    
+    return paths[end]
+```
+**The Battleground:** 2050 (Parallel Courses III), 1857, 329, 1976
+
+**Time:** O(V + E)
+**Space:** O(V + E)
+
+---
+
+## SECTION C: ARRAY & RANGE PATTERNS
+
+### 37. Difference Array
+**The Signal:** "Add value to range [L, R] multiple times," "Range increment queries," then "final array state."
+**Concept:** Instead of updating each element, mark only boundaries.
+```python
+def difference_array(n, updates):
+    """
+    updates: list of (left, right, value) meaning add 'value' to range [left, right]
+    Returns final array after all updates.
+    """
+    diff = [0] * (n + 1)  # Extra space to avoid boundary checks
+    
+    for left, right, val in updates:
+        diff[left] += val       # Start adding here
+        diff[right + 1] -= val  # Stop adding after right
+    
+    # Reconstruct array with prefix sum
+    result = []
+    curr = 0
+    for i in range(n):
+        curr += diff[i]
+        result.append(curr)
+    
+    return result
+
+# Example: n=5, updates = [(1,3,2), (2,4,3), (0,2,-1)]
+# Initial:  [0, 0, 0, 0, 0]
+# Final:    [-1, 1, 4, 5, 3]
+```
+
+**2D Difference Array:**
+```python
+def difference_2d(m, n, updates):
+    """
+    updates: list of (r1, c1, r2, c2, val)
+    Add 'val' to submatrix from (r1,c1) to (r2,c2)
+    """
+    diff = [[0] * (n + 2) for _ in range(m + 2)]
+    
+    for r1, c1, r2, c2, val in updates:
+        diff[r1][c1] += val
+        diff[r1][c2 + 1] -= val
+        diff[r2 + 1][c1] -= val
+        diff[r2 + 1][c2 + 1] += val
+    
+    # Reconstruct with 2D prefix sum
+    result = [[0] * n for _ in range(m)]
+    for i in range(m):
+        for j in range(n):
+            diff[i][j] += (diff[i-1][j] if i > 0 else 0) + \
+                          (diff[i][j-1] if j > 0 else 0) - \
+                          (diff[i-1][j-1] if i > 0 and j > 0 else 0)
+            result[i][j] = diff[i][j]
+    
+    return result
+```
+**The Battleground:** 370 (Range Addition), 1109, 2381, 2536
+
+**Time:** O(K) for K updates + O(N) to reconstruct
+**Space:** O(N)
+
+---
+
+### 38. Coordinate Compression
+**The Signal:** Values up to 10⁹ but only 10⁵ unique values. "Discretize," "Map to smaller range."
+**Concept:** Map large values to consecutive integers 0, 1, 2, ...
+```python
+def coordinate_compress(arr):
+    """
+    Compress large values to indices 0, 1, 2, ...
+    Returns: compressed array and mapping dictionaries
+    """
+    # Get sorted unique values
+    sorted_unique = sorted(set(arr))
+    
+    # Create mappings
+    val_to_idx = {v: i for i, v in enumerate(sorted_unique)}
+    idx_to_val = {i: v for i, v in enumerate(sorted_unique)}
+    
+    # Compress the array
+    compressed = [val_to_idx[x] for x in arr]
+    
+    return compressed, val_to_idx, idx_to_val
+
+# Example usage: Count inversions with values up to 10^9
+def count_smaller_after_self(nums):
+    """LC 315: Count of Smaller Numbers After Self"""
+    # Compress coordinates
+    sorted_unique = sorted(set(nums))
+    rank = {v: i + 1 for i, v in enumerate(sorted_unique)}  # 1-indexed for BIT
+    
+    # Use BIT/Fenwick tree on compressed values
+    n = len(sorted_unique)
+    bit = [0] * (n + 1)
+    
+    def update(i):
+        while i <= n:
+            bit[i] += 1
+            i += i & (-i)
+    
+    def query(i):
+        s = 0
+        while i > 0:
+            s += bit[i]
+            i -= i & (-i)
+        return s
+    
+    result = []
+    for num in reversed(nums):
+        r = rank[num]
+        result.append(query(r - 1))  # Count elements smaller than current
+        update(r)
+    
+    return result[::-1]
+```
+**The Battleground:** 315, 493, 327, 2926
+
+**📝 When to Use:**
+- Value range is huge (10⁹) but count is small (10⁵)
+- Need to use values as array indices
+- Segment tree / BIT with large value range
+
+**Time:** O(N log N) for sorting
+**Space:** O(N)
+
+---
+
+### 39. Prefix Frequency Array
+**The Signal:** "Count occurrences in substring," "Character frequency in range [L, R]."
+**Concept:** For each position, store cumulative frequency of each character.
+```python
+def prefix_frequency(s):
+    """
+    Build prefix frequency for string queries.
+    prefix[i][c] = count of character c in s[0:i]
+    """
+    n = len(s)
+    # For lowercase letters only
+    prefix = [[0] * 26 for _ in range(n + 1)]
+    
+    for i, char in enumerate(s):
+        # Copy previous counts
+        for c in range(26):
+            prefix[i + 1][c] = prefix[i][c]
+        # Increment current char
+        prefix[i + 1][ord(char) - ord('a')] += 1
+    
+    return prefix
+
+def query_frequency(prefix, left, right, char):
+    """Count of 'char' in s[left:right+1]"""
+    c = ord(char) - ord('a')
+    return prefix[right + 1][c] - prefix[left][c]
+
+# Optimized version using dictionary (for sparse alphabets)
+def prefix_frequency_sparse(s):
+    from collections import defaultdict
+    n = len(s)
+    # prefix[char] = list of positions where char appears
+    positions = defaultdict(list)
+    
+    for i, char in enumerate(s):
+        positions[char].append(i)
+    
+    return positions
+
+def query_sparse(positions, left, right, char):
+    """Count of 'char' in s[left:right+1] using binary search"""
+    import bisect
+    if char not in positions:
+        return 0
+    pos_list = positions[char]
+    return bisect.bisect_right(pos_list, right) - bisect.bisect_left(pos_list, left)
+```
+**The Battleground:** 1177, 2559, 1915
+
+**Time:** O(N × A) build, O(1) or O(log N) query (A = alphabet size)
+**Space:** O(N × A) or O(N)
+
+---
+
+## SECTION D: ADVANCED DP PATTERNS
+
+### 40. Interval DP
+**The Signal:** "Optimal way to merge/split intervals," "Minimum cost to combine," "Burst balloons."
+**Concept:** `dp[i][j]` = optimal value for interval `[i, j]`. Try all split points `k`.
+```python
+def interval_dp(arr):
+    """
+    Example: Minimum cost to merge stones (simplified)
+    dp[i][j] = minimum cost to process interval [i, j]
+    """
+    n = len(arr)
+    # Precompute prefix sums for range sum queries
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + arr[i]
+    
+    def range_sum(i, j):
+        return prefix[j + 1] - prefix[i]
+    
+    # dp[i][j] = min cost for interval [i, j]
+    dp = [[0] * n for _ in range(n)]
+    
+    # Iterate by interval length
+    for length in range(2, n + 1):  # length of interval
+        for i in range(n - length + 1):
+            j = i + length - 1
+            dp[i][j] = float('inf')
+            
+            # Try all split points
+            for k in range(i, j):
+                cost = dp[i][k] + dp[k + 1][j] + range_sum(i, j)
+                dp[i][j] = min(dp[i][j], cost)
+    
+    return dp[0][n - 1]
+
+# Classic: Burst Balloons (LC 312)
+def maxCoins(nums):
+    nums = [1] + nums + [1]
+    n = len(nums)
+    dp = [[0] * n for _ in range(n)]
+    
+    for length in range(2, n):
+        for left in range(n - length):
+            right = left + length
+            for k in range(left + 1, right):
+                # k is the LAST balloon to burst in (left, right)
+                coins = nums[left] * nums[k] * nums[right]
+                coins += dp[left][k] + dp[k][right]
+                dp[left][right] = max(dp[left][right], coins)
+    
+    return dp[0][n - 1]
+```
+**The Battleground:** 312 (Burst Balloons), 1039, 1547, 516, 1246
+
+**Time:** O(N³)
+**Space:** O(N²)
+
+---
+
+### 41. Monotonic Stack/Queue DP Optimization
+**The Signal:** "DP transition depends on max/min in sliding range," "Jump Game variants."
+**Concept:** Use monotonic structure to optimize O(N²) DP to O(N).
+```python
+from collections import deque
+
+def optimized_dp_with_monotonic_queue(nums, k):
+    """
+    Example: Maximum sum of at most k consecutive elements ending at each position
+    dp[i] = max(dp[j] + sum(nums[j+1:i+1])) for j in [i-k, i-1]
+    
+    Naive: O(N*K)
+    Optimized: O(N) using monotonic deque
+    """
+    n = len(nums)
+    
+    # prefix sum for range sums
+    prefix = [0] * (n + 1)
+    for i in range(n):
+        prefix[i + 1] = prefix[i] + nums[i]
+    
+    # dp[i] = best answer ending at index i
+    dp = [0] * (n + 1)
+    
+    # Monotonic deque stores indices
+    # We want max(dp[j] - prefix[j]) for j in valid range
+    q = deque([0])  # Store indices
+    
+    def value(j):
+        return dp[j] - prefix[j]
+    
+    for i in range(1, n + 1):
+        # Remove out-of-window elements
+        while q and q[0] < i - k:
+            q.popleft()
+        
+        # Best j is at front of deque
+        j = q[0]
+        dp[i] = value(j) + prefix[i]
+        
+        # Maintain monotonic property (decreasing by value)
+        while q and value(q[-1]) <= value(i):
+            q.pop()
+        q.append(i)
+    
+    return max(dp)
+```
+
+**Jump Game VII Pattern:**
+```python
+def canReach(s, minJump, maxJump):
+    """LC 1871: Jump Game VII"""
+    n = len(s)
+    if s[-1] == '1':
+        return False
+    
+    dp = [False] * n
+    dp[0] = True
+    
+    # Count of True values in sliding window [i-maxJump, i-minJump]
+    reachable = 0
+    
+    for i in range(minJump, n):
+        if i - minJump >= 0 and dp[i - minJump]:
+            reachable += 1
+        if i - maxJump - 1 >= 0 and dp[i - maxJump - 1]:
+            reachable -= 1
+        
+        if s[i] == '0' and reachable > 0:
+            dp[i] = True
+    
+    return dp[n - 1]
+```
+**The Battleground:** 1425, 1696, 1871, 2944
+
+**Time:** O(N)
+**Space:** O(N)
+
+---
+
+## SECTION E: STRING PATTERNS
+
+### 42. Canonical Form (Normalization)
+**The Signal:** "Group equivalent strings," "Check if two structures are the same," "Isomorphic strings."
+**Concept:** Convert to a standard form where equivalent items become identical.
+```python
+def canonical_form_string(s):
+    """
+    Convert string to canonical form based on first occurrence.
+    "egg" -> "abb" (e=a, g=b)
+    "add" -> "abb" (a=a, d=b)
+    Both are equivalent!
+    """
+    mapping = {}
+    next_char = 0
+    result = []
+    
+    for char in s:
+        if char not in mapping:
+            mapping[char] = chr(ord('a') + next_char)
+            next_char += 1
+        result.append(mapping[char])
+    
+    return ''.join(result)
+
+def group_isomorphic(words):
+    """Group words by their canonical form."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    
+    for word in words:
+        canonical = canonical_form_string(word)
+        groups[canonical].append(word)
+    
+    return list(groups.values())
+
+# Tree canonical form (for tree isomorphism)
+def tree_canonical(node, adj, parent=-1):
+    """
+    Create canonical string representation of tree rooted at node.
+    Two trees are isomorphic iff their canonical forms are equal.
+    """
+    children_forms = []
+    
+    for child in adj[node]:
+        if child != parent:
+            children_forms.append(tree_canonical(child, adj, node))
+    
+    children_forms.sort()  # Key: sort to make canonical
+    return "(" + "".join(children_forms) + ")"
+```
+**The Battleground:** 205, 290, 1460, 652 (Duplicate Subtrees)
+
+**Time:** O(N) for strings, O(N log N) for trees (due to sorting)
+**Space:** O(N)
+
+---
+
+### 43. Z-Algorithm (Linear Pattern Matching)
+**The Signal:** "Find all occurrences of pattern in text," "Longest prefix that is also suffix."
+**Concept:** z[i] = length of longest substring starting at i that matches prefix of string.
+```python
+def z_function(s):
+    """
+    z[i] = length of longest substring starting at position i
+           that is also a prefix of s
+    
+    Example: s = "aabxaab"
+    z = [7, 1, 0, 0, 3, 1, 0]
+         ^  a matches prefix "a"
+               ^  "aab" matches prefix "aab"
+    """
+    n = len(s)
+    z = [0] * n
+    z[0] = n  # Convention: z[0] = length of string
+    
+    l, r = 0, 0  # Current rightmost match window [l, r]
+    
+    for i in range(1, n):
+        if i < r:
+            # We're inside a known match window
+            z[i] = min(r - i, z[i - l])
+        
+        # Extend match naively
+        while i + z[i] < n and s[z[i]] == s[i + z[i]]:
+            z[i] += 1
+        
+        # Update window
+        if i + z[i] > r:
+            l, r = i, i + z[i]
+    
+    return z
+
+def find_pattern(text, pattern):
+    """Find all occurrences of pattern in text."""
+    combined = pattern + "$" + text
+    z = z_function(combined)
+    
+    result = []
+    pattern_len = len(pattern)
+    
+    for i in range(pattern_len + 1, len(combined)):
+        if z[i] == pattern_len:
+            result.append(i - pattern_len - 1)  # Position in original text
+    
+    return result
+```
+**The Battleground:** 28, 214, 1392
+
+**Time:** O(N)
+**Space:** O(N)
+
+---
+
+## SECTION F: DATA STRUCTURE COMBINATIONS
+
+### 44. Two-Structure Pairing
+**The Signal:** "O(1) for two different operations that seem incompatible," "Min Stack," "Max Queue."
+**Concept:** Combine two data structures where each handles one operation efficiently.
+```python
+# Pattern 1: Stack + Auxiliary Stack (Min Stack)
+class MinStack:
+    def __init__(self):
+        self.stack = []
+        self.min_stack = []  # Parallel stack tracking minimums
+    
+    def push(self, val):
+        self.stack.append(val)
+        min_val = min(val, self.min_stack[-1] if self.min_stack else val)
+        self.min_stack.append(min_val)
+    
+    def pop(self):
+        self.stack.pop()
+        self.min_stack.pop()
+    
+    def getMin(self):
+        return self.min_stack[-1]
+
+# Pattern 2: Queue with Max (using two stacks)
+class MaxQueue:
+    """
+    Queue with O(1) amortized push, pop, and getMax.
+    Uses two stacks to implement queue + monotonic tracking.
+    """
+    def __init__(self):
+        self.push_stack = []  # (value, max_so_far in this stack)
+        self.pop_stack = []
+    
+    def push(self, val):
+        max_val = max(val, self.push_stack[-1][1] if self.push_stack else val)
+        self.push_stack.append((val, max_val))
+    
+    def pop(self):
+        if not self.pop_stack:
+            while self.push_stack:
+                val, _ = self.push_stack.pop()
+                max_val = max(val, self.pop_stack[-1][1] if self.pop_stack else val)
+                self.pop_stack.append((val, max_val))
+        return self.pop_stack.pop()[0]
+    
+    def getMax(self):
+        max_val = float('-inf')
+        if self.push_stack:
+            max_val = max(max_val, self.push_stack[-1][1])
+        if self.pop_stack:
+            max_val = max(max_val, self.pop_stack[-1][1])
+        return max_val
+
+# Pattern 3: HashMap + Doubly Linked List (LRU Cache - already covered)
+
+# Pattern 4: HashMap + Heap (for delete from middle)
+class HeapWithDelete:
+    """Heap that supports lazy deletion."""
+    def __init__(self):
+        self.heap = []
+        self.deleted = {}  # Count of deleted elements
+    
+    def push(self, val):
+        heapq.heappush(self.heap, val)
+    
+    def delete(self, val):
+        self.deleted[val] = self.deleted.get(val, 0) + 1
+    
+    def top(self):
+        self._clean()
+        return self.heap[0] if self.heap else None
+    
+    def pop(self):
+        self._clean()
+        return heapq.heappop(self.heap) if self.heap else None
+    
+    def _clean(self):
+        while self.heap and self.deleted.get(self.heap[0], 0) > 0:
+            self.deleted[self.heap[0]] -= 1
+            heapq.heappop(self.heap)
+```
+**The Battleground:** 155, 716, 895, 432, 480
+
+**Time:** Usually O(1) or O(log N) per operation
+**Space:** O(N)
+
+---
+
+### 45. Lazy Propagation (Conceptual)
+**The Signal:** "Range updates + range queries," "Too many updates to apply individually."
+**Concept:** Delay applying updates until absolutely necessary.
+```python
+class LazySegmentTree:
+    """
+    Segment Tree with Lazy Propagation.
+    Supports: Range Add, Range Sum Query
+    """
+    def __init__(self, arr):
+        self.n = len(arr)
+        self.tree = [0] * (4 * self.n)
+        self.lazy = [0] * (4 * self.n)
+        self._build(arr, 0, 0, self.n - 1)
+    
+    def _build(self, arr, node, start, end):
+        if start == end:
+            self.tree[node] = arr[start]
+        else:
+            mid = (start + end) // 2
+            self._build(arr, 2*node+1, start, mid)
+            self._build(arr, 2*node+2, mid+1, end)
+            self.tree[node] = self.tree[2*node+1] + self.tree[2*node+2]
+    
+    def _push_down(self, node, start, end):
+        """Push lazy value to children."""
+        if self.lazy[node] != 0:
+            mid = (start + end) // 2
+            # Update children
+            self.tree[2*node+1] += self.lazy[node] * (mid - start + 1)
+            self.tree[2*node+2] += self.lazy[node] * (end - mid)
+            # Pass lazy to children
+            self.lazy[2*node+1] += self.lazy[node]
+            self.lazy[2*node+2] += self.lazy[node]
+            self.lazy[node] = 0
+    
+    def update_range(self, node, start, end, l, r, val):
+        """Add val to all elements in range [l, r]."""
+        if r < start or end < l:
+            return
+        if l <= start and end <= r:
+            self.tree[node] += val * (end - start + 1)
+            self.lazy[node] += val
+            return
+        
+        self._push_down(node, start, end)
+        mid = (start + end) // 2
+        self.update_range(2*node+1, start, mid, l, r, val)
+        self.update_range(2*node+2, mid+1, end, l, r, val)
+        self.tree[node] = self.tree[2*node+1] + self.tree[2*node+2]
+    
+    def query_range(self, node, start, end, l, r):
+        """Get sum of range [l, r]."""
+        if r < start or end < l:
+            return 0
+        if l <= start and end <= r:
+            return self.tree[node]
+        
+        self._push_down(node, start, end)
+        mid = (start + end) // 2
+        return (self.query_range(2*node+1, start, mid, l, r) +
+                self.query_range(2*node+2, mid+1, end, l, r))
+```
+**The Battleground:** 699, 715, 732
+
+**Time:** O(log N) per operation
+**Space:** O(N)
+
+---
+
+## SECTION G: META-PATTERNS (Thinking Habits)
+
+### 46. Preprocessing vs Query Tradeoff
+**The Signal:** Many queries on same data structure. "Answer Q queries."
+```python
+"""
+THE DECISION FRAMEWORK:
+
+1. Count queries (Q) vs data size (N)
+
+2. If Q is large relative to N:
+   → Heavy preprocess, O(1) query
+   
+3. If Q is small:
+   → Light/no preprocess, O(X) per query
+
+4. Common tradeoffs:
+   | Approach          | Preprocess | Query    | When to use           |
+   |-------------------|------------|----------|------------------------|
+   | No preprocess     | O(1)       | O(N)     | Q << N                |
+   | Prefix Sum        | O(N)       | O(1)     | Sum queries           |
+   | Sparse Table      | O(N log N) | O(1)     | Static RMQ            |
+   | Segment Tree      | O(N)       | O(log N) | Dynamic + queries     |
+   | Mo's Algorithm    | O(N√N)     | O(√N)    | Offline range queries |
+"""
+
+# Example: Sparse Table for Range Minimum Query (RMQ)
+import math
+
+class SparseTable:
+    """O(N log N) build, O(1) query for range min/max."""
+    def __init__(self, arr):
+        n = len(arr)
+        self.LOG = int(math.log2(n)) + 1
+        # sparse[i][j] = min of range starting at i with length 2^j
+        self.sparse = [[0] * self.LOG for _ in range(n)]
+        self.log_table = [0] * (n + 1)
+        
+        # Precompute log values
+        for i in range(2, n + 1):
+            self.log_table[i] = self.log_table[i // 2] + 1
+        
+        # Initialize
+        for i in range(n):
+            self.sparse[i][0] = arr[i]
+        
+        # Build
+        for j in range(1, self.LOG):
+            for i in range(n - (1 << j) + 1):
+                self.sparse[i][j] = min(
+                    self.sparse[i][j-1],
+                    self.sparse[i + (1 << (j-1))][j-1]
+                )
+    
+    def query(self, l, r):
+        """Min in range [l, r]."""
+        length = r - l + 1
+        k = self.log_table[length]
+        return min(self.sparse[l][k], self.sparse[r - (1 << k) + 1][k])
+```
+
+---
+
+### 47. Constraint Analysis Thinking
+**The Signal:** Before writing code, analyze constraints to determine algorithm.
+```python
+"""
+THE CONSTRAINT CHEAT SHEET:
+
+N ≤ 10        → O(N!) brute force OK         → Try all permutations
+N ≤ 20        → O(2^N) bitmask DP OK         → Subset enumeration
+N ≤ 500       → O(N³) OK                      → Matrix DP, Floyd-Warshall
+N ≤ 5000      → O(N²) OK                      → Nested loops, 2D DP
+N ≤ 10^5      → O(N log N) needed            → Sorting, Binary Search, Segment Tree
+N ≤ 10^6      → O(N) or O(N log N) needed    → Linear scan, efficient DS
+N ≤ 10^8      → O(N) barely OK, O(log N) preferred → Math, binary search
+N ≤ 10^12     → O(√N) or O(log N) needed     → Math tricks, binary search
+
+SPACE:
+N ≤ 10^6      → O(N) array OK
+N ≤ 10^8      → O(N) might TLE or MLE, consider streaming
+
+COMBINATIONS:
+- "N ≤ 20 with combinations" → Bitmask DP
+- "N ≤ 10^5 with range queries" → Segment Tree or BIT
+- "N ≤ 10^5 but values up to 10^9" → Coordinate Compression
+- "Tree with N ≤ 10^5" → O(N) or O(N log N) tree algos
+- "Graph with N,E ≤ 10^5" → Dijkstra, Union Find OK
+"""
+
+def analyze_constraints(n, time_limit=1):
+    """
+    Helper to estimate maximum complexity allowed.
+    Assumes ~10^8 operations per second.
+    """
+    max_ops = time_limit * 10**8
+    
+    if n <= 10:
+        return "O(N!) OK - brute force all permutations"
+    elif n <= 20:
+        return "O(2^N) OK - bitmask DP"
+    elif n <= 500:
+        return "O(N³) OK - cubic algorithms"
+    elif n <= 5000:
+        return "O(N²) OK - quadratic algorithms"
+    elif n <= 10**5:
+        return "O(N log N) needed - sorting/binary search"
+    elif n <= 10**6:
+        return "O(N) or O(N log N) - linear algorithms"
+    elif n <= 10**8:
+        return "O(N) barely, prefer O(log N) - optimize heavily"
+    else:
+        return "O(√N) or O(log N) needed - math/binary search"
+```
+
+---
+
+### 48. Offline vs Online Query Processing
+**The Signal:** "All queries known in advance" = offline. "Queries come one by one" = online.
+```python
+"""
+OFFLINE ADVANTAGES:
+1. Sort queries to process efficiently
+2. Process in a specific order (e.g., by right endpoint)
+3. Mo's algorithm becomes possible
+4. Can use simpler data structures
+
+ONLINE REQUIREMENTS:
+1. Must answer query before seeing next
+2. Need persistent or dynamic data structures
+3. Usually more complex
+"""
+
+# Example: Offline processing with sorting
+def answer_queries_offline(nums, queries):
+    """
+    queries = [(left, right, query_id), ...]
+    Process sorted by right endpoint for efficiency.
+    """
+    n = len(nums)
+    q = len(queries)
+    
+    # Add original indices to queries
+    indexed_queries = [(l, r, i) for i, (l, r) in enumerate(queries)]
+    
+    # Sort by right endpoint
+    indexed_queries.sort(key=lambda x: x[1])
+    
+    answers = [0] * q
+    j = 0  # Pointer in nums
+    
+    # Some data structure being built incrementally
+    data_structure = []
+    
+    for l, r, idx in indexed_queries:
+        # Extend data structure up to r
+        while j <= r:
+            data_structure.append(nums[j])  # Or update as needed
+            j += 1
+        
+        # Answer query using data structure
+        answers[idx] = process_query(data_structure, l, r)
+    
+    return answers
+```
+
+---
+
+## STUDY PRIORITY ORDER
+
+**Phase 1 (Immediately useful):**
+1. Tree Flattening (#31)
+2. Difference Array (#37)
+3. Coordinate Compression (#38)
+4. Multi-Source BFS (#35)
+
+**Phase 2 (Common in harder interviews):**
+5. Binary Lifting (#32)
+6. Tree DP (#33)
+7. Topological DP (#36)
+8. Prefix Frequency (#39)
+
+**Phase 3 (For senior/staff level):**
+9. Re-rooting DP (#34)
+10. Interval DP (#40)
+11. Monotonic DP Optimization (#41)
+
+**Phase 4 (Specialist/Competitive):**
+12. Canonical Form (#42)
+13. Z-Algorithm (#43)
+14. Two-Structure Patterns (#44)
+15. Lazy Propagation (#45)
+16. Sparse Table (#46)
+
+---
+
+## QUICK REFERENCE: WHEN TO USE WHAT
+
+| Problem Type | Pattern | Section |
+|-------------|---------|---------|
+| Subtree queries | Tree Flattening | A |
+| Kth ancestor / LCA | Binary Lifting | A |
+| Max independent set on tree | Tree DP | A |
+| Answer changes with root | Re-rooting | A |
+| Distance from multiple sources | Multi-Source BFS | B |
+| Longest path in DAG | Topological DP | B |
+| Range increment queries | Difference Array | C |
+| Values too large for array | Coordinate Compression | C |
+| Character count in substring | Prefix Frequency | C |
+| Merge/split intervals optimally | Interval DP | D |
+| DP with sliding window optimization | Monotonic DP | D |
+| Group equivalent structures | Canonical Form | E |
+| Fast pattern matching | Z-Algorithm | E |
+| O(1) for conflicting operations | Two-Structure | F |
+| Range update + range query | Lazy Propagation | F |
+
 
 
 
