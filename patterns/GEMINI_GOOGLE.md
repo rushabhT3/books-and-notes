@@ -35,9 +35,9 @@ return prev
 **The Signal:** Linked List cycles, finding the middle node, finding the start of a cycle, "Happy Number".
 ```python
 def fast_slow(head):
-    slow, fast = head, head
+    slow, fast = head, head    
     
-    while fast and fast.next:
+    while fast and fast.next:   # fast and fast.next both needed; checking only fast.next it may crash since fast may NOT be present 
         slow = slow.next
         fast = fast.next.next
         
@@ -3208,6 +3208,7 @@ def answer_queries_offline(nums, queries):
 | Fast pattern matching | Z-Algorithm | E |
 | O(1) for conflicting operations | Two-Structure | F |
 | Range update + range query | Lazy Propagation | F |
+
 
 
 
