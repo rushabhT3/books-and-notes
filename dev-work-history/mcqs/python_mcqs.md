@@ -1,6 +1,8 @@
 # Python Technical Quiz: 50 Questions
 
-This quiz covers fundamental to advanced Python concepts, including memory management, functional programming, object-oriented principles, asynchronous programming, memory management, and design patterns.
+Python quiz: https://notebooklm.google.com/notebook/96d9fb39-de5e-4ea8-81a9-b2040b33f5c5?artifactId=b09a10f0-1ef4-4cf2-a2d5-f66333b297de
+
+Following quiz covers fundamental to advanced Python concepts, including memory management, functional programming, object-oriented principles, asynchronous programming, memory management, and design patterns.
 
 ---
 
