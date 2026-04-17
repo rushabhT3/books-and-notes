@@ -4,6 +4,7 @@
 // go DOES NOT have "of", "in" keyword like in JS
 
 // golang pointers video: https://www.youtube.com/watch?v=2XEQsJLsLN0
+// Golang pointers MCQs: https://notebooklm.google.com/notebook/88acf77b-8bcf-4662-a755-989289960bf0
 
 package main
 
