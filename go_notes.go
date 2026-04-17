@@ -3,6 +3,8 @@
 // i++, i+=1 SUPPORTED; ++i NOT SUPPORTED
 // go DOES NOT have "of", "in" keyword like in JS
 
+// golang pointers video: https://www.youtube.com/watch?v=2XEQsJLsLN0
+
 package main
 
 import (
@@ -10,6 +12,7 @@ import (
 	"math"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -143,8 +146,9 @@ func here() {
 
 
 	// ========== Dictionary ========== 
-	// An empty map
-	// map[Key_Type]Value_Type{}
+	// An empty, non-nil map (mutable: you CAN add or remove elements): 
+	// m := map[Key_Type]Value_Type{}
+	// NOTE: m := map[string]int{"a": 1, "b": 2} // can't put initial values with `make`
 
 	// Map with key-value pairs
 	// map[Key_Type]Value_Type{key1: value1, ..., keyN: valueN}
@@ -319,7 +323,8 @@ func here() {
 	}
 
 	hehe := func (p Person) string {
-		return p.Name + " " + string(p.Age)
+		return p.Name + " " + strconv.Itoa(p.Age)
+		// or, fmt.Sprintf("%s %d", p.Name, p.Age)
 	}
 	fmt.Println(hehe(Person{Name: "John", Age: 30}))
 	// output: John 30
