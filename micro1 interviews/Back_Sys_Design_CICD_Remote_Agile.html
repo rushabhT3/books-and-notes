@@ -1,0 +1,2877 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Senior Developer Prep — Part 2</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f1f5f9;
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+      --accent: #4f46e5;
+      --accent-light: #e0e7ff;
+      --accent-dark: #3730a3;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+      --tip-bg: #eff6ff;
+      --tip-border: #3b82f6;
+      --success: #10b981;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+      --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      --header-height: 64px;
+      --sidebar-width: 280px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: calc(var(--header-height) + 20px);
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: var(--header-height);
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+    }
+
+    .topbar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      white-space: nowrap;
+    }
+
+    .topbar .badge {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    .search-wrap {
+      flex: 1;
+      max-width: 420px;
+      position: relative;
+    }
+
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+    }
+
+    .menu-btn:hover {
+      background: var(--surface-hover);
+    }
+
+    /* Layout */
+    .layout {
+      display: flex;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding-top: var(--header-height);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: var(--sidebar-width);
+      position: fixed;
+      top: var(--header-height);
+      bottom: 0;
+      left: max(0px, calc((100vw - 1400px) / 2));
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+      overflow-y: auto;
+      padding: 20px 0;
+      z-index: 50;
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar.hidden {
+      transform: translateX(-100%);
+    }
+
+    .nav-section {
+      margin-bottom: 4px;
+    }
+
+    .nav-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 12px 20px 6px;
+    }
+
+    .nav-link {
+      display: block;
+      padding: 6px 20px 6px 28px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      transition: all 0.15s;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      border-left-color: var(--accent);
+      background: var(--accent-light);
+      font-weight: 500;
+    }
+
+    .nav-link.matched {
+      color: var(--accent-dark);
+      font-weight: 500;
+    }
+
+    .nav-link.hidden {
+      display: none;
+    }
+
+    /* Main content */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 32px 40px 80px;
+      max-width: 900px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-header {
+      margin-bottom: 28px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .section-header .meta {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    /* Topic pills (mobile fallback) */
+    .topic-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .topic-btn {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .topic-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .topic-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* QA Cards */
+    .qa-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .qa-card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: var(--border-light);
+    }
+
+    .qa-card.hidden {
+      display: none;
+    }
+
+    .qa-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      background: transparent;
+      transition: background 0.15s;
+      border: none;
+      width: 100%;
+      text-align: left;
+      font-family: inherit;
+      color: inherit;
+    }
+
+    .qa-header:hover {
+      background: var(--surface-hover);
+    }
+
+    .qa-header:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .q-num {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-light);
+      min-width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .q-text {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .chevron {
+      margin-left: auto;
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      color: var(--text-muted);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-top: 2px;
+    }
+
+    .qa-header.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    /* Smooth accordion using grid */
+    .qa-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .qa-body.open {
+      grid-template-rows: 1fr;
+    }
+
+    .qa-inner {
+      overflow: hidden;
+    }
+
+    .qa-content {
+      padding: 0 20px 20px 60px;
+      font-size: 14.5px;
+      line-height: 1.75;
+      color: var(--text-secondary);
+    }
+
+    .qa-content p {
+      margin-bottom: 12px;
+    }
+
+    .qa-content p:last-child {
+      margin-bottom: 0;
+    }
+
+    .qa-content strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Code blocks */
+    .code-block {
+      display: block;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 14px 0;
+      overflow-x: auto;
+      white-space: pre;
+      position: relative;
+      border: 1px solid #334155;
+    }
+
+    .code-block::before {
+      content: attr(data-lang);
+      position: absolute;
+      top: 6px;
+      right: 12px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      font-family: var(--font-sans);
+      font-weight: 600;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      background: #f1f5f9;
+      color: var(--accent-dark);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .code-block code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-weight: inherit;
+    }
+
+    /* Tip / Key interview point */
+    .tip {
+      background: var(--tip-bg);
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--tip-border);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 18px;
+      margin-top: 16px;
+      font-size: 13.5px;
+      color: #1e40af;
+      line-height: 1.6;
+    }
+
+    .tip strong {
+      color: #1e3a8a;
+      font-weight: 700;
+    }
+
+    /* Progress bar */
+    .progress-bar {
+      position: fixed;
+      top: var(--header-height);
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--border);
+      z-index: 90;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 0.3s ease-out;
+    }
+
+    /* Back to top */
+    .back-to-top {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s;
+      pointer-events: none;
+      z-index: 80;
+    }
+
+    .back-to-top.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    .back-to-top:hover {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .sidebar {
+        left: 0;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 24px 20px 60px;
+      }
+
+      .menu-btn {
+        display: block;
+      }
+
+      .topic-nav {
+        display: flex;
+      }
+
+      .topbar h1 {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .search-wrap {
+        max-width: none;
+      }
+
+      .qa-content {
+        padding-left: 20px;
+      }
+    }
+
+    /* Print */
+    @media print {
+
+      .topbar,
+      .sidebar,
+      .back-to-top,
+      .progress-bar,
+      .topic-nav {
+        display: none !important;
+      }
+
+      .main {
+        margin: 0;
+        padding: 0;
+        max-width: none;
+      }
+
+      .section {
+        display: block !important;
+        page-break-before: always;
+      }
+
+      .qa-body {
+        grid-template-rows: 1fr !important;
+      }
+
+      .qa-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+    }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <header class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6" />
+        <line x1="3" y1="12" x2="21" y2="12" />
+        <line x1="3" y1="18" x2="21" y2="18" />
+      </svg>
+    </button>
+    <h1>Senior Dev Prep <span class="badge">Part 2</span></h1>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search questions..." oninput="handleSearch(this.value)">
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <nav id="nav"></nav>
+    </aside>
+
+    <main class="main" id="main">
+
+      <!-- Topic pills for mobile -->
+      <div class="topic-nav" id="topicNav">
+        <button class="topic-btn active" onclick="show('backend')">Backend</button>
+        <button class="topic-btn" onclick="show('systems')">Systems Design</button>
+        <button class="topic-btn" onclick="show('cicd')">CI/CD</button>
+        <button class="topic-btn" onclick="show('agile')">Remote Agile</button>
+      </div>
+
+      <!-- ===== BACKEND / FULL-STACK ===== -->
+      <div id="backend" class="section active">
+        <div class="section-header">
+          <h2>Backend / Full-stack</h2>
+          <div class="meta">10 concept-depth questions</div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What makes an API RESTful, and where does REST actually break down in practice?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q1</span>
+            <span class="q-text">What makes an API RESTful, and where does REST actually break down in practice?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>REST is an architectural style, not a protocol. The constraints that matter in practice: stateless
+                  (every request carries all context needed — no server-side sessions), uniform interface (consistent
+                  URL patterns and HTTP verbs), and resource-based (URLs identify resources, verbs express what to do
+                  with them).</p>
+                <p><strong>HTTP verbs correctly:</strong> GET is idempotent and safe (no side effects). POST creates.
+                  PUT replaces the full resource. PATCH updates part of it. DELETE removes. Using GET with side effects
+                  breaks caching and idempotency guarantees that proxies and clients rely on.</p>
+                <p><strong>Status codes that matter:</strong> 201 on create (with Location header pointing to new
+                  resource), 204 on delete or no-body response, 409 on conflict, 422 for semantic validation failures
+                  (valid JSON but invalid business logic), 429 for rate limiting with Retry-After. Most APIs use 200 for
+                  everything — this degrades client behavior.</p>
+                <p><strong>Where REST breaks down:</strong></p>
+                <p>— <strong>Chatty APIs:</strong> to render a dashboard, a client might need to call /users/{id},
+                  /users/{id}/posts, /users/{id}/notifications — 3 round trips. GraphQL solves this by letting the
+                  client specify exactly what fields it needs in one request.<br>
+                  — <strong>Actions that aren't CRUD:</strong> how do you REST-fully "send a password reset email"?
+                  Common workarounds: POST /password-reset-requests (noun-ify the action) or just accept that some RPCs
+                  don't map cleanly to REST.<br>
+                  — <strong>Real-time:</strong> REST is request-response. It doesn't model subscriptions. You end up
+                  adding WebSockets or SSE alongside REST, which means maintaining two communication layers.<br>
+                  — <strong>Over-fetching:</strong> a /users endpoint returns 30 fields when the client needs 3. REST
+                  has no built-in mechanism to request partial responses (sparse fieldsets exist in JSONAPI spec but are
+                  rarely implemented).</p>
+                <p><strong>Versioning strategies:</strong> URL versioning (/api/v1/) is most visible and cache-friendly.
+                  Header versioning (Accept: application/vnd.api+json;version=2) is "purer" REST but harder to test and
+                  document. URL versioning wins in practice.</p>
+                <div class="tip"><strong>Key interview point:</strong> Know when NOT to use REST — mention GraphQL for
+                  client-driven queries, gRPC for internal service-to-service calls where you control both ends, and
+                  WebSockets for real-time. REST is the right default, not the only tool.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How does JWT authentication work, what are its real security risks, and how do you handle token revocation?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q2</span>
+            <span class="q-text">How does JWT authentication work, what are its real security risks, and how do you
+              handle token revocation?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A JWT is a signed token containing claims (user ID, roles, expiry). The server signs it with a secret
+                  (HS256) or private key (RS256). The client stores it and sends it on every request. The server
+                  verifies the signature — no DB lookup required. This is stateless auth.</p>
+                <p><strong>Structure:</strong> <code>header.payload.signature</code> — each base64-encoded. The payload
+                  is NOT encrypted by default — anyone can read it. Never put sensitive data (passwords, PII) in the
+                  payload. Use JWE if you need encryption.</p>
+                <p><strong>Real security risks:</strong></p>
+                <p>— <strong>Algorithm confusion attack:</strong> early libraries accepted alg: none in the header,
+                  bypassing signature verification entirely. Always specify allowed algorithms explicitly — never trust
+                  the header's alg claim.<br>
+                  — <strong>Storing tokens in localStorage:</strong> vulnerable to XSS — any injected script can read
+                  it. Prefer httpOnly cookies for auth tokens (XSS-safe, but then you need CSRF protection).<br>
+                  — <strong>Long-lived tokens:</strong> a 7-day expiry means a stolen token is valid for 7 days. Balance
+                  UX against risk with short access tokens + refresh tokens.<br>
+                  — <strong>Secret rotation:</strong> if the signing secret leaks, all existing tokens can be forged.
+                  Use asymmetric keys (RS256) so the public key can be shared but the signing key stays private.</p>
+                <p><strong>Token revocation</strong> — the core problem with JWTs. Because verification is stateless, a
+                  valid token stays valid until expiry even after logout. Solutions:</p>
+                <div class="code-block" data-lang="python"># 1. Short-lived access tokens (15min) + refresh tokens
+                  stored in DB
+                  # Revoke by deleting the refresh token — user must re-auth on next refresh
+
+                  # 2. Token denylist in Redis — store revoked JTI (JWT ID claim) on logout
+                  async def logout(token: str, redis: Redis):
+                  payload = decode_token(token)
+                  ttl = payload["exp"] - int(time.time())
+                  await redis.setex(f"revoked:{payload['jti']}", ttl, "1")
+
+                  async def verify_token(token: str, redis: Redis):
+                  payload = decode_token(token)
+                  if await redis.exists(f"revoked:{payload['jti']}"):
+                  raise HTTPException(401, "Token revoked")</div>
+                <p>The denylist approach reintroduces a DB lookup per request — you lose some of the statelessness
+                  benefit, but you gain revocation. For most apps this trade-off is worth it.</p>
+                <div class="tip"><strong>Key interview point:</strong> "JWTs are stateless verification, not stateless
+                  auth. The moment you need logout or permission changes to take immediate effect, you need a
+                  server-side check."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the architectural differences between monoliths, microservices, and modular monoliths — and how do you choose?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q3</span>
+            <span class="q-text">What are the architectural differences between monoliths, microservices, and modular
+              monoliths — and how do you choose?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>Monolith:</strong> single deployable unit, single process, single DB. Simple to develop,
+                  test, deploy, and debug — one log stream, one transaction boundary, no network calls between
+                  components. Becomes a problem when teams step on each other, deploy frequency is throttled by
+                  coupling, or a single component needs to scale independently.</p>
+                <p><strong>Microservices:</strong> separate deployable services, each with its own DB, communicating
+                  over network (HTTP or message bus). Enables independent deployment and scaling, team autonomy, and
+                  technology heterogeneity. The cost: distributed systems complexity — network latency, partial
+                  failures, distributed transactions, service discovery, observability across services, and significant
+                  ops overhead. Microservices are operationally expensive. Most teams underestimate this.</p>
+                <p><strong>Modular monolith:</strong> single deployable but with strict module boundaries enforced in
+                  code. Modules communicate through defined interfaces, not direct imports. DB tables are logically
+                  partitioned by module (or physically via schemas). You get the simplicity of a monolith with the code
+                  organization of microservices. Extracting a module into a service later is straightforward because the
+                  boundary already exists.</p>
+                <p><strong>How to choose:</strong></p>
+                <p>— Starting a product: modular monolith. You don't know your domain boundaries yet — splitting too
+                  early creates the wrong seams.<br>
+                  — Team of 2-8 engineers: modular monolith, period. The overhead of microservices consumes engineering
+                  capacity that should go to product.<br>
+                  — Specific scaling problem (one component gets 100x the traffic of others): extract that one service.
+                  Don't boil the ocean.<br>
+                  — Multiple large teams (10+) who need independent release cadences: microservices may be justified.
+                  Conway's Law — your architecture will mirror your org structure anyway.</p>
+                <div class="tip"><strong>Key interview point:</strong> "The modular monolith is underrated. Most teams
+                  that struggle with microservices would have been better served by disciplined module boundaries in a
+                  monolith. Microservices solve org problems as much as technical ones."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the different types of API testing, and what does a good integration test for a backend endpoint actually look like?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q4</span>
+            <span class="q-text">What are the different types of API testing, and what does a good integration test for
+              a backend endpoint actually look like?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>Unit tests</strong> — test a single function or class in isolation. Mock all external
+                  dependencies (DB, HTTP clients, queues). Fast. Good for business logic with branches: discount
+                  calculations, permission checks, input transformations.</p>
+                <p><strong>Integration tests</strong> — test a slice of the system with real dependencies (real DB, real
+                  Redis if applicable). For a FastAPI route, this means hitting the endpoint via TestClient with a real
+                  test DB. Slower but catches real bugs: missing indexes causing test failures, ORM relationship config
+                  errors, constraint violations.</p>
+                <p><strong>Contract tests</strong> — verify that the API response shape matches what consumers expect.
+                  Pact is the standard library. Essential when multiple teams consume your API — a breaking schema
+                  change in a contract test fails before deployment.</p>
+                <p><strong>E2E tests</strong> — test the full system including frontend. Playwright, Cypress. Expensive,
+                  flaky, slow. Keep them minimal — only critical paths (login, checkout, core CRUD flows).</p>
+                <p><strong>What a good integration test actually looks like:</strong></p>
+                <div class="code-block" data-lang="python">@pytest.fixture
+                  def auth_client(client, db_session):
+                  user = create_test_user(db_session, role="admin")
+                  token = create_access_token(user.id)
+                  client.headers["Authorization"] = f"Bearer {token}"
+                  return client, user
+
+                  def test_create_feedback_persists_to_db(auth_client, db_session):
+                  client, user = auth_client
+                  payload = {"trainer_id": 1, "rating": 4, "comment": "Good session"}
+
+                  response = client.post("/api/v1/feedback", json=payload)
+
+                  assert response.status_code == 201
+                  data = response.json()
+                  assert data["rating"] == 4
+                  assert data["trainer_id"] == 1
+
+                  # Verify the DB actually has the row — don't just trust the response
+                  feedback = db_session.get(Feedback, data["id"])
+                  assert feedback is not None
+                  assert feedback.user_id == user.id # check ownership was set correctly</div>
+                <p>The key habit: always assert at the DB level, not just the response. The response could be
+                  constructed from cached data or stale state — the DB assertion proves the write actually happened.</p>
+                <div class="tip"><strong>Key interview point:</strong> Distinguish what each test layer catches. Unit
+                  tests catch logic bugs. Integration tests catch config, migration, and ORM bugs. If you only have one,
+                  integration tests give more confidence per test.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is middleware in a web framework, how does it work, and what are the right use cases for it?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q5</span>
+            <span class="q-text">What is middleware in a web framework, how does it work, and what are the right use
+              cases for it?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Middleware is code that runs on every request and response, wrapped around the actual route handler.
+                  It forms a pipeline: request passes through middleware A → middleware B → handler → middleware B
+                  (response) → middleware A (response).</p>
+                <p>In ASGI frameworks like FastAPI/Starlette, middleware wraps the entire application using the
+                  <code>__call__</code> protocol. In Express (Node), it's a chain of <code>(req, res, next)</code>
+                  functions.
+                </p>
+                <div class="code-block" data-lang="python">from starlette.middleware.base import BaseHTTPMiddleware
+                  import time, uuid
+
+                  class RequestTracingMiddleware(BaseHTTPMiddleware):
+                  async def dispatch(self, request, call_next):
+                  request_id = str(uuid.uuid4())
+                  request.state.request_id = request_id
+                  start = time.monotonic()
+
+                  response = await call_next(request)
+
+                  duration_ms = (time.monotonic() - start) * 1000
+                  response.headers["X-Request-ID"] = request_id
+                  logger.info("request", extra={
+                  "request_id": request_id,
+                  "path": request.url.path,
+                  "method": request.method,
+                  "status": response.status_code,
+                  "duration_ms": round(duration_ms, 2),
+                  })
+                  return response
+
+                  app.add_middleware(RequestTracingMiddleware)</div>
+                <p><strong>Right use cases:</strong> authentication (check token before handler runs), rate limiting,
+                  request/response logging, CORS headers, request ID injection, response compression, global exception
+                  catching, tenant identification in multi-tenant apps.</p>
+                <p><strong>Wrong use cases:</strong> business logic that is route-specific — if it only applies to one
+                  endpoint, put it in the route handler or a dependency, not global middleware. Middleware that
+                  conditionally skips based on path becomes a maintenance nightmare.</p>
+                <p><strong>Middleware ordering matters:</strong> the first middleware added is the outermost wrapper —
+                  it sees the request first and the response last. Auth middleware should be outer (fail fast before
+                  hitting business logic). Logging middleware should also be outer so it captures auth failures.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you handle file uploads at scale — what breaks when you naively upload to the application server?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q6</span>
+            <span class="q-text">How do you handle file uploads at scale — what breaks when you naively upload to the
+              application server?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Naive approach: receive file in the route handler, write to local disk, return a path or ID. This
+                  works for a single-instance app in development. It breaks in three specific ways in production:</p>
+                <p>— <strong>Horizontal scaling:</strong> file uploaded to instance A isn't visible to instance B or C.
+                  Users get 404s for their own uploads depending on which instance handles the request.<br>
+                  — <strong>Memory exhaustion:</strong> reading a 100MB file into memory before writing blocks that
+                  process and can exhaust RAM under concurrent load. Large files should stream.<br>
+                  — <strong>Single point of failure:</strong> if the instance dies, the disk and its files go with it.
+                  Ephemeral containers (Kubernetes, ECS) have no persistent local storage at all.</p>
+                <p><strong>Production approach — presigned URLs:</strong></p>
+                <div class="code-block" data-lang="python"># FastAPI route — generates a presigned upload URL
+                  @router.post("/upload-url")
+                  async def get_upload_url(filename: str, content_type: str, current_user: User =
+                  Depends(get_current_user)):
+                  key = f"uploads/{current_user.id}/{uuid.uuid4()}/{filename}"
+                  url = s3_client.generate_presigned_url(
+                  "put_object",
+                  Params={"Bucket": BUCKET, "Key": key, "ContentType": content_type},
+                  ExpiresIn=300, # 5 minutes
+                  )
+                  return {"upload_url": url, "key": key}
+
+                  # Client uploads directly to S3 — application server never touches the bytes
+                  # After upload, client calls POST /files with the key to record metadata in DB</div>
+                <p>This pattern offloads bandwidth from your application servers entirely. S3 handles the upload
+                  directly. Your server only stores metadata.</p>
+                <p><strong>Post-upload processing:</strong> trigger a Celery task (or Lambda via S3 event) for virus
+                  scanning, image resizing, thumbnail generation, or transcoding. Never do this synchronously in the
+                  upload request — it blocks.</p>
+                <p><strong>Security:</strong> validate file type by inspecting magic bytes, not the file extension
+                  (extensions are user-controlled). Set content-type explicitly on the S3 object. Scan for malware
+                  before making files publicly accessible.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is the N-tier architecture pattern and how do you enforce layer separation without it becoming dogma?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q7</span>
+            <span class="q-text">What is the N-tier architecture pattern and how do you enforce layer separation without
+              it becoming dogma?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>N-tier (usually 3-tier for web apps) separates the application into: presentation layer (HTTP routes,
+                  request/response handling), business logic layer (services, use cases, domain rules), and data access
+                  layer (repositories, ORM queries).</p>
+                <p><strong>Why it matters:</strong> without layers, routes start containing ORM queries, which contain
+                  business logic, which makes testing impossible without a live DB. With layers, you can unit-test
+                  service functions with mocked repos, and integration-test repos against a real DB independently.</p>
+                <p><strong>Practical structure in FastAPI:</strong></p>
+                <div class="code-block" data-lang="text">app/
+                  api/routes/ # Layer 1: HTTP concerns only — parse request, call service, return response
+                  services/ # Layer 2: business logic, orchestration, validation rules
+                  repositories/ # Layer 3: all DB queries live here, returns domain models
+                  models/ # SQLAlchemy ORM models
+                  schemas/ # Pydantic request/response schemas (separate from ORM models)
+
+                  # Route: no DB calls, no business logic
+                  @router.post("/feedback", response_model=FeedbackOut, status_code=201)
+                  async def create_feedback(body: FeedbackCreate, svc: FeedbackService = Depends()):
+                  return await svc.submit_feedback(body)
+
+                  # Service: no HTTP concerns, no direct ORM calls
+                  class FeedbackService:
+                  async def submit_feedback(self, data: FeedbackCreate) -> Feedback:
+                  trainer = await self.trainer_repo.get_or_raise(data.trainer_id)
+                  feedback = Feedback(**data.model_dump(), submitted_at=utcnow())
+                  return await self.feedback_repo.create(feedback)</div>
+                <p><strong>Where it becomes dogma:</strong> some teams add a Repository layer that's just a thin wrapper
+                  around SQLAlchemy with no actual abstraction benefit. If you're never swapping the DB, a repository
+                  that just calls <code>db.add(obj)</code> is ceremony. Add abstraction when it provides testability or
+                  real flexibility — not because the pattern says to.</p>
+                <div class="tip"><strong>Key interview point:</strong> "The goal is testability and clear ownership of
+                  concerns, not pattern compliance. The test: can I unit-test my business logic without a running
+                  database? If yes, the separation is working."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is database migration management, and what can go wrong with migrations in production?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q8</span>
+            <span class="q-text">What is database migration management, and what can go wrong with migrations in
+              production?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A migration is a versioned, incremental change to the DB schema. Tools like Alembic (Python), Flyway,
+                  or Liquibase track which migrations have run and apply new ones in order. The alternative — manually
+                  running SQL scripts — doesn't scale and can't be automated or audited.</p>
+                <p><strong>Alembic basics:</strong></p>
+                <div class="code-block" data-lang="bash"># Generate migration from ORM model changes
+                  alembic revision --autogenerate -m "add_rating_to_feedback"
+
+                  # Apply all pending migrations
+                  alembic upgrade head
+
+                  # Roll back one step
+                  alembic downgrade -1
+
+                  # Check current state
+                  alembic current</div>
+                <p><strong>What goes wrong in production:</strong></p>
+                <p>— <strong>Long-running ALTER TABLE:</strong> adding a NOT NULL column to a table with 50M rows takes
+                  an exclusive lock for minutes. Postgres rewrites the whole table. Use a multi-step strategy: add
+                  nullable column → backfill data → add constraint. Or use <code>pg_repack</code> / online DDL.<br>
+                  — <strong>Locking conflicts:</strong> <code>ALTER TABLE ... ADD INDEX</code> locks the table in MySQL.
+                  In Postgres, use <code>CREATE INDEX CONCURRENTLY</code> — it doesn't lock.<br>
+                  — <strong>Migration vs. deployment order:</strong> if you deploy new code before running the
+                  migration, old code hits a schema it doesn't expect (missing column). If you run the migration before
+                  deploying code, new schema with old code. Solution: make migrations backward-compatible by adding
+                  columns as nullable, deleting them in a later migration after the code no longer references them.<br>
+                  — <strong>Never auto-migrate in app startup:</strong> <code>Base.metadata.create_all(engine)</code> in
+                  main.py is dangerous in multi-instance deploys — all instances race to run migrations. Run migrations
+                  as a separate step in your deployment pipeline before starting instances.</p>
+                <div class="tip"><strong>Key interview point:</strong> "Backward-compatible migrations are the
+                  discipline that makes zero-downtime deploys possible. Add before you remove, never break what the
+                  current running code expects."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How does WebSocket communication work and what backend considerations are required for real-time features?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q9</span>
+            <span class="q-text">How does WebSocket communication work and what backend considerations are required for
+              real-time features?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A WebSocket is a persistent, full-duplex TCP connection established via an HTTP upgrade handshake.
+                  After the upgrade, both client and server can push messages at any time — unlike HTTP which is
+                  strictly request-response.</p>
+                <div class="code-block" data-lang="python">from fastapi import WebSocket
+                  from typing import dict
+
+                  class ConnectionManager:
+                  def __init__(self):
+                  self.connections: dict[str, WebSocket] = {} # user_id -> socket
+
+                  async def connect(self, user_id: str, ws: WebSocket):
+                  await ws.accept()
+                  self.connections[user_id] = ws
+
+                  async def disconnect(self, user_id: str):
+                  self.connections.pop(user_id, None)
+
+                  async def send_to_user(self, user_id: str, message: dict):
+                  ws = self.connections.get(user_id)
+                  if ws:
+                  await ws.send_json(message)
+
+                  manager = ConnectionManager()
+
+                  @router.websocket("/ws/{user_id}")
+                  async def websocket_endpoint(ws: WebSocket, user_id: str):
+                  await manager.connect(user_id, ws)
+                  try:
+                  while True:
+                  data = await ws.receive_json()
+                  await handle_message(user_id, data)
+                  except WebSocketDisconnect:
+                  await manager.disconnect(user_id)</div>
+                <p><strong>The scaling problem:</strong> the above ConnectionManager is in-process. If user A is on
+                  instance 1 and sends a message to user B on instance 2, instance 1 has no connection to user B. Fix:
+                  Redis Pub/Sub as the message bus.</p>
+                <div class="code-block" data-lang="python"># Instance 1 publishes event to Redis channel
+                  await redis.publish(f"user:{target_user_id}", json.dumps(message))
+
+                  # Every instance subscribes to the relevant channels
+                  # When message arrives, the instance that holds the target socket delivers it</div>
+                <p><strong>Other backend considerations:</strong> heartbeat/ping-pong to detect stale connections
+                  (clients that close without sending a close frame), authentication on the upgrade handshake (not every
+                  request), connection limits per instance, graceful restart — draining connections before shutdown
+                  rather than hard-killing them.</p>
+                <p><strong>When to use SSE instead:</strong> Server-Sent Events (one-directional push from server to
+                  client) are simpler, work over standard HTTP/2, and reconnect automatically. If the client only needs
+                  to receive updates (not send), prefer SSE over WebSockets.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are environment variables, secrets management, and how should configuration be structured across dev/staging/prod?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q10</span>
+            <span class="q-text">What are environment variables, secrets management, and how should configuration be
+              structured across dev/staging/prod?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Environment variables are the correct mechanism to inject configuration that varies between
+                  deployments: DB URLs, API keys, feature flags. Code should be identical across environments — only
+                  config changes. This is the twelve-factor app principle and it's right.</p>
+                <p><strong>Structured config with Pydantic Settings:</strong></p>
+                <div class="code-block" data-lang="python">from pydantic_settings import BaseSettings,
+                  SettingsConfigDict
+
+                  class Settings(BaseSettings):
+                  database_url: str
+                  redis_url: str
+                  jwt_secret: str
+                  environment: str = "development"
+                  debug: bool = False
+                  sentry_dsn: str | None = None
+
+                  model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+
+                  settings = Settings() # reads from env vars, falls back to .env in dev</div>
+                <p>Pydantic validates types at startup — a missing <code>DATABASE_URL</code> raises an error
+                  immediately, not when the first DB call fails 2 hours into a deployment.</p>
+                <p><strong>Secrets management in production — never hardcode, never commit:</strong></p>
+                <p>— AWS Secrets Manager / GCP Secret Manager: secrets stored encrypted, accessed via SDK with IAM auth.
+                  Rotation is built-in for DB credentials.<br>
+                  — HashiCorp Vault: self-hosted, more control, dynamic secrets (generates short-lived DB credentials
+                  per service).<br>
+                  — Kubernetes Secrets: base64-encoded (not encrypted by default — use Sealed Secrets or External
+                  Secrets Operator to sync from a real secrets manager).<br>
+                  — .env files: acceptable in local development, must be in .gitignore. Never in CI environments.</p>
+                <p><strong>.env.example committed to git</strong> — a template with all required keys but no values. New
+                  developers know what to configure. The actual .env is always local and never committed.</p>
+                <div class="tip"><strong>Key interview point:</strong> "A leaked DB password in git history is a
+                  permanent compromise — git history is forever. If a secret was ever committed, rotate it immediately.
+                  The history still has it."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== SCALABLE SYSTEMS DESIGN ===== -->
+      <div id="systems" class="section">
+        <div class="section-header">
+          <h2>Scalable Systems Design</h2>
+          <div class="meta">10 concept-depth questions</div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is the CAP theorem and what does it mean for the design choices you make daily?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q1</span>
+            <span class="q-text">What is the CAP theorem and what does it mean for the design choices you make
+              daily?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>CAP theorem states that a distributed system can guarantee at most two of three properties:
+                  Consistency (every read gets the most recent write), Availability (every request gets a response — not
+                  necessarily the most recent data), and Partition tolerance (the system continues operating despite
+                  network partitions between nodes).</p>
+                <p>Network partitions happen in any distributed system — cables fail, VMs drop packets. Partition
+                  tolerance isn't optional; it's reality. The real choice is: during a partition, do you return a
+                  potentially stale response (AP) or reject the request until consistency is restored (CP)?</p>
+                <p><strong>What this means in practice:</strong></p>
+                <p>— <strong>PostgreSQL:</strong> CP. If the primary is unreachable, reads from replicas return stale
+                  data or are rejected. Strict consistency for financial data is worth the availability trade-off.<br>
+                  — <strong>Cassandra / DynamoDB:</strong> AP by default. Returns data even during partitions, with
+                  eventual consistency. The right choice for user preferences, activity feeds, analytics — where stale
+                  data for a few seconds is acceptable.<br>
+                  — <strong>Redis Sentinel / Cluster:</strong> depends on configuration. A single-primary Redis is CP.
+                  Cluster mode can be tuned toward AP.</p>
+                <p><strong>PACELC — the extension that actually matters:</strong> even without a partition, there's a
+                  latency vs. consistency trade-off. Synchronous replication (consistent) is slower than asynchronous
+                  (eventually consistent). PACELC makes this explicit: you're always choosing latency vs. consistency,
+                  not just during failures.</p>
+                <div class="tip"><strong>Key interview point:</strong> CAP is often misunderstood as "pick two" with
+                  partition tolerance as optional. It isn't. The practical framing: "what do I want the system to do
+                  during a network failure — serve stale data or return an error?"</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the different load balancing strategies and how does session affinity work?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q2</span>
+            <span class="q-text">What are the different load balancing strategies and how does session affinity
+              work?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A load balancer distributes incoming requests across multiple backend instances. Without it,
+                  horizontal scaling does nothing — all traffic hits one server.</p>
+                <p><strong>Strategies:</strong></p>
+                <p>— <strong>Round-robin:</strong> requests go to instances 1, 2, 3, 1, 2, 3... Simple, effective when
+                  requests are roughly equal cost. Default in most LBs.<br>
+                  — <strong>Least connections:</strong> route to whichever instance has the fewest active connections.
+                  Better when request duration varies significantly — a slow upload doesn't starve fast requests.<br>
+                  — <strong>IP hash / consistent hashing:</strong> the same client IP always routes to the same backend.
+                  Used for session affinity (sticky sessions). Downside: if that instance dies, the session is gone.<br>
+                  — <strong>Weighted:</strong> allocate more traffic to higher-capacity instances. Used during rolling
+                  deploys (send less traffic to new instances while they warm up) or when instances have different
+                  specs.<br>
+                  — <strong>Least response time:</strong> tracks latency per instance, routes to the fastest. More
+                  overhead but maximizes throughput.</p>
+                <p><strong>Session affinity (sticky sessions):</strong> routes all requests from a given client to the
+                  same instance, typically because session state is in-process. This is a code smell — it limits
+                  horizontal scaling and means one instance dying breaks sessions. The correct fix is to externalize
+                  session state to Redis so any instance can handle any request.</p>
+                <div class="code-block" data-lang="python"># AWS ALB sticky session — still works but creates coupling
+                  # Target group attribute: stickiness.enabled = true
+
+                  # Better: stateless sessions using Redis
+                  @app.middleware("http")
+                  async def session_middleware(request: Request, call_next):
+                  session_id = request.cookies.get("session_id")
+                  if session_id:
+                  request.state.session = await redis.get(f"session:{session_id}")
+                  return await call_next(request)</div>
+                <p><strong>Health checks:</strong> load balancers probe each instance (HTTP GET /health every 30s). If
+                  an instance fails, it's removed from rotation. Your health check endpoint should verify the DB
+                  connection is up — a 200 from a server that can't reach its DB is worse than a 503.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do message queues work and when do you use async messaging versus synchronous HTTP calls between services?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q3</span>
+            <span class="q-text">How do message queues work and when do you use async messaging versus synchronous HTTP
+              calls between services?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A message queue decouples the producer (sender) from the consumer (processor). The producer publishes
+                  a message and continues immediately — it doesn't wait for the consumer to process it. The queue stores
+                  messages until a consumer picks them up.</p>
+                <p><strong>Key characteristics:</strong> durability (messages survive crashes if persisted),
+                  at-least-once delivery (the consumer may process the same message twice — design handlers to be
+                  idempotent), ordering (SQS FIFO and Kafka partitions preserve order, standard queues don't),
+                  visibility timeout (message is hidden while being processed — if consumer crashes before ack, it
+                  reappears).</p>
+                <p><strong>When to use async messaging:</strong></p>
+                <p>— Sending an email after signup — the user doesn't need to wait for this. Publish event, return 201,
+                  process async.<br>
+                  — Generating a PDF report — could take 10-30 seconds. Return a job ID immediately, process in
+                  background, notify when done.<br>
+                  — Fan-out notifications — one event (order placed) triggers multiple consumers (inventory, shipping,
+                  email, analytics).<br>
+                  — Load leveling — a burst of 10k requests can be queued and processed at a sustainable rate rather
+                  than overwhelming downstream services.</p>
+                <p><strong>When to use synchronous HTTP:</strong></p>
+                <p>— You need the result of the operation to continue (payment charge must succeed before creating the
+                  order).<br>
+                  — The operation is fast and the client is waiting for the response.<br>
+                  — Simple request-response where failure handling is straightforward.</p>
+                <div class="code-block" data-lang="python"># Async pattern: respond immediately, process in background
+                  @router.post("/reports", status_code=202)
+                  async def generate_report(params: ReportParams):
+                  job_id = str(uuid.uuid4())
+                  await celery_app.send_task("generate_report", args=[job_id, params.model_dump()])
+                  return {"job_id": job_id, "status_url": f"/reports/{job_id}/status"}</div>
+                <div class="tip"><strong>Key interview point:</strong> "Async messaging trades latency (eventual) for
+                  resilience and decoupling. Synchronous HTTP is simpler but couples availability — if the downstream
+                  service is down, your request fails too."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is database read/write splitting, and how do you implement it without introducing consistency bugs?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q4</span>
+            <span class="q-text">What is database read/write splitting, and how do you implement it without introducing
+              consistency bugs?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Read/write splitting routes write operations to the primary DB and read operations to read replicas.
+                  Replicas receive changes asynchronously from the primary — typically with 10ms-500ms replication lag.
+                  This scales read capacity without scaling write capacity.</p>
+                <p><strong>Implementation in SQLAlchemy:</strong></p>
+                <div class="code-block" data-lang="python">from sqlalchemy.ext.asyncio import create_async_engine
+
+                  write_engine = create_async_engine(PRIMARY_DB_URL)
+                  read_engine = create_async_engine(READ_REPLICA_URL)
+
+                  # Use write session for mutations
+                  async def get_write_db():
+                  async with AsyncSession(write_engine) as session:
+                  yield session
+
+                  # Use read session for queries
+                  async def get_read_db():
+                  async with AsyncSession(read_engine) as session:
+                  yield session
+
+                  # Route depends on the type of operation
+                  @router.get("/trainers")
+                  async def list_trainers(db: AsyncSession = Depends(get_read_db)):
+                  return await trainer_repo.list_all(db)
+
+                  @router.post("/trainers")
+                  async def create_trainer(data: TrainerCreate, db: AsyncSession = Depends(get_write_db)):
+                  return await trainer_repo.create(db, data)</div>
+                <p><strong>Read-your-own-writes problem:</strong> a user updates their profile (write to primary), then
+                  immediately fetches it (reads from replica). The replica hasn't caught up — they see the old data.
+                  Looks like a bug. Solutions:</p>
+                <p>— Route all reads for a session to primary for a short window after a write (typically 1-2
+                  seconds).<br>
+                  — Include a timestamp in the write response; replica reads check the replica lag and fall back to
+                  primary if the replica is behind.<br>
+                  — For critical reads (displaying data the user just saved), always use primary.</p>
+                <div class="tip"><strong>Key interview point:</strong> Replication lag is not zero and not constant. A
+                  replica that's 2 seconds behind during normal load might be 30 seconds behind during a batch
+                  migration. Always design reads to tolerate eventual consistency, or explicitly use the primary when
+                  you need the latest data.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is rate limiting, how do you implement it correctly at scale, and what are the common algorithms?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q5</span>
+            <span class="q-text">What is rate limiting, how do you implement it correctly at scale, and what are the
+              common algorithms?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Rate limiting controls how many requests a client can make in a time window. It protects your
+                  infrastructure from abuse, brute-force attacks, and runaway clients, and it enforces fair usage across
+                  tenants.</p>
+                <p><strong>Algorithms:</strong></p>
+                <p>— <strong>Fixed window:</strong> count requests per minute, reset at :00. Simple but vulnerable to
+                  burst attacks at window boundaries — 100 requests at :59 + 100 at :00 = 200 in 2 seconds.<br>
+                  — <strong>Sliding window log:</strong> store timestamps of each request, count how many fall in the
+                  last 60 seconds. Accurate but memory-heavy at scale — storing every timestamp per user.<br>
+                  — <strong>Sliding window counter:</strong> approximate sliding window using two fixed windows weighted
+                  by overlap. Accurate enough, low memory. Used by Redis rate limiting libraries.<br>
+                  — <strong>Token bucket:</strong> tokens refill at a constant rate, each request consumes one token.
+                  Allows bursting up to bucket capacity. The most natural for APIs where short bursts are
+                  acceptable.<br>
+                  — <strong>Leaky bucket:</strong> requests drain from a queue at a fixed rate regardless of burst.
+                  Enforces smooth output rate. Good for protecting downstream services with fixed capacity.</p>
+                <div class="code-block" data-lang="lua">-- Redis sliding window rate limiter with Lua atomic script
+                  -- KEYS[1] = rate limit key, ARGV[1] = window (seconds), ARGV[2] = limit
+                  local current = redis.call('INCR', KEYS[1])
+                  if current == 1 then
+                  redis.call('EXPIRE', KEYS[1], ARGV[1])
+                  end
+                  if current > tonumber(ARGV[2]) then
+                  return 0 -- blocked
+                  end
+                  return 1 -- allowed</div>
+                <p><strong>At scale:</strong> the rate limiter must be centralized — in-process counters don't work
+                  across multiple instances. Redis with atomic operations is the standard. For very high traffic, Redis
+                  Cluster or a dedicated service like envoy's rate limit service.</p>
+                <p><strong>Rate limit keys:</strong> by IP for unauthenticated, by user ID for authenticated. Layered
+                  limits work well — per-second bursts (100 req/s) plus per-hour sustained limits (1000 req/hour).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is observability, and what's the difference between monitoring, logging, tracing, and metrics?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q6</span>
+            <span class="q-text">What is observability, and what's the difference between monitoring, logging, tracing,
+              and metrics?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Monitoring tells you when something is wrong. Observability tells you why. The distinction matters:
+                  monitoring is dashboards and alerts on known failure modes. Observability is the ability to answer
+                  arbitrary questions about system behavior from the data it emits, including failure modes you didn't
+                  anticipate.</p>
+                <p>The three pillars:</p>
+                <p><strong>Metrics</strong> — numerical measurements aggregated over time. Request rate, error rate,
+                  p50/p95/p99 latency, DB connection pool size, queue depth. Low cardinality, cheap to store, great for
+                  dashboards and alerting. Tools: Prometheus + Grafana, Datadog, CloudWatch.</p>
+                <p><strong>Logs</strong> — discrete events with context. Every HTTP request, every exception, every
+                  significant business event. Structured JSON logs (not plaintext) so they're queryable. Include:
+                  request_id, user_id, duration_ms, endpoint, status_code. Tools: ELK stack, Loki, Splunk, Datadog Logs.
+                </p>
+                <p><strong>Traces</strong> — end-to-end path of a single request through multiple services. A trace is
+                  made up of spans — each span represents one operation (HTTP call, DB query, cache lookup). Correlates
+                  logs across services via trace_id. Tools: Jaeger, Zipkin, Datadog APM, OpenTelemetry (the
+                  vendor-neutral instrumentation standard).</p>
+                <div class="code-block" data-lang="python">from opentelemetry import trace
+                  from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+                  from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+
+                  FastAPIInstrumentor.instrument_app(app) # auto-traces all routes
+                  SQLAlchemyInstrumentor().instrument() # auto-traces all DB queries
+                  # Every request now has spans for HTTP + DB, linked by trace_id</div>
+                <p><strong>The golden signals (Google SRE):</strong> the four metrics that matter most for any service —
+                  latency (how long requests take), traffic (request rate), errors (error rate), saturation (how full
+                  your resources are). If all four are healthy, the service is healthy.</p>
+                <div class="tip"><strong>Key interview point:</strong> "Request IDs are the connective tissue of
+                  observability. Every request generates an ID at the entry point; every log, every downstream call,
+                  every error carries it. Without request IDs, distributed debugging is archaeology."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are CDNs and how do you design a caching strategy that works across application, database, and edge layers?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q7</span>
+            <span class="q-text">What are CDNs and how do you design a caching strategy that works across application,
+              database, and edge layers?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A CDN (Content Delivery Network) caches content at edge nodes geographically close to users. A user
+                  in Mumbai hitting a CDN edge in Mumbai gets the response in ~5ms. Without a CDN, the same request
+                  hitting a server in US-East gets 200ms just from round-trip latency — before your application does
+                  anything.</p>
+                <p><strong>What CDNs can cache:</strong> static assets (JS, CSS, images — cache for weeks), HTML pages
+                  (short TTL for dynamic content, long TTL for versioned builds), and API responses (carefully — only
+                  truly static or slowly-changing data).</p>
+                <p><strong>Multi-layer cache strategy:</strong></p>
+                <div class="code-block" data-lang="text">Request flow:
+                  Browser cache (seconds-minutes)
+                  ↓ miss
+                  CDN edge cache (minutes-hours)
+                  ↓ miss
+                  Application cache (Redis, seconds-minutes)
+                  ↓ miss
+                  DB (source of truth)
+
+                  # Cache-Control header controls browser + CDN behavior
+                  @router.get("/public/trainers/{id}")
+                  async def get_trainer(id: int):
+                  trainer = await get_cached_trainer(id)
+                  response = JSONResponse(content=trainer)
+                  response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+                  return response</div>
+                <p><strong>Cache invalidation at CDN layer:</strong> CDNs let you purge specific paths or tags.
+                  Cloudflare Cache Tags let you tag all responses related to a resource (e.g., tag: trainer:42) and
+                  invalidate them all when that trainer is updated. Without this, you're stuck with TTL-based staleness.
+                </p>
+                <p><strong>What not to cache:</strong> authenticated responses (unless you vary by Authorization header
+                  or use cache keys per user), CSRF tokens, session data, real-time data (prices, inventory levels), any
+                  response containing PII not scoped to the requesting user.</p>
+                <p><strong>Cache stampede:</strong> when a popular cached item expires, thousands of requests
+                  simultaneously hit the DB to rebuild it. Mitigation: cache locking (only one request rebuilds, others
+                  wait), probabilistic early expiration (refresh before it expires under high load), background refresh
+                  (async job refreshes before expiry).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the SLA, SLO, and SLI concepts and how do you design a service to meet a reliability target?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q8</span>
+            <span class="q-text">What are the SLA, SLO, and SLI concepts and how do you design a service to meet a
+              reliability target?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>SLI (Service Level Indicator)</strong> — a measurable metric of service behavior. Examples:
+                  request success rate (non-5xx / total), p99 latency, availability (minutes healthy / total minutes).
+                </p>
+                <p><strong>SLO (Service Level Objective)</strong> — the target value for an SLI. "99.9% of requests
+                  succeed" or "p99 latency under 200ms". SLOs are internal commitments — what your team is working to
+                  maintain.</p>
+                <p><strong>SLA (Service Level Agreement)</strong> — a contract with the customer, with financial
+                  penalties for breach. SLAs should be more lenient than your SLOs — you want a buffer between your
+                  internal target and your customer commitment.</p>
+                <p><strong>Error budget:</strong> 99.9% uptime allows 43.8 minutes of downtime per month. That's your
+                  error budget — you can spend it on risky deployments, experiments, or infrastructure changes. If
+                  you're burning it fast (production incidents), you slow down deployments until the budget recovers.
+                  Error budgets make reliability vs. velocity trade-offs concrete and quantifiable.</p>
+                <p><strong>Designing to meet a 99.9% target:</strong></p>
+                <p>— Identify the blast radius of each component failure. Which single point of failure (SPOF) would
+                  breach the SLO?<br>
+                  — Eliminate SPOFs: multiple instances behind a load balancer, DB with automatic failover (RDS
+                  Multi-AZ), redundant message broker nodes.<br>
+                  — Set up alerts before the SLO breaches. Alert when error rate exceeds 0.5% (half your budget burning)
+                  not 1%.<br>
+                  — Define runbooks for each alert — on-call engineers shouldn't be figuring out what to do at 3am.</p>
+                <div class="tip"><strong>Key interview point:</strong> "99.9% sounds like a lot. 43 minutes of downtime
+                  a month. A single unplanned deployment that takes 10 minutes to roll back uses 23% of your monthly
+                  budget. That context changes how you think about deployment risk."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you design for graceful degradation and fault tolerance in a distributed system?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q9</span>
+            <span class="q-text">How do you design for graceful degradation and fault tolerance in a distributed
+              system?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Graceful degradation means the system continues providing reduced functionality when a component
+                  fails, rather than failing completely. The goal: a downstream dependency going down should not take
+                  your entire service down with it.</p>
+                <p><strong>Circuit breaker pattern:</strong> wrap calls to external services. After N consecutive
+                  failures, the circuit "opens" — calls fail immediately (fast fail) without hitting the failing
+                  service. After a timeout, it "half-opens" to test if the service recovered.</p>
+                <div class="code-block" data-lang="python">from circuitbreaker import circuit
+
+                  @circuit(failure_threshold=5, recovery_timeout=60)
+                  async def call_payment_service(order_id: str) -> PaymentResult:
+                  async with httpx.AsyncClient() as client:
+                  response = await client.post(PAYMENT_URL, json={"order_id": order_id})
+                  response.raise_for_status()
+                  return PaymentResult(**response.json())</div>
+                <p><strong>Timeouts everywhere:</strong> every external call must have a timeout. A DB query with no
+                  timeout that hangs for 30 seconds holds a connection in the pool and a thread/coroutine — under load
+                  this cascades into full service unavailability. Set aggressive timeouts (2-5 seconds for external
+                  APIs) and handle the timeout error explicitly.</p>
+                <p><strong>Fallback strategies by type:</strong></p>
+                <p>— <strong>Cache fallback:</strong> if the DB is slow, serve stale cached data with a header
+                  indicating it's stale.<br>
+                  — <strong>Default fallback:</strong> recommendation engine down → show popular items instead of
+                  personalized ones.<br>
+                  — <strong>Queue for later:</strong> notification service down → queue the notification, deliver when
+                  it recovers.<br>
+                  — <strong>Feature flag:</strong> disable the feature entirely rather than showing errors. A degraded
+                  experience beats an error page.</p>
+                <p><strong>Retry with exponential backoff and jitter:</strong> retrying immediately after a failure
+                  hammers an already struggling service. Exponential backoff spaces retries out. Jitter randomizes them
+                  so all clients don't retry simultaneously.</p>
+                <div class="code-block" data-lang="python">async def retry_with_backoff(fn, max_attempts=3):
+                  for attempt in range(max_attempts):
+                  try:
+                  return await fn()
+                  except TransientError:
+                  if attempt == max_attempts - 1:
+                  raise
+                  delay = (2 ** attempt) + random.uniform(0, 1) # jitter
+                  await asyncio.sleep(delay)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you approach capacity planning and performance testing before a feature ships at scale?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q10</span>
+            <span class="q-text">How do you approach capacity planning and performance testing before a feature ships at
+              scale?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Capacity planning is estimating how much load your system can handle and ensuring you have headroom
+                  before you need it. Reacting after a production incident is the expensive way to learn your capacity
+                  limits.</p>
+                <p><strong>Back-of-envelope estimation:</strong> before writing code, estimate the load. If you're
+                  building a feature for 10,000 daily active users, estimate: average requests per user per day × DAU /
+                  86400 seconds = average RPS. Multiply by peak factor (typically 3-5x average for well-behaved
+                  traffic). This tells you whether you're building for 10 RPS or 500 RPS before you choose your
+                  architecture.</p>
+                <p><strong>Load testing before launch:</strong></p>
+                <div class="code-block" data-lang="javascript">// k6 load test — ramps up to 100 virtual users over 5
+                  minutes
+                  import http from 'k6/http';
+                  import { sleep, check } from 'k6';
+
+                  export const options = {
+                  stages: [
+                  { duration: '2m', target: 50 }, // ramp up
+                  { duration: '5m', target: 100 }, // sustain
+                  { duration: '2m', target: 0 }, // ramp down
+                  ],
+                  thresholds: {
+                  http_req_duration: ['p99&lt;500'], // 99% of requests under 500ms
+                  http_req_failed: ['rate&lt;0.01'], // error rate under 1%
+                  },
+                  };
+
+                  export default function () {
+                  const res = http.get('https://api.yourservice.com/trainers');
+                  check(res, { 'status 200': r => r.status === 200 });
+                  sleep(1);
+                  }</div>
+                <p><strong>What to measure:</strong> throughput at which error rate increases (breaking point), latency
+                  degradation curve (does p99 stay flat as load increases or does it balloon?), resource saturation
+                  (which bottleneck appears first — CPU, memory, DB connections, I/O?), recovery behavior (does the
+                  system recover gracefully after load drops or does it need a restart?).</p>
+                <p><strong>Baseline in production before the load test:</strong> you need to know normal metrics to spot
+                  anomalies during the test. A 500ms p99 during load testing only matters if the baseline is 50ms.</p>
+                <div class="tip"><strong>Key interview point:</strong> "Load tests tell you about the shape of
+                  degradation, not just a pass/fail number. A system that goes from 50ms to 5000ms at 80% capacity is
+                  much worse than one that goes from 50ms to 200ms at 95% capacity."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CI/CD & DEV TOOLING ===== -->
+      <div id="cicd" class="section">
+        <div class="section-header">
+          <h2>CI/CD & Dev Tooling</h2>
+          <div class="meta">10 concept-depth questions</div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is CI/CD and what's the actual difference between Continuous Integration, Continuous Delivery, and Continuous Deployment?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q1</span>
+            <span class="q-text">What is CI/CD and what's the actual difference between Continuous Integration,
+              Continuous Delivery, and Continuous Deployment?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>These three terms get conflated constantly. They're three levels of automation maturity on a
+                  spectrum.</p>
+                <p><strong>Continuous Integration</strong> — every developer commits frequently (at least daily), and
+                  each commit triggers an automated build and test suite. The goal is to catch integration problems
+                  early, before they accumulate into large merge conflicts. Without CI, a team of 5 on separate branches
+                  for a week builds up divergence that takes days to reconcile.</p>
+                <p><strong>Continuous Delivery</strong> — extends CI to ensure the main branch is always in a deployable
+                  state. After CI passes, a deployment-ready artifact (Docker image, zip, package) is produced and
+                  validated. Deployment to production is a manual decision but a single button click — everything else
+                  is automated. This is the right level for most teams: fast when you want to ship, gated when you want
+                  review.</p>
+                <p><strong>Continuous Deployment</strong> — every commit that passes CI/CD automatically deploys to
+                  production without human intervention. Requires very high confidence in your test coverage and the
+                  ability to roll back instantly. Common at companies like Netlify (hundreds of deploys per day). Not
+                  appropriate when deploys have regulatory review requirements or when test coverage is insufficient to
+                  catch regressions.</p>
+                <p><strong>Pipeline stages in order:</strong></p>
+                <div class="code-block" data-lang="text">1. Code push triggers pipeline
+                  2. Static analysis: linting, type checking (mypy, ruff, ESLint)
+                  3. Unit tests (fast — should finish in &lt;2 minutes)
+                  4. Build artifact (Docker image, wheel, compiled binary)
+                  5. Integration tests (run against test DB, may take 5-10 min)
+                  6. Security scan (SAST, dependency audit — Snyk, Trivy, Bandit)
+                  7. Push artifact to registry (only if all above pass)
+                  8. Deploy to staging
+                  9. Smoke tests against staging
+                  10. Manual approval gate (CD) or automatic deploy (CDP) to production</div>
+                <div class="tip"><strong>Key interview point:</strong> Fail fast — run the fastest, cheapest checks
+                  first. Linting before tests, unit tests before integration tests. A pipeline that runs security scans
+                  before unit tests wastes 5 minutes before finding a syntax error.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is Docker and what are the best practices for writing production-grade Dockerfiles?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q2</span>
+            <span class="q-text">What is Docker and what are the best practices for writing production-grade
+              Dockerfiles?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Docker packages an application and all its dependencies into a container — an isolated process with
+                  its own filesystem, network, and process space. Unlike VMs, containers share the host OS kernel. This
+                  makes them lightweight (seconds to start, tens of MBs vs. GBs for VMs) and portable — the same image
+                  runs identically on a developer laptop, CI server, and production cluster.</p>
+                <p><strong>Production-grade Dockerfile — Python FastAPI example:</strong></p>
+                <div class="code-block" data-lang="dockerfile">FROM python:3.12-slim AS builder
+                  WORKDIR /app
+                  COPY requirements.txt .
+                  RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+
+                  FROM python:3.12-slim AS runtime
+                  # Non-root user — principle of least privilege
+                  RUN useradd -m -u 1001 appuser
+                  WORKDIR /app
+
+                  # Copy only installed packages, not the full build environment
+                  COPY --from=builder /install /usr/local
+                  COPY --chown=appuser:appuser . .
+
+                  USER appuser
+
+                  # HEALTHCHECK lets the orchestrator know the app is ready
+                  HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD python -c "import httpx;
+                  httpx.get('http://localhost:8000/health').raise_for_status()"
+
+                  EXPOSE 8000
+                  CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]</div>
+                <p><strong>Key practices:</strong></p>
+                <p>— <strong>Multi-stage builds:</strong> separate build stage (with build tools, compilers) from
+                  runtime stage. The runtime image contains only what's needed to run — no gcc, no pip, no test
+                  dependencies. Reduces image size and attack surface.<br>
+                  — <strong>Pin base image versions:</strong> <code>python:3.12-slim</code> not
+                  <code>python:latest</code> — a Monday build and a Tuesday build should be identical.<br>
+                  — <strong>Layer ordering:</strong> copy dependencies first, code second. Dependencies change rarely;
+                  code changes constantly. This maximizes layer cache hits — <code>pip install</code> only reruns when
+                  requirements.txt changes.<br>
+                  — <strong>Never run as root:</strong> if a container is compromised, a non-root user limits blast
+                  radius.<br>
+                  — <strong>.dockerignore:</strong> exclude .git, __pycache__, .env, test fixtures — they bloat the
+                  image and leak secrets.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the different deployment strategies — rolling, blue/green, canary — and when do you use each?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q3</span>
+            <span class="q-text">What are the different deployment strategies — rolling, blue/green, canary — and when
+              do you use each?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>Rolling deploy:</strong> replace old instances with new ones incrementally — a few at a time.
+                  At any moment during the deploy, some instances run old code and some run new. Simple, the default in
+                  Kubernetes and ECS. Risk: both versions are live simultaneously — DB migrations must be
+                  backward-compatible (the old code must still work with the new schema).</p>
+                <p><strong>Blue/Green deploy:</strong> maintain two identical environments. Blue is production. Green
+                  runs the new version. When green is validated, switch the load balancer from blue to green. Instant
+                  cutover, instant rollback (just switch back). High cost — you maintain two full production
+                  environments. Best for stateful services where rolling deploy's simultaneous-version problem is
+                  unacceptable.</p>
+                <p><strong>Canary deploy:</strong> route a small percentage of traffic (1-5%) to the new version.
+                  Monitor error rates, latency, and business metrics. If metrics stay healthy, gradually increase the
+                  percentage until 100%. If not, roll back — only a small percentage of users were affected. Best
+                  practice for high-risk changes or when you want to validate on real traffic before full rollout.</p>
+                <div class="code-block" data-lang="bash"># Kubernetes canary — 90/10 traffic split via replica ratio
+                  # Old deployment: 9 replicas
+                  # New deployment: 1 replica (canary)
+                  # Load balancer distributes evenly across all 10 pods = 10% canary traffic
+
+                  # After validation, scale canary to 10 replicas, scale old to 0
+                  kubectl scale deployment app-canary --replicas=10
+                  kubectl scale deployment app-stable --replicas=0</div>
+                <p><strong>Feature flags</strong> as a deployment strategy: deploy the code to all instances but keep
+                  the feature disabled. Enable it for internal users, then a percentage, then all. Decouples code
+                  deployment from feature release. Tools: LaunchDarkly, Unleash, Flagsmith (self-hosted).</p>
+                <div class="tip"><strong>Key interview point:</strong> Canary and feature flags are complementary.
+                  Canary handles infrastructure-level risk (new image, new DB version). Feature flags handle
+                  feature-level risk. Using both gives fine-grained control over what users see and when.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is Git branching strategy and how do you choose between GitFlow, trunk-based development, and GitHub Flow?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q4</span>
+            <span class="q-text">What is Git branching strategy and how do you choose between GitFlow, trunk-based
+              development, and GitHub Flow?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>GitFlow:</strong> long-lived branches — main (production), develop (integration), feature/*
+                  (per-feature), release/* (stabilization), hotfix/*. Originally designed for software with scheduled
+                  releases (e.g., mobile apps). Merge ceremony is high: features merge to develop, develop merges to
+                  release, release merges to main. This overhead creates large merge conflicts and slows down teams. Not
+                  recommended for web services with continuous deployment.</p>
+                <p><strong>GitHub Flow:</strong> main is always deployable. Create a short-lived feature branch from
+                  main, open a PR, merge when approved. Simple, low overhead, pairs well with CI/CD. The catch: main can
+                  accumulate unfinished features unless you use feature flags to hide work-in-progress.</p>
+                <p><strong>Trunk-based development:</strong> engineers commit directly to main (or use very short-lived
+                  branches — less than 1 day). Feature flags hide incomplete work. Requires strong CI — trunk must stay
+                  green at all times. Enables continuous deployment. Google, Meta, and most high-velocity teams operate
+                  this way. It sounds chaotic but the discipline of keeping trunk green actually produces higher code
+                  quality than long-lived branches.</p>
+                <p><strong>Choosing:</strong></p>
+                <p>— Startup / web service / SaaS: trunk-based or GitHub Flow + feature flags.<br>
+                  — Multiple concurrent releases (enterprise software, mobile SDK): GitFlow may be justified for the
+                  release branch overhead.<br>
+                  — Team size doesn't dictate choice — discipline does. Trunk-based works with 50 engineers if CI is
+                  strong.</p>
+                <div class="code-block" data-lang="bash"># Good commit message — imperative, specific, references ticket
+                  git commit -m "feat(feedback): add rating validation to prevent duplicate submissions (#142)
+
+                  - Adds idempotency check on (user_id, trainer_id, date)
+                  - Returns 409 Conflict if same user rates same trainer twice in a day
+                  - Adds DB unique constraint migration"</div>
+                <div class="tip"><strong>Key interview point:</strong> "Long-lived branches are the enemy of flow. The
+                  longer a branch lives, the larger the merge and the higher the conflict risk. Feature flags let you
+                  keep branches short without hiding incomplete work."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is a good CI pipeline configuration for a Python/FastAPI project using GitHub Actions?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q5</span>
+            <span class="q-text">What is a good CI pipeline configuration for a Python/FastAPI project using GitHub
+              Actions?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>A CI pipeline should give developers fast, reliable feedback. The goal: green means safe to merge,
+                  red means specific failure with enough context to fix immediately.</p>
+                <div class="code-block" data-lang="yaml">name: CI
+
+                  on:
+                  pull_request:
+                  branches: [main]
+                  push:
+                  branches: [main]
+
+                  jobs:
+                  lint-and-typecheck:
+                  runs-on: ubuntu-latest
+                  steps:
+                  - uses: actions/checkout@v4
+                  - uses: actions/setup-python@v5
+                  with: { python-version: "3.12" }
+                  - uses: actions/cache@v4
+                  with:
+                  path: ~/.cache/pip
+                  key: pip-${{ hashFiles('requirements*.txt') }}
+                  - run: pip install ruff mypy
+                  - run: ruff check .
+                  - run: mypy app/ --ignore-missing-imports
+
+                  test:
+                  runs-on: ubuntu-latest
+                  services:
+                  postgres:
+                  image: postgres:16
+                  env: { POSTGRES_PASSWORD: test, POSTGRES_DB: testdb }
+                  options: >-
+                  --health-cmd pg_isready
+                  --health-interval 5s --health-timeout 5s --health-retries 5
+                  ports: ["5432:5432"]
+                  env:
+                  DATABASE_URL: postgresql+asyncpg://postgres:test@localhost/testdb
+                  steps:
+                  - uses: actions/checkout@v4
+                  - uses: actions/setup-python@v5
+                  with: { python-version: "3.12" }
+                  - uses: actions/cache@v4
+                  with:
+                  path: ~/.cache/pip
+                  key: pip-${{ hashFiles('requirements*.txt') }}
+                  - run: pip install -r requirements.txt -r requirements-dev.txt
+                  - run: alembic upgrade head
+                  - run: pytest --cov=app --cov-report=xml -q
+                  - uses: codecov/codecov-action@v4
+
+                  security-scan:
+                  runs-on: ubuntu-latest
+                  steps:
+                  - uses: actions/checkout@v4
+                  - run: pip install bandit safety
+                  - run: bandit -r app/ -ll # only high/critical issues
+                  - run: safety check -r requirements.txt</div>
+                <p>Key decisions: lint and typecheck run in parallel with tests (separate jobs, both fail fast
+                  independently). Postgres runs as a service container — real DB, not SQLite mocking. Pip cache keyed on
+                  requirements hash — cache hit on most commits. Coverage uploaded to Codecov so PRs show coverage
+                  delta.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is Infrastructure as Code and what are the key differences between Terraform, Pulumi, and CDK?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q6</span>
+            <span class="q-text">What is Infrastructure as Code and what are the key differences between Terraform,
+              Pulumi, and CDK?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Infrastructure as Code (IaC) means defining your cloud resources — VPCs, databases, compute
+                  instances, IAM roles — in version-controlled code rather than through the console. Benefits:
+                  reproducible environments (dev/staging/prod are identical by definition), peer review for infra
+                  changes, rollback by reverting a git commit, no "snowflake" servers that no one knows how to
+                  reproduce.</p>
+                <p><strong>Terraform (HCL):</strong> declarative — you describe the desired end state, Terraform figures
+                  out what to create, modify, or destroy. Large ecosystem, provider support for every major cloud and
+                  SaaS. HCL is purpose-built and readable but is not a general-purpose language — no proper loops,
+                  functions, or type system. <code>terraform plan</code> shows the diff before applying. State is stored
+                  in a backend (S3 + DynamoDB for locking in AWS). Most widely adopted IaC tool.</p>
+                <div class="code-block" data-lang="hcl"># Terraform: RDS PostgreSQL instance
+                  resource "aws_db_instance" "primary" {
+                  identifier = "myapp-prod"
+                  engine = "postgres"
+                  engine_version = "16.2"
+                  instance_class = "db.t3.medium"
+                  allocated_storage = 100
+                  multi_az = true
+                  deletion_protection = true
+
+                  db_name = "myapp"
+                  username = var.db_username
+                  password = var.db_password # use secrets manager in practice
+                  }</div>
+                <p><strong>Pulumi:</strong> uses real programming languages (Python, TypeScript, Go). Infrastructure is
+                  code with all the tooling — proper types, imports, tests, loops. Better for dynamic infrastructure
+                  (creating N identical resources based on a config value). The downside: complexity of a
+                  general-purpose language for what is often simple resource declaration.</p>
+                <p><strong>AWS CDK:</strong> Pulumi but AWS-specific, outputs CloudFormation. If you're AWS-only and
+                  already a TypeScript/Python shop, CDK has excellent type safety and AWS-native constructs (L2/L3
+                  abstractions like a one-liner VPC with public/private subnets).</p>
+                <div class="tip"><strong>Key interview point:</strong> "IaC drift — the console has diverged from the
+                  code — is the failure mode to prevent. Enforce: all infra changes go through the IaC pipeline. No
+                  console changes in production. CI/CD runs terraform plan on every PR so infra changes get reviewed
+                  like code."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is the difference between linting, static analysis, and type checking, and how do you enforce code quality in a Python project?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q7</span>
+            <span class="q-text">What is the difference between linting, static analysis, and type checking, and how do
+              you enforce code quality in a Python project?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p><strong>Linting</strong> — enforces style and catches obvious errors: unused variables, undefined
+                  names, import ordering, line length, anti-patterns. Fast, syntactic. For Python: Ruff (replaced
+                  Flake8, isort, and many Pylint rules in one tool — 10-100x faster).</p>
+                <p><strong>Type checking</strong> — verifies that types are used consistently throughout the codebase.
+                  Catches bugs like passing a string where an int is expected, calling a method that doesn't exist on a
+                  type, or a function returning None when a str is expected. For Python: mypy (strict mode) or Pyright.
+                  Requires type annotations — the investment in annotations pays off in refactoring confidence.</p>
+                <p><strong>Static analysis</strong> — deeper program analysis looking for security vulnerabilities,
+                  logic errors, and code smells. Bandit (security), SonarQube, Semgrep (custom rules). Not purely
+                  syntactic — understands data flow and call chains.</p>
+                <div class="code-block" data-lang="toml"># pyproject.toml — centralized tool config
+                  [tool.ruff]
+                  line-length = 100
+                  select = ["E", "F", "I", "UP", "B", "SIM"] # error, pyflakes, isort, upgrades, bugbear, simplify
+                  ignore = ["E501"]
+
+                  [tool.mypy]
+                  python_version = "3.12"
+                  strict = true
+                  plugins = ["pydantic.mypy"]
+
+                  [tool.pytest.ini_options]
+                  testpaths = ["tests"]
+                  asyncio_mode = "auto" # for pytest-asyncio
+
+                  # pre-commit hooks — runs checks before every commit
+                  # .pre-commit-config.yaml
+                  repos:
+                  - repo: https://github.com/astral-sh/ruff-pre-commit
+                  rev: v0.5.0
+                  hooks:
+                  - id: ruff
+                  args: [--fix]
+                  - id: ruff-format</div>
+                <p><strong>Pre-commit hooks vs. CI enforcement:</strong> pre-commit runs locally on commit — fast
+                  feedback, keeps CI green. CI is the authoritative gate — it runs the same checks but can't be
+                  bypassed. Both are necessary: pre-commit for developer experience, CI for enforcement.
+                  <code>--no-verify</code> bypasses pre-commit hooks but not CI.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is container orchestration, what problem does Kubernetes solve, and what are the core objects you need to understand?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q8</span>
+            <span class="q-text">What is container orchestration, what problem does Kubernetes solve, and what are the
+              core objects you need to understand?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Container orchestration automates the deployment, scaling, networking, and lifecycle management of
+                  containers across a cluster of machines. Running a single container is easy. Running 50 services with
+                  health checks, auto-scaling, rolling deploys, service discovery, and secrets management across 20
+                  nodes is the problem Kubernetes solves.</p>
+                <p><strong>Core Kubernetes objects:</strong></p>
+                <p>— <strong>Pod:</strong> the smallest deployable unit. One or more containers that share network and
+                  storage. You rarely create pods directly.<br>
+                  — <strong>Deployment:</strong> manages a set of identical pods. Handles rolling updates, rollbacks,
+                  desired replica count. This is what you deploy your app as.<br>
+                  — <strong>Service:</strong> stable network endpoint for a set of pods. Pods are ephemeral (IPs
+                  change), Services are stable. Type ClusterIP (internal), NodePort, or LoadBalancer (creates a cloud
+                  LB).<br>
+                  — <strong>ConfigMap:</strong> non-sensitive configuration as key-value pairs mounted into pods as env
+                  vars or files.<br>
+                  — <strong>Secret:</strong> base64-encoded sensitive data. Not encrypted at rest by default — use
+                  Sealed Secrets or External Secrets Operator for real security.<br>
+                  — <strong>Ingress:</strong> HTTP routing rules — maps <code>api.example.com/v1</code> to the API
+                  service, <code>app.example.com</code> to the frontend service. Requires an ingress controller
+                  (nginx-ingress, Traefik).<br>
+                  — <strong>HorizontalPodAutoscaler:</strong> scales deployment replicas based on CPU/memory or custom
+                  metrics. The traffic doubles → HPA adds pods within seconds.</p>
+                <div class="code-block" data-lang="yaml">apiVersion: apps/v1
+                  kind: Deployment
+                  metadata:
+                  name: api
+                  spec:
+                  replicas: 3
+                  selector:
+                  matchLabels: { app: api }
+                  template:
+                  metadata:
+                  labels: { app: api }
+                  spec:
+                  containers:
+                  - name: api
+                  image: ghcr.io/yourorg/api:sha-abc123 # pin to SHA, never latest
+                  ports: [{ containerPort: 8000 }]
+                  readinessProbe:
+                  httpGet: { path: /health, port: 8000 }
+                  initialDelaySeconds: 5
+                  resources:
+                  requests: { cpu: 250m, memory: 256Mi }
+                  limits: { cpu: 500m, memory: 512Mi }</div>
+                <div class="tip"><strong>Key interview point:</strong> Resource requests and limits are critical —
+                  without them, a noisy pod can starve others on the same node. Requests are what Kubernetes schedules
+                  on (guaranteed), limits are the cap (throttled if exceeded).</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is semantic versioning and how should you manage dependency versions in a Python project?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q9</span>
+            <span class="q-text">What is semantic versioning and how should you manage dependency versions in a Python
+              project?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Semantic versioning (SemVer) is MAJOR.MINOR.PATCH. Patch: backward-compatible bug fix. Minor:
+                  backward-compatible new feature. Major: breaking change. If you depend on
+                  <code>fastapi==0.111.0</code> and FastAPI releases <code>0.112.0</code> (minor), it should be safe to
+                  upgrade. If they release <code>1.0.0</code>, expect breaking changes.
+                </p>
+                <p><strong>Pinning strategy:</strong></p>
+                <p>— <strong>requirements.txt with exact pins</strong> (<code>fastapi==0.111.0</code>): fully
+                  reproducible builds — every developer and CI instance gets identical dependencies. Downside: security
+                  patches require manual pin updates.<br>
+                  — <strong>pyproject.toml with ranges</strong> (<code>fastapi>=0.110.0,&lt;1.0.0</code>): expresses
+                  intent — compatible versions. Requires a lockfile (uv.lock, poetry.lock) to make builds
+                  reproducible.<br>
+                  — <strong>Never unpinned in production</strong> (<code>fastapi</code> with no version constraint): a
+                  <code>pip install</code> today might give a different version than tomorrow, and a major version could
+                  break your app silently.
+                </p>
+                <div class="code-block" data-lang="text"># Modern approach: uv (2024+) for fast Python package
+                  management
+                  # pyproject.toml — declarative dependency specification
+                  [project]
+                  dependencies = [
+                  "fastapi>=0.111.0,&lt;1.0.0",
+                  "sqlalchemy[asyncio]>=2.0.0,&lt;3.0.0",
+                  "pydantic>=2.7.0,&lt;3.0.0",
+                  ]
+
+                  # uv.lock — auto-generated, exact pins, commit this to git
+                  # CI installs from lockfile: uv sync --frozen
+
+                  # Dependency auditing in CI
+                  uv run safety check # checks for known CVEs
+                  # Or GitHub Dependabot / Renovate for automated PRs when new versions release</div>
+                <p><strong>Dependabot / Renovate:</strong> automated PRs when a dependency has a new version or security
+                  advisory. Set up automerge for patch-level updates with passing CI — removes manual toil from keeping
+                  dependencies current.</p>
+                <div class="tip"><strong>Key interview point:</strong> "Outdated dependencies are a security surface.
+                  The discipline is: keep them current incrementally (small upgrades frequently) rather than letting
+                  them drift for 18 months and then doing a big bang upgrade that breaks everything."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What is a production incident response process and what should happen from alert to postmortem?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q10</span>
+            <span class="q-text">What is a production incident response process and what should happen from alert to
+              postmortem?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Incident response is the process of detecting, triaging, resolving, and learning from production
+                  failures. The quality of this process determines whether you repeat incidents or systematically
+                  eliminate classes of failure.</p>
+                <p><strong>Detection:</strong> alert fires (error rate > 1%, p99 latency > 1000ms for 5 minutes, health
+                  check failing). Alerts should page a human only when human action is required — alert fatigue from
+                  noisy low-severity alerts makes engineers ignore pages.</p>
+                <p><strong>Triage:</strong> the on-call engineer acknowledges the alert and immediately classifies: is
+                  this P1 (service down, data loss risk), P2 (significant degradation), or P3 (minor impact)? P1 and P2
+                  require a dedicated incident commander role — someone coordinating, not fixing — so engineers can
+                  focus on the technical problem.</p>
+                <p><strong>Communication:</strong> post an incident update in Slack (#incidents channel or status page)
+                  within 5 minutes: "Investigating elevated error rates on the API — users may experience failures.
+                  Update in 15 minutes." Regular updates every 15-30 minutes during the incident. No radio silence.</p>
+                <p><strong>Resolution:</strong> identify the cause, apply the fix (rollback is fastest — a 5-minute
+                  redeploy is almost always faster than a bug fix under pressure), verify the fix with metrics, declare
+                  resolution.</p>
+                <p><strong>Postmortem within 48 hours:</strong></p>
+                <div class="code-block" data-lang="text">Incident: API error rate spiked to 45% for 23 minutes on
+                  2025-06-01
+                  Impact: ~4,200 failed requests, 0 data loss
+
+                  Timeline:
+                  14:03 - Deploy v2.4.1 completed (rolling deploy finished)
+                  14:11 - Alert: error rate > 5%
+                  14:13 - On-call acknowledged, investigation started
+                  14:18 - Root cause identified: missing DB index added in migration
+                  caused full table scans under load — query time 4s avg
+                  14:21 - Decision: roll back v2.4.1 to v2.4.0
+                  14:26 - Rollback complete, error rate returned to baseline
+
+                  Root cause: Migration added NOT NULL column but index was missing
+                  Contributing factor: Load test ran against empty test DB (index mattered only at scale)
+
+                  Action items:
+                  - Add query time assertions to integration tests (EXPLAIN ANALYZE in test)
+                  - Load test with production-scale data volume before deploy
+                  - Add p99 DB query latency to deploy smoke test gates</div>
+                <div class="tip"><strong>Key interview point:</strong> Blameless postmortems are a prerequisite for
+                  honest ones. The goal is system improvement, not individual accountability. If engineers fear
+                  punishment for incidents, they hide failures, prevent escalation, and the system never improves.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== REMOTE AGILE & COMMUNICATION ===== -->
+      <div id="agile" class="section">
+        <div class="section-header">
+          <h2>Remote Agile & Communication</h2>
+          <div class="meta">10 concept-depth questions</div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What are the actual mechanics of a Scrum sprint and what does each ceremony accomplish?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q1</span>
+            <span class="q-text">What are the actual mechanics of a Scrum sprint and what does each ceremony
+              accomplish?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Scrum is a framework for iterating on complex work in fixed-length cycles (sprints, typically 2
+                  weeks). The value is not the ceremonies themselves — it's the forcing function they create: regular
+                  commitment, regular reflection, and regular course-correction.</p>
+                <p><strong>Sprint Planning (beginning of sprint, 1-4 hours):</strong> team pulls stories from the
+                  product backlog into the sprint backlog, breaks them into tasks, and commits to a sprint goal. The
+                  sprint goal is a single sentence that describes what value the sprint delivers — not just a list of
+                  tickets. A sprint goal keeps the team aligned when surprises arise mid-sprint.</p>
+                <p><strong>Daily Standup (15 minutes every day):</strong> synchronization, not status reporting. The
+                  three questions — what did I do yesterday, what am I doing today, any blockers — are a starting point,
+                  not the format. Senior engineers use standup to surface impediments that cross team boundaries, call
+                  for help early, and flag when a task is taking longer than expected. Standups that turn into
+                  monologues kill engagement — keep it to ~1 minute per person, take deep discussions offline.</p>
+                <p><strong>Sprint Review (end of sprint, 1-2 hours):</strong> demonstrate working software to
+                  stakeholders. Real users, product managers, business stakeholders. The demo should be against
+                  production or production-equivalent — not a local dev environment. This ceremony keeps the team honest
+                  about what "done" means and creates direct feedback loops with stakeholders.</p>
+                <p><strong>Sprint Retrospective (end of sprint, 1 hour):</strong> team-only reflection. What went well,
+                  what didn't, what's one thing to change next sprint. The worst retrospectives produce a list of
+                  complaints. Good ones produce one concrete, actionable change with an owner. Improvement compounds:
+                  one change per sprint = 26 improvements per year.</p>
+                <p><strong>Backlog Refinement (mid-sprint, ongoing):</strong> not officially a Scrum ceremony but
+                  essential. Stories for the next sprint need acceptance criteria, estimates, and dependencies
+                  identified before sprint planning — otherwise planning devolves into design sessions that blow past
+                  the timebox.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you estimate work accurately and what's wrong with story point estimating?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q2</span>
+            <span class="q-text">How do you estimate work accurately and what's wrong with story point
+              estimating?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Estimation is a forecast, not a commitment. The goal is not accuracy per ticket — it's predictability
+                  at the sprint level. Whether any individual story takes 1 day or 3 days matters less than whether the
+                  sprint's total scope fits in 2 weeks.</p>
+                <p><strong>Story points vs. time:</strong> story points are supposed to measure relative complexity and
+                  effort, not hours. A 3-point story is roughly 3x a 1-point story. The team's velocity (points per
+                  sprint) stabilizes over time and becomes a useful planning input. The problem: teams drift to using
+                  points as proxies for hours, lose the abstraction benefit, and then argue about whether a story is 3
+                  or 5 for 10 minutes.</p>
+                <p><strong>What actually works:</strong></p>
+                <p>— <strong>T-shirt sizing (S/M/L/XL):</strong> faster than point debates for backlog refinement.
+                  Forces the real question: is this a small or large chunk of work?<br>
+                  — <strong>Splitting over estimating:</strong> a story that is XL should be split before it enters the
+                  sprint, not estimated more precisely. Stories that are too large create sprint-end crunch and
+                  unpredictability.<br>
+                  — <strong>Reference story calibration:</strong> pick two or three well-understood past stories as
+                  anchors (a 1-pointer, a 3-pointer, an 8-pointer). Estimate new stories relative to anchors, not in
+                  absolute terms.<br>
+                  — <strong>Three-point estimation for critical path work:</strong> estimate optimistic, pessimistic,
+                  and most likely. Expected = (O + 4M + P) / 6. Forces thinking about risk and variance, not just "how
+                  long will this probably take."</p>
+                <p><strong>The cone of uncertainty:</strong> estimates made before design is complete are inherently
+                  wide. Expecting a precise estimate for an unexplored story is a misunderstanding of estimation, not a
+                  failure of the team. Estimation confidence increases as work is broken down and risks are understood.
+                </p>
+                <div class="tip"><strong>Key interview point:</strong> "I estimate to facilitate planning and surface
+                  risk, not to commit to a deadline. If a story blows my estimate, the interesting question is why —
+                  unknown complexity, unclear scope, or external dependency — not whether the estimate was right."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What makes an effective async-first remote team and what communication patterns break down at scale?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q3</span>
+            <span class="q-text">What makes an effective async-first remote team and what communication patterns break
+              down at scale?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Async-first means decisions, discussions, and design happen in writing by default — not in real-time
+                  meetings. Documents and threads are the default medium; meetings are for alignment and relationship,
+                  not information transfer.</p>
+                <p><strong>What works:</strong></p>
+                <p>— <strong>Writing as the primary communication medium:</strong> decisions documented in a shared
+                  space (Notion, Confluence, GitHub). Anyone in any timezone can read context without waiting for
+                  someone to wake up. The discipline: write well. A terse Slack message that needs 4 follow-up questions
+                  is not async-friendly.<br>
+                  — <strong>Clear response-time expectations per channel:</strong> Slack = 4-hour response time during
+                  work hours. Email = next business day. @urgent tag = 30-minute response. Without explicit norms,
+                  people default to always-on anxiety or assume everything is urgent.<br>
+                  — <strong>Status transparency:</strong> team members proactively post daily updates — what they
+                  shipped, what they're working on, any blockers. This replaces the synchronous standup and works across
+                  timezones. Tools: Geekbot (Slack bot), written daily check-ins in a team channel.<br>
+                  — <strong>Decision documents over decision meetings:</strong> "I need a 30-minute meeting to discuss
+                  X" is often better served by a 1-page doc with a stated recommendation, alternatives, and a 48-hour
+                  comment window. Many decisions that "need a meeting" just need a document and a deadline.</p>
+                <p><strong>What breaks down:</strong></p>
+                <p>— <strong>Over-documenting into a void:</strong> writing detailed specs no one reads because there's
+                  no culture of async engagement. Async requires disciplined reading, not just writing.<br>
+                  — <strong>Losing informal context:</strong> the hallway conversation that built team trust doesn't
+                  exist remotely. Intentional 1:1s and informal channels (water-cooler Slack channels, optional social
+                  calls) replace this deliberately.<br>
+                  — <strong>Timezone imbalance:</strong> a team that is 80% in one timezone will default to synchronous
+                  for that majority. Engineers in minority timezones get excluded. Fix: protect async windows during
+                  which no decisions are made synchronously.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you write effective technical documentation and when is documentation the wrong solution?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q4</span>
+            <span class="q-text">How do you write effective technical documentation and when is documentation the wrong
+              solution?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Good technical documentation answers three questions: what does this do, how do I use it, and why
+                  does it work this way. Most documentation fails because it only answers the first two.</p>
+                <p><strong>Types of documentation and their purpose:</strong></p>
+                <p>— <strong>README:</strong> the contract. Gets someone from zero to running in 10 minutes. Includes:
+                  what this is, prerequisites, how to run locally, how to run tests, how to deploy, where to get help.
+                  Should be tested — actually run through it quarterly.<br>
+                  — <strong>Architecture Decision Records (ADRs):</strong> short documents capturing why a technical
+                  decision was made. "Why do we use Celery instead of Dramatiq? Why is the DB in Postgres instead of
+                  MongoDB?" The value: six months later, when someone questions the decision, context is preserved.
+                  Format: context (why did this come up), decision (what we chose), consequences (trade-offs
+                  accepted).<br>
+                  — <strong>API documentation:</strong> auto-generated from OpenAPI schema (FastAPI does this free),
+                  supplemented with usage examples and error code descriptions. Examples are more valuable than
+                  parameter descriptions.<br>
+                  — <strong>Runbooks:</strong> step-by-step operational procedures. How to run a DB migration in
+                  production. How to scale up Celery workers. How to respond to an OOM alert. Should be written so a
+                  junior engineer on-call at 2am can execute them without context.</p>
+                <p><strong>When documentation is the wrong solution:</strong> if you're writing documentation because
+                  the code is confusing, the documentation is a band-aid on a design problem. Confusing code with great
+                  docs is still confusing code. The test: if a new engineer needs the docs to understand a function, the
+                  function needs better naming, not a comment.</p>
+                <div class="code-block" data-lang="python"># Documentation in code: docstring for intent, not mechanics
+                  # Wrong — describes what the code does (reader can see that)
+                  def calculate_discount(price, tier):
+                  """Multiplies price by tier discount factor and returns result."""
+
+                  # Right — explains the why and the constraints
+                  def calculate_discount(price: Decimal, tier: str) -> Decimal:
+                  """Apply tier discount and return the final price.
+
+                  Tier discounts are based on the 2024 pricing model (see pricing-model.md).
+                  'enterprise' tier cannot combine with promotional codes — callers must
+                  check is_promo_eligible() before applying a promo on top.
+                  """</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card" data-question="How do you run effective code reviews as both reviewer and author?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q5</span>
+            <span class="q-text">How do you run effective code reviews as both reviewer and author?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Code review is the primary quality gate and knowledge-sharing mechanism in a team. Poor review
+                  culture either rubber-stamps everything (no quality improvement) or creates adversarial friction
+                  (slows down development and damages relationships).</p>
+                <p><strong>As an author:</strong></p>
+                <p>— Keep PRs small. A 50-line PR gets a thoughtful 20-minute review. A 500-line PR gets a rubber stamp
+                  because no one has the cognitive budget to review it properly. If a feature requires 500 lines, split
+                  it into sequential PRs — infrastructure first, then feature, then tests and cleanup.<br>
+                  — Write a PR description that answers: what does this change, why is it being made, and what's the
+                  testing approach. Link the relevant ticket. If there are areas of concern or trade-offs, call them out
+                  explicitly — don't make the reviewer find them.<br>
+                  — Respond to every comment — even if it's "acknowledged, I'll address in a follow-up" or "I disagree
+                  because X." Silent unresolved comments make reviewers feel ignored and they stop leaving useful
+                  feedback.</p>
+                <p><strong>As a reviewer:</strong></p>
+                <p>— Separate blocking from non-blocking feedback. "This will cause a bug" (blocking) vs. "I'd have
+                  named this differently" (non-blocking, a nit). Labeling prevents confusion about what must be
+                  addressed before merge.<br>
+                  — Ask questions before asserting. "Why did you choose X here?" is better than "This should be Y." The
+                  author may have context you don't.<br>
+                  — Review the diff, not the author. Feedback about code patterns is engineering. Feedback about the
+                  author's capability is personal. Never conflate the two.<br>
+                  — Praise good code explicitly. "This approach to handling the race condition is clean" costs you 10
+                  seconds and builds the culture of noticing quality, not just catching bugs.<br>
+                  — Turnaround within 24 hours during working hours. A PR sitting unreviewed for 3 days kills momentum
+                  and creates merge conflicts.</p>
+                <div class="tip"><strong>Key interview point:</strong> "The best PRs make the reviewer's job easy —
+                  they're small, well-described, and the hard decisions are explained rather than hidden. I aim to write
+                  PRs that make the reviewer think 'this was well thought through' before they've read a single line of
+                  code."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you manage technical debt without it becoming an excuse to never ship?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q6</span>
+            <span class="q-text">How do you manage technical debt without it becoming an excuse to never ship?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Technical debt is the accumulated cost of decisions made to ship faster at the expense of code
+                  quality or architectural cleanliness. It's not inherently bad — like financial debt, it's sometimes
+                  rational. The problem is when it's untracked, unacknowledged, and accumulates compound interest in the
+                  form of slower velocity and more bugs.</p>
+                <p><strong>Types that matter differently:</strong></p>
+                <p>— <strong>Deliberate debt (accepted):</strong> "we hardcoded this config value to ship by the
+                  deadline; we'll parameterize it next sprint." Logged, has an owner, has a timeline. Acceptable.<br>
+                  — <strong>Accidental debt (discovered):</strong> "this code is a mess because the original developer
+                  left and no one has touched it in two years." No one chose this — it accumulated. Needs to be
+                  surfaced, prioritized, and addressed incrementally.<br>
+                  — <strong>Bit rot:</strong> dependencies that haven't been updated in 2 years, APIs that are
+                  deprecated but still called, patterns that were best practice in 2021 but aren't now. Low-urgency but
+                  silently raises costs over time.</p>
+                <p><strong>Managing it practically:</strong></p>
+                <p>— <strong>The debt register:</strong> a real list (GitHub Issues with a "technical-debt" label, a
+                  Notion page) where debt is logged when it's created. Visibility prevents denial.<br>
+                  — <strong>10-20% of sprint capacity to debt:</strong> not a separate "cleanup sprint" that never
+                  happens — ongoing allocation. Debt addressed incrementally during normal work rather than in a
+                  big-bang refactor that disrupts product development.<br>
+                  — <strong>Boy Scout Rule:</strong> leave code slightly better than you found it. If you're touching a
+                  function to add a feature, fix the obvious readability issue while you're there. This doesn't add
+                  significant time and prevents gradual degradation.<br>
+                  — <strong>Hard no to debt that creates security risk or data integrity risk:</strong> no-auth endpoint
+                  "we'll fix later," missing DB constraints "we'll add later." These are time bombs, not debt.</p>
+                <div class="tip"><strong>Key interview point:</strong> "Technical debt is a leadership problem as much
+                  as a technical one. Engineers who see debt but have no path to address it eventually stop caring —
+                  learned helplessness. Having a real process for surfacing and scheduling debt keeps the team engaged
+                  in quality."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you handle disagreements with a tech lead or senior engineer about architectural decisions?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q7</span>
+            <span class="q-text">How do you handle disagreements with a tech lead or senior engineer about architectural
+              decisions?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Technical disagreements are a sign of a functioning team, not a dysfunction. The dysfunction is when
+                  disagreements are resolved by seniority rather than argument quality, or when engineers stop voicing
+                  concerns to avoid conflict.</p>
+                <p><strong>Before escalating: make your case in writing first.</strong> A clear written argument —
+                  here's the problem, here's my proposed solution, here are the alternatives I considered, here are the
+                  trade-offs — forces you to check whether your concern is well-formed. Half of technical disagreements
+                  dissolve in the process of writing them down because you discover a constraint you hadn't considered.
+                </p>
+                <p><strong>Structure the disagreement around trade-offs, not correctness:</strong> "I'm right and you're
+                  wrong" is a dead end. "My concern with approach X is that it introduces eventual consistency in a
+                  place where we currently have strong consistency — I worry this increases the risk of the specific bug
+                  class described here. Can we talk through the trade-off?" is a productive framing.</p>
+                <p><strong>Ask for the reasoning, not just the decision:</strong> "Help me understand the constraint
+                  that led to this choice" opens a conversation. You might learn something that changes your position.
+                  If the reason is "because I said so," that's signal about team culture, not the decision.</p>
+                <p><strong>Disagree and commit:</strong> if you've made your case clearly and the decision goes the
+                  other way, commit fully to the chosen direction. Half-hearted implementation of a decision you
+                  disagree with is worse than either alternative. Express disagreement, document it, then execute. "I
+                  disagree with the direction but I understand the decision was made with the context available — I'll
+                  flag if I see the concerns I raised materialize."</p>
+                <p><strong>When to escalate beyond the tech lead:</strong> if the decision creates a security
+                  vulnerability, violates compliance requirements, or will cause data loss. These aren't technical
+                  preferences — they're material risks that the right people in the organization need to know about.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you communicate technical complexity and trade-offs to non-technical stakeholders?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q8</span>
+            <span class="q-text">How do you communicate technical complexity and trade-offs to non-technical
+              stakeholders?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Non-technical stakeholders don't need to understand the technical details — they need to understand
+                  the business implications of technical choices. The translation is your job as the engineer, and it's
+                  a skill as important as the technical work itself.</p>
+                <p><strong>Lead with the business impact, not the technical mechanism:</strong></p>
+                <p>Bad: "We need to refactor the authentication service to use Redis-backed JWT denylist because the
+                  current stateless implementation doesn't support immediate session invalidation."</p>
+                <p>Good: "Right now, if an employee's account is compromised, we can disable their account but their
+                  existing login session stays active for up to 24 hours. The fix takes about 3 days and ensures we can
+                  instantly lock out a compromised account."</p>
+                <p><strong>Use consistent analogies for recurring concepts:</strong> technical debt as deferred
+                  maintenance on a building (works indefinitely — everyone understands maintenance cost). A distributed
+                  transaction as updating two bank accounts simultaneously — both updates must succeed or both must
+                  fail. A cache as a whiteboard next to the filing cabinet — fast to read, but may be out of date.</p>
+                <p><strong>Give options with explicit trade-offs, not a single recommendation:</strong></p>
+                <div class="code-block" data-lang="text">Option A: Fix properly — 3 weeks, eliminates the problem
+                  entirely, $12k eng cost
+                  Option B: Workaround — 3 days, reduces risk by ~70%, will need revisiting in 6 months
+                  Option C: Do nothing — $0 now, risk of a security incident with unknown impact
+
+                  Recommendation: Option A given our security requirements, but if Q3 deadline is firm, Option B buys
+                  time.</div>
+                <p>This format respects the stakeholder's decision-making authority. You're the expert on what's
+                  possible and what it costs. They're the expert on what the business can absorb.</p>
+                <p><strong>Acknowledge uncertainty explicitly:</strong> "My estimate is 2-3 weeks, but there's a
+                  dependency on the third-party API we haven't integrated with before — that could add time."
+                  Stakeholders who are surprised by slips lose trust. Stakeholders who receive early uncertainty signals
+                  can plan around it.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="What does senior-level ownership look like on a remote team, and how is it different from just executing tasks?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q9</span>
+            <span class="q-text">What does senior-level ownership look like on a remote team, and how is it different
+              from just executing tasks?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Task execution is: take ticket, implement ticket, mark done. Ownership is: understand why the ticket
+                  exists, anticipate what will break when it's done, notice the adjacent problem that wasn't on the
+                  ticket, and ensure the outcome — not just the deliverable — is good.</p>
+                <p><strong>What ownership looks like in practice:</strong></p>
+                <p>— <strong>Proactive communication:</strong> you don't wait for someone to ask for a status update. If
+                  you're blocked for more than a few hours, you say so. If the estimate was wrong, you flag it before
+                  the deadline, not after. Remote teams live and die on information flow — a blocked engineer who says
+                  nothing for two days looks like progress until it becomes a crisis.<br>
+                  — <strong>Defining done beyond "code merged":</strong> a feature is done when it's deployed,
+                  monitored, documented, and the edge cases are handled — not when the PR is approved. Senior ownership
+                  means following a change from ticket to production.<br>
+                  — <strong>Noticing what wasn't specified:</strong> the ticket says "add email notifications for new
+                  bookings." A task executor adds the notification. An owner asks: what happens if the email service is
+                  down — do we silently fail or retry? What's the expected volume and will this saturate the email
+                  quota? Does GDPR require an opt-out? These questions aren't scope creep — they're the gap between a
+                  working feature and a reliable one.<br>
+                  — <strong>Reducing load on others:</strong> a senior engineer who owns a domain should require less
+                  management, not more. If a tech lead has to follow up on everything you touch, you're creating
+                  management overhead, not reducing it.</p>
+                <p><strong>On a remote team specifically:</strong> visibility into ownership requires deliberate
+                  signaling. You can't demonstrate ownership through presence in an office. You demonstrate it through
+                  write-ups, proactive updates, decisions documented in public channels, and the absence of surprises.
+                  The remote senior engineer who says nothing and ships quality work invisibly isn't perceived as
+                  high-ownership — they're perceived as low-communication.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="qa-card"
+          data-question="How do you handle scope creep, unclear requirements, and shifting priorities without derailing a sprint?">
+          <button class="qa-header" onclick="tog(this)" aria-expanded="false">
+            <span class="q-num">Q10</span>
+            <span class="q-text">How do you handle scope creep, unclear requirements, and shifting priorities without
+              derailing a sprint?</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <div class="qa-body">
+            <div class="qa-inner">
+              <div class="qa-content">
+                <p>Scope creep, unclear requirements, and shifting priorities are not failures of process — they're
+                  features of building software where understanding evolves. The skill is navigating them without
+                  derailing commitments or burning the team.</p>
+                <p><strong>Preventing unclear requirements before they enter the sprint:</strong> acceptance criteria on
+                  every story before sprint planning. "The feature is done when X is true" removes ambiguity at the
+                  point where it's cheapest to resolve. If a story enters sprint planning without acceptance criteria,
+                  it either gets written in planning or gets pushed to the next sprint. Stories without acceptance
+                  criteria are technical debt before a line of code is written.</p>
+                <p><strong>When new scope arrives mid-sprint:</strong> the product owner/team lead decides whether to
+                  accept it. The trade-off is explicit: "We can add this, but it displaces stories X and Y from this
+                  sprint. Want to make that call?" This prevents scope creep from happening invisibly while protecting
+                  the team from looking irresponsible when they don't hit the original commitment.</p>
+                <p><strong>When priorities shift and it's legitimate:</strong> accept the change, update the sprint
+                  goal, communicate what's no longer happening. A clean re-plan is better than pretending the original
+                  commitment still holds while working against a different one.</p>
+                <p><strong>Protecting the team from thrash:</strong> some teams experience constant priority shifts
+                  driven by whoever last spoke to the product manager. If this is chronic, it's a product/prioritization
+                  process problem, not a sprint problem. The fix is upstream: more structured backlog refinement,
+                  clearer product strategy, a product owner who can say no. Engineers can flag the pattern ("we've
+                  shifted priority in the last 3 sprints mid-sprint") but can't fix it unilaterally — it requires the
+                  right people to address the root cause.</p>
+                <div class="tip"><strong>Key interview point:</strong> "A sprint commitment is a forecast, not a
+                  contract. When scope changes, the right response is to re-plan openly, not to work nights trying to
+                  fit everything in. Sustainable pace is a senior responsibility, not just a nice-to-have."</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})"
+    aria-label="Back to top">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+      stroke-linecap="round" stroke-linejoin="round">
+      <path d="M18 15l-6-6-6 6" />
+    </svg>
+  </button>
+
+  <script>
+    const sections = ['backend', 'systems', 'cicd', 'agile'];
+    let currentSection = 'backend';
+
+    function show(id) {
+      currentSection = id;
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (event && event.target) event.target.classList.add('active');
+      buildNav();
+      updateProgress();
+      // Close sidebar on mobile after selection
+      if (window.innerWidth <= 900) {
+        document.getElementById('sidebar').classList.remove('open');
+      }
+    }
+
+    function tog(header) {
+      const body = header.nextElementSibling;
+      const isOpen = header.classList.contains('open');
+      header.classList.toggle('open', !isOpen);
+      header.setAttribute('aria-expanded', String(!isOpen));
+      body.classList.toggle('open', !isOpen);
+      updateProgress();
+    }
+
+    function buildNav() {
+      const nav = document.getElementById('nav');
+      nav.innerHTML = '';
+      const sec = document.getElementById(currentSection);
+      const cards = sec.querySelectorAll('.qa-card');
+      let sectionTitle = '';
+      if (currentSection === 'backend') sectionTitle = 'Backend / Full-stack';
+      else if (currentSection === 'systems') sectionTitle = 'Scalable Systems Design';
+      else if (currentSection === 'cicd') sectionTitle = 'CI/CD & Dev Tooling';
+      else if (currentSection === 'agile') sectionTitle = 'Remote Agile & Communication';
+
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'nav-section-title';
+      titleDiv.textContent = sectionTitle;
+      nav.appendChild(titleDiv);
+
+      cards.forEach((card, idx) => {
+        const qText = card.querySelector('.q-text').textContent;
+        const link = document.createElement('a');
+        link.className = 'nav-link';
+        link.textContent = (idx + 1) + '. ' + qText;
+        link.onclick = () => {
+          const header = card.querySelector('.qa-header');
+          if (!header.classList.contains('open')) tog(header);
+          card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        nav.appendChild(link);
+      });
+    }
+
+    function handleSearch(query) {
+      const q = query.toLowerCase().trim();
+      document.querySelectorAll('.qa-card').forEach(card => {
+        const text = (card.getAttribute('data-question') || '').toLowerCase();
+        const body = card.querySelector('.qa-content').textContent.toLowerCase();
+        const match = !q || text.includes(q) || body.includes(q);
+        card.classList.toggle('hidden', !match);
+      });
+      document.querySelectorAll('.nav-link').forEach(link => {
+        const text = link.textContent.toLowerCase();
+        link.classList.toggle('hidden', !!(q && !text.includes(q)));
+        link.classList.toggle('matched', !!(q && text.includes(q)));
+      });
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    function updateProgress() {
+      const sec = document.getElementById(currentSection);
+      const total = sec.querySelectorAll('.qa-card').length;
+      const open = sec.querySelectorAll('.qa-header.open').length;
+      const pct = total ? (open / total) * 100 : 0;
+      document.getElementById('progressFill').style.width = pct + '%';
+    }
+
+    // Back to top visibility
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('backToTop');
+      btn.classList.toggle('visible', window.scrollY > 600);
+    });
+
+    // Keyboard: Escape closes open accordions
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.qa-header.open').forEach(h => tog(h));
+      }
+    });
+
+    // Init
+    buildNav();
+    updateProgress();
+  </script>
+
+</body>
+
+</html>
