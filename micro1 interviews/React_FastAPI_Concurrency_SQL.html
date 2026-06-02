@@ -1,0 +1,867 @@
+
+<style>
+* { box-sizing: border-box; }
+.container { padding: 1rem 0; font-family: var(--font-sans); }
+.topic-nav { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.topic-btn {
+  padding: 6px 16px; border-radius: 20px; border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-secondary); color: var(--color-text-secondary);
+  font-size: 13px; cursor: pointer; transition: all .15s;
+}
+.topic-btn.active {
+  background: var(--color-background-primary); color: var(--color-text-primary);
+  border-color: var(--color-border-primary); font-weight: 500;
+}
+.section { display: none; }
+.section.active { display: block; }
+.qa-card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 14px; overflow: hidden; }
+.qa-header {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 13px 16px; cursor: pointer;
+  background: var(--color-background-secondary);
+  border-bottom: 1px solid transparent; transition: background .15s; user-select: none;
+}
+.qa-header:hover { background: var(--color-background-primary); }
+.qa-header.open { border-bottom-color: var(--color-border-tertiary); }
+.q-num { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); min-width: 22px; margin-top: 2px; }
+.q-text { font-size: 14px; font-weight: 500; color: var(--color-text-primary); flex: 1; line-height: 1.45; }
+.chevron { margin-left: auto; flex-shrink: 0; transition: transform .2s; color: var(--color-text-tertiary); font-size: 16px; }
+.qa-header.open .chevron { transform: rotate(180deg); }
+.qa-body { padding: 16px; font-size: 14px; color: var(--color-text-secondary); line-height: 1.8; display: none; }
+.qa-body.open { display: block; }
+.qa-body p { margin: 0 0 10px; }
+.qa-body p:last-child { margin: 0; }
+code { font-family: var(--font-mono); font-size: 12.5px; background: var(--color-background-secondary); padding: 1px 5px; border-radius: 4px; color: var(--color-text-primary); }
+.code-block { display: block; background: var(--color-background-secondary); padding: 12px 14px; border-radius: 8px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.7; color: var(--color-text-primary); margin: 10px 0; white-space: pre; overflow-x: auto; }
+.tip { background: var(--color-background-secondary); border-left: 3px solid var(--color-border-primary); border-radius: 0 8px 8px 0; padding: 9px 13px; margin-top: 12px; font-size: 13px; color: var(--color-text-tertiary); }
+.tip strong { color: var(--color-text-secondary); }
+.count { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 14px; }
+</style>
+
+<div class="container">
+<div class="topic-nav">
+  <button class="topic-btn active" onclick="show('react')">React</button>
+  <button class="topic-btn" onclick="show('python')">Python & FastAPI</button>
+  <button class="topic-btn" onclick="show('concurrency')">Concurrency & Optimization</button>
+  <button class="topic-btn" onclick="show('sql')">SQL</button>
+</div>
+
+<!-- ===== REACT ===== -->
+<div id="react" class="section active">
+<div class="count">10 concept-depth questions</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What are the key advanced JavaScript concepts a senior React developer must master?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Closures</strong> — every React hook relies on closures. A stale closure is when a callback captures an old value of state or props because it was created before a re-render. This is the root cause of most useEffect bugs. Fix: include all referenced values in the dependency array, or use a ref to hold the latest value.</p>
+<p><strong>Prototypal inheritance and the event loop</strong> — understanding the call stack, microtask queue (Promises), and macrotask queue (setTimeout) explains why setState batching works and why certain async patterns behave unexpectedly.</p>
+<p><strong>Higher-order functions</strong> — map, filter, reduce are table stakes. More important: understanding how HOCs in React are just functions returning functions, and how custom hooks are closures over state.</p>
+<p><strong>Immutability</strong> — React's reconciler uses reference equality to detect changes. Mutating objects directly breaks change detection. Always return new references: <code>{...obj, key: value}</code>, <code>[...arr, newItem]</code>.</p>
+<p><strong>Promises and async/await</strong> — understanding microtask scheduling matters when you're chaining async operations in useEffect or handling race conditions in data fetching.</p>
+<p><strong>WeakMap and WeakRef</strong> — relevant when building caching utilities or memoization outside React's built-ins, because they allow GC to collect entries when the key is no longer referenced.</p>
+<div class="tip"><strong>Key interview point:</strong> Stale closures in useEffect are the most common senior-level trap. Always have a specific example ready.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">What are the different phases of the React component lifecycle and their use cases?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>In the hooks model there are three conceptual phases:</p>
+<p><strong>Mount</strong> — component renders for the first time. <code>useEffect(() => { ... }, [])</code> runs after the first paint. Use for: initial data fetching, setting up subscriptions, DOM manipulation that needs the element to exist.</p>
+<p><strong>Update</strong> — re-renders triggered by state or prop changes. <code>useEffect(() => { ... }, [dep])</code> runs when <code>dep</code> changes. Use for: syncing external systems with state, re-fetching when a filter changes, responding to prop changes.</p>
+<p><strong>Unmount</strong> — component is removed. The cleanup function returned from useEffect runs. Use for: clearing timeouts, unsubscribing from websockets, aborting fetch requests with AbortController, removing event listeners.</p>
+<p>React 18 also introduced a concurrent rendering phase where React can pause, abort, and restart rendering. This is why effects should be idempotent — in Strict Mode, React intentionally mounts, unmounts, and remounts components to surface cleanup bugs.</p>
+<div class="code-block">useEffect(() => {
+  const controller = new AbortController();
+  fetchData(id, controller.signal);
+  return () => controller.abort(); // cleanup on unmount or dep change
+}, [id]);</div>
+<div class="tip"><strong>Key interview point:</strong> Mention AbortController for cleanup — it shows you understand real-world side effect management, not just toy examples.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">What are the different approaches to state management in large-scale React applications?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Local state (useState / useReducer)</strong> — default choice. If only one component needs the data, keep it local. useReducer is better than useState when state transitions have logic — think a form with validation states, or a multi-step wizard.</p>
+<p><strong>Context API</strong> — for state shared across a subtree that doesn't update frequently. Good for: theme, auth user, locale. Bad for: high-frequency updates (every render of a Consumer re-renders all subscribers). Fix high-frequency Context with useMemo or by splitting contexts.</p>
+<p><strong>Zustand</strong> — lightweight, no boilerplate, subscription-based so components only re-render when their slice changes. Best default for global client state in 2024-25.</p>
+<p><strong>Redux Toolkit</strong> — best when you need predictable state machines, time-travel debugging, or complex action flows across many slices. The boilerplate complaint is mostly gone with RTK. Still overkill for most apps.</p>
+<p><strong>React Query / TanStack Query</strong> — for server state. Separating server state (what's in the DB) from client state (UI interactions) is the most important architectural decision in large apps. React Query handles caching, background refetch, stale-while-revalidate, optimistic updates — things Redux does badly.</p>
+<p><strong>URL state</strong> — often overlooked. Filters, pagination, selected tab — these belong in the URL so they survive refresh and are shareable. Use useSearchParams.</p>
+<div class="tip"><strong>Key interview point:</strong> The insight interviewers want: "server state and client state are different problems and should be managed separately."</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">What are the techniques to optimize re-rendering in React components?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>React.memo</strong> — wraps a component so it only re-renders when its props change (shallow comparison). Effective when a parent re-renders often but the child's props are stable.</p>
+<p><strong>useMemo</strong> — memoizes a computed value. Use when the computation is expensive and its inputs don't change every render. Don't use for cheap computations — the memoization itself has overhead.</p>
+<p><strong>useCallback</strong> — memoizes a function reference. Important when passing callbacks to memoized children — without it, a new function reference is created every render, breaking memo.</p>
+<p><strong>State colocation</strong> — the most impactful optimization. If only a child needs a piece of state, don't put it in the parent. State at the right level means fewer unnecessary re-renders higher in the tree.</p>
+<p><strong>Context splitting</strong> — if a Context holds both frequently and rarely changing values, split them into two contexts. Subscribers to the stable one won't re-render when the fast-changing one updates.</p>
+<p><strong>List virtualization</strong> — react-window or TanStack Virtual. For lists of 100+ items, only render what's in the viewport. Critical for performance on large datasets.</p>
+<p><strong>Lazy loading</strong> — <code>React.lazy</code> + <code>Suspense</code> for route-level code splitting. Large libraries (charts, maps, editors) should only load when the user navigates to the page that needs them.</p>
+<div class="code-block">// Wrong: new function ref every render, breaks memo on Child
+&lt;Child onClick={() => doSomething(id)} /&gt;
+
+// Right: stable reference
+const handleClick = useCallback(() => doSomething(id), [id]);
+&lt;Child onClick={handleClick} /&gt;</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What are the differences between controlled and uncontrolled components?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Controlled</strong> — React is the single source of truth for the input's value. The value is bound to state and every keystroke calls setState. You always know exactly what the input contains.</p>
+<div class="code-block">const [val, setVal] = useState('');
+&lt;input value={val} onChange={e => setVal(e.target.value)} /&gt;</div>
+<p><strong>Uncontrolled</strong> — the DOM owns the value. You use a ref to read it when needed (on submit). Less code, but you can't validate in real-time or conditionally disable submit.</p>
+<div class="code-block">const ref = useRef();
+&lt;input ref={ref} defaultValue="initial" /&gt;
+// read with ref.current.value on submit</div>
+<p><strong>When to use which:</strong> Controlled for forms with real-time validation, conditional logic, or interdependent fields. Uncontrolled for simple forms where you only need the value on submit, or when integrating with non-React libraries that manage their own DOM.</p>
+<p><strong>React Hook Form</strong> uses uncontrolled inputs internally by default (with refs) for performance — it avoids re-rendering the whole form on every keystroke — while still giving you a controlled API surface. This is the best of both worlds for large forms.</p>
+<div class="tip"><strong>Key interview point:</strong> Mention RHF's hybrid approach — it signals production awareness beyond the basic distinction.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">What are the best practices for organizing and structuring React components in a large codebase?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Feature-based folder structure</strong> over type-based. Don't put all components in /components, all hooks in /hooks. Instead: <code>/features/auth/</code>, <code>/features/dashboard/</code> — each feature owns its components, hooks, utils, and types. Shared primitives go in <code>/ui/</code> or <code>/components/</code>.</p>
+<p><strong>Barrel exports with caution</strong> — <code>index.ts</code> re-exports make imports cleaner but can cause circular dependency issues and slow down bundlers if overused. Use them at feature boundaries, not inside features.</p>
+<p><strong>Separate concerns explicitly:</strong></p>
+<p>— Presentational components: pure render, no data fetching, all data via props<br>
+— Container/page components: fetch data, manage state, compose presentational components<br>
+— Custom hooks: all logic that's reusable across components</p>
+<p><strong>Colocation principle</strong> — keep tests, styles, and types next to the component they belong to. <code>Button.tsx</code>, <code>Button.test.tsx</code>, <code>Button.module.css</code> in the same folder.</p>
+<p><strong>Single responsibility</strong> — if a component is over ~150 lines, it's doing too much. Extract sub-components or hooks. This also makes testing dramatically easier.</p>
+<p><strong>Consistent naming</strong> — components are PascalCase, hooks are camelCase starting with <code>use</code>, utility functions are camelCase. File names match component names exactly.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">What are the different ways to handle side effects in React?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>useEffect</strong> — the primary tool. Runs after render. For: data fetching, subscriptions, DOM side effects. Always return a cleanup function for anything that needs teardown.</p>
+<p><strong>useLayoutEffect</strong> — runs synchronously after DOM mutations but before the browser paints. Use only for DOM measurements (reading element dimensions) or mutations that need to happen before the user sees the render. Using it for data fetching blocks painting and degrades performance.</p>
+<p><strong>Event handlers</strong> — for side effects triggered by user interaction. Don't put user-triggered logic in useEffect watching a flag — put it directly in the onClick handler. This is cleaner and avoids unnecessary renders.</p>
+<p><strong>React Query / SWR</strong> — for data fetching side effects specifically. They handle caching, deduplication, background refresh, and error states that you'd otherwise build manually in useEffect. For any real app, prefer these over raw useEffect for fetch calls.</p>
+<p><strong>Zustand or Redux middleware</strong> — for side effects that need to happen in response to state changes across the app, like logging, analytics, or syncing to localStorage.</p>
+<p><strong>useRef for imperative side effects</strong> — when you need to call a method on a DOM element or a third-party library directly (like a map instance, a video player), useRef gives you the handle without triggering re-renders.</p>
+<div class="tip"><strong>Key interview point:</strong> "I prefer to keep side effects in event handlers when they're user-triggered, and in useEffect only when they need to sync with external systems." This shows nuanced understanding.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What are the advantages and limitations of Redux for state management?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Advantages:</strong></p>
+<p>— Predictable state: state only changes through dispatched actions, making the flow easy to trace<br>
+— Time-travel debugging with Redux DevTools: you can replay actions and inspect state at any point<br>
+— Good for complex state machines with many interacting slices<br>
+— Excellent for teams — the strict pattern makes code predictable across contributors<br>
+— RTK (Redux Toolkit) has eliminated most of the original boilerplate complaints</p>
+<p><strong>Limitations:</strong></p>
+<p>— Still more verbose than Zustand or Context for simple cases<br>
+— Not designed for server state — people often use Redux to cache API responses, which leads to complex normalization logic that React Query handles automatically<br>
+— Performance: all connected components re-render when any part of the store changes unless you use selectors precisely. useSelector with poorly scoped selectors is a common perf bug<br>
+— Overkill for most apps — a medium-size app rarely needs Redux's guarantees<br>
+— Learning curve is real for new developers</p>
+<p><strong>Modern verdict:</strong> Redux Toolkit for apps that genuinely need complex client state machines. React Query for server state. Zustand for everything in between. The combination of React Query + Zustand covers 90% of real apps better than Redux alone.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">What are the considerations for integrating ES6+ features into React projects?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Destructuring</strong> — essential in React. Props destructuring in function signature keeps components readable. Array destructuring is how useState is consumed.</p>
+<p><strong>Spread operator</strong> — used constantly for immutable state updates and passing props. But be careful with prop spreading (<code>&lt;Component {...props}/&gt;</code>) — it passes unknown attributes to DOM elements and generates React warnings.</p>
+<p><strong>Optional chaining (?.) and nullish coalescing (??)</strong> — reduce defensive null checks in JSX. <code>user?.profile?.avatar ?? defaultAvatar</code> is cleaner than nested ternaries.</p>
+<p><strong>Dynamic imports</strong> — the foundation of React.lazy code splitting. <code>const Chart = lazy(() => import('./Chart'))</code> only loads the Chart bundle when the component is actually rendered.</p>
+<p><strong>Generators and async iterators</strong> — relevant for streaming responses (reading chunks from a ReadableStream in a for-await-of loop) and for complex async workflows in custom hooks.</p>
+<p><strong>Proxy</strong> — used internally by Immer (which RTK uses) to enable "mutating" syntax for immutable updates. Knowing this helps debug confusing Immer behavior.</p>
+<p><strong>Logical assignment operators (??=, ||=, &&=)</strong> — useful for default initialization patterns in reducers and config objects.</p>
+<p><strong>Bundler consideration</strong> — Vite and Next.js handle transpilation automatically. You don't manually configure Babel for most modern setups. Just write modern JS and let the toolchain handle targets.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What are the implications of improper state management on React performance?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>State too high in the tree</strong> — the most common issue. If you put state in a top-level component when only a leaf component needs it, every intermediate component re-renders on every state change, even though they don't use it. Fix: colocate state as low as possible.</p>
+<p><strong>Object/array references in state</strong> — creating new objects or arrays during render (e.g., <code>style={{ color: 'red' }}</code> inline) generates a new reference every render. Children receiving that as a prop will always re-render, breaking React.memo. Fix: useMemo or define outside the component.</p>
+<p><strong>Storing derived state</strong> — saving to state something that can be computed from existing state causes double renders and sync bugs. Derive it in the render or useMemo instead.</p>
+<p><strong>Context with high-frequency updates</strong> — every Context value change re-renders every consumer, even if the consumer only uses a part of the value that didn't change. This is why putting WebSocket messages or mouse coordinates in Context is a performance disaster.</p>
+<p><strong>Missing cleanup in useEffect</strong> — stale subscriptions, unresolved promises, and leaked event listeners accumulate over time and cause memory leaks and state updates on unmounted components (the "Can't perform a React state update on an unmounted component" error).</p>
+<p><strong>Cascading setState calls</strong> — calling setState multiple times in sequence outside of React's batching (pre-React 18) triggered multiple re-renders. React 18 auto-batches all state updates including async ones, but understanding this matters for legacy codebases.</p>
+<div class="tip"><strong>Key interview point:</strong> "The most impactful thing I do for performance isn't memo or useMemo — it's making sure state lives at the right level in the tree."</div>
+</div>
+</div>
+
+</div>
+
+<!-- ===== PYTHON & FASTAPI ===== -->
+<div id="python" class="section">
+<div class="count">10 concept-depth questions</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What are the key differences between Django and FastAPI, and when would you choose each?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Django</strong> — batteries-included framework. ORM, admin panel, auth, migrations, forms — all built in. Synchronous by default (WSGI), though Django 3.1+ supports async views. Best for: content-heavy apps, admin dashboards, teams that want conventions enforced, projects where rapid CRUD development matters more than raw throughput.</p>
+<p><strong>FastAPI</strong> — async-first, minimal, built on Starlette and Pydantic. No ORM or admin out of the box — you bring your own (SQLAlchemy, Tortoise ORM). Best for: high-throughput APIs, microservices, ML model serving, any service where async I/O performance matters.</p>
+<p><strong>Performance:</strong> FastAPI handles concurrent I/O-bound requests significantly better than sync Django because it doesn't block the event loop waiting for DB or network calls. Uvicorn/Gunicorn with async workers vs Django's threaded WSGI server.</p>
+<p><strong>Type safety:</strong> FastAPI uses Pydantic for automatic request validation and response serialization with type hints. Django REST Framework does this with serializers — more verbose but more flexible for complex nested writes.</p>
+<div class="tip"><strong>Rule of thumb:</strong> Django if you need the full web framework. FastAPI if you're building a pure API service that needs async throughput.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">How does FastAPI's dependency injection system work, and what are its advantages?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>FastAPI's DI system uses <code>Depends()</code> — you declare what a route needs as function parameters, and FastAPI resolves and injects them automatically.</p>
+<div class="code-block">async def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@router.get("/users/{id}")
+async def get_user(id: int, db: Session = Depends(get_db)):
+    return db.query(User).get(id)</div>
+<p><strong>Advantages:</strong></p>
+<p>— <strong>Composability:</strong> dependencies can depend on other dependencies. An auth dependency can depend on get_db. FastAPI resolves the tree.<br>
+— <strong>Testability:</strong> override dependencies in tests with <code>app.dependency_overrides[get_db] = mock_db</code> — no monkey-patching needed.<br>
+— <strong>Separation of concerns:</strong> route handlers stay clean, cross-cutting concerns (auth, rate limiting, DB sessions) live in reusable dependency functions.<br>
+— <strong>Lifecycle management:</strong> generator dependencies (using yield) automatically handle setup and teardown — DB sessions close, connections release.</p>
+<p><strong>Scopes:</strong> By default dependencies are re-evaluated per request. Use <code>Depends(func, use_cache=True)</code> (default) so the same dependency is only called once per request even if multiple routes depend on it.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">How does Pydantic v2 work and what are the important differences from v1?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Pydantic v2 (released 2023) rewrote the core in Rust, giving 5-50x faster validation. The API changed significantly.</p>
+<p><strong>Key v2 changes:</strong></p>
+<p>— <code>@validator</code> replaced by <code>@field_validator</code> (field-level) and <code>@model_validator</code> (cross-field)<br>
+— <code>.dict()</code> replaced by <code>.model_dump()</code>, <code>.json()</code> by <code>.model_dump_json()</code><br>
+— <code>orm_mode = True</code> replaced by <code>model_config = ConfigDict(from_attributes=True)</code><br>
+— <code>__fields__</code> replaced by <code>model_fields</code></p>
+<div class="code-block">from pydantic import BaseModel, field_validator, model_validator, ConfigDict
+
+class OrderCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    
+    start_date: date
+    end_date: date
+    amount: float
+    
+    @field_validator('amount')
+    @classmethod
+    def amount_positive(cls, v):
+        if v <= 0:
+            raise ValueError('Amount must be positive')
+        return v
+    
+    @model_validator(mode='after')
+    def dates_valid(self):
+        if self.end_date <= self.start_date:
+            raise ValueError('end_date must be after start_date')
+        return self</div>
+<div class="tip"><strong>FastAPI 0.100+ uses Pydantic v2 by default.</strong> If you're on a project still using v1, migration is non-trivial — plan for it explicitly.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">How do you handle authentication and authorization properly in FastAPI?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Authentication</strong> — verifying identity. Standard approach: JWT with OAuth2PasswordBearer.</p>
+<div class="code-block">oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db = Depends(get_db)):
+    payload = decode_jwt(token)  # raises 401 on invalid
+    user = db.query(User).get(payload["sub"])
+    if not user:
+        raise HTTPException(status_code=401)
+    return user</div>
+<p><strong>Authorization</strong> — verifying permissions. Layer on top of auth with role checks:</p>
+<div class="code-block">def require_role(role: str):
+    async def checker(user: User = Depends(get_current_user)):
+        if user.role != role:
+            raise HTTPException(status_code=403)
+        return user
+    return checker
+
+@router.delete("/admin/user/{id}", dependencies=[Depends(require_role("admin"))])</div>
+<p><strong>Refresh tokens</strong> — short-lived access tokens (15min) + long-lived refresh tokens (7 days) stored in httpOnly cookies. Rotate refresh tokens on each use.</p>
+<p><strong>Security considerations:</strong> Never store passwords in plain text — use bcrypt (passlib). Rate-limit the /token endpoint. Validate token audience and issuer claims. Use HTTPS only — JWT in Authorization header is meaningless over HTTP.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What are Python's async/await mechanics and how does FastAPI use them?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Python's asyncio is a single-threaded event loop. When an <code>await</code> is hit, control returns to the event loop which can run other coroutines. No actual parallelism — concurrency through cooperative multitasking.</p>
+<p><strong>FastAPI on top of this:</strong> FastAPI runs on Uvicorn (ASGI server). For async route handlers, requests run on the event loop — thousands of concurrent I/O-bound requests with no thread overhead. For sync route handlers, FastAPI automatically runs them in a threadpool to avoid blocking the loop.</p>
+<div class="code-block"># Async: runs on event loop, can handle many concurrent requests
+@router.get("/data")
+async def get_data(db = Depends(get_async_db)):
+    result = await db.execute(select(User))  # yields control while waiting
+    return result.scalars().all()
+
+# Sync: FastAPI runs this in a threadpool automatically
+@router.get("/heavy")
+def heavy_compute():
+    return do_cpu_work()  # doesn't block event loop</div>
+<p><strong>Common pitfall:</strong> Using a sync DB driver (like psycopg2) inside an async route handler blocks the event loop. Always use async drivers — asyncpg, aiosqlite, SQLAlchemy async — in async routes.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">How do you structure a large FastAPI application with multiple modules and routers?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<div class="code-block">app/
+├── main.py              # app factory, router registration
+├── core/
+│   ├── config.py        # Settings via pydantic-settings
+│   ├── database.py      # engine, session, Base
+│   └── security.py      # JWT utils, password hashing
+├── features/
+│   ├── auth/
+│   │   ├── router.py    # APIRouter
+│   │   ├── service.py   # business logic
+│   │   ├── models.py    # SQLAlchemy models
+│   │   └── schemas.py   # Pydantic models
+│   └── users/
+│       └── ...
+└── dependencies.py      # shared Depends() functions</div>
+<p><strong>main.py pattern:</strong></p>
+<div class="code-block">app = FastAPI(lifespan=lifespan)
+app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(users.router, prefix="/users", tags=["users"])</div>
+<p><strong>Settings with pydantic-settings:</strong> environment variables are parsed and typed automatically. No manual os.environ.get() chains.</p>
+<p><strong>Lifespan events</strong> (FastAPI 0.93+): replace deprecated on_startup/on_shutdown with a single async context manager for startup and shutdown logic (DB pool init, ML model loading).</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">How does Python handle memory management and what pitfalls exist in long-running services?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Python uses reference counting as the primary GC mechanism — objects are freed when their reference count drops to zero. A cyclic garbage collector handles reference cycles. CPython's GIL prevents true parallel execution of Python bytecode across threads.</p>
+<p><strong>Memory pitfalls in long-running services:</strong></p>
+<p>— <strong>Growing caches without bounds:</strong> an in-memory dict used as a cache that never evicts entries will grow forever. Use <code>functools.lru_cache</code> with maxsize, or a TTL-based cache like cachetools.<br>
+— <strong>Unclosed DB connections:</strong> SQLAlchemy sessions or raw connections that aren't closed return to the pool (or don't). Over time this exhausts the pool. Always use context managers or yield-based dependencies.<br>
+— <strong>Large objects in module scope:</strong> ML models, large config objects loaded at import time persist for the process lifetime. Fine intentionally, a leak if accidental.<br>
+— <strong>Celery worker memory growth:</strong> workers that process large documents accumulate memory. Set <code>max_tasks_per_child</code> to recycle workers periodically.<br>
+— <strong>Async task leaks:</strong> <code>asyncio.create_task()</code> without keeping a reference lets tasks get GC'd silently if they're not awaited. Always store task references.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What are the best practices for error handling and logging in a FastAPI service?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Custom exception handlers:</strong> define domain exceptions and register global handlers so every route doesn't repeat try/except logic.</p>
+<div class="code-block">class NotFoundError(Exception):
+    def __init__(self, resource: str):
+        self.resource = resource
+
+@app.exception_handler(NotFoundError)
+async def not_found_handler(request, exc):
+    return JSONResponse(status_code=404, content={"error": f"{exc.resource} not found"})</div>
+<p><strong>Structured logging:</strong> use structlog or Python's logging with a JSON formatter. Log request ID, user ID, endpoint, duration for every request. A middleware that injects a correlation ID into each request context makes distributed tracing feasible.</p>
+<p><strong>Never expose internals:</strong> catch all unhandled exceptions at the middleware level and return a generic 500. Stack traces go to logs, not to API responses.</p>
+<p><strong>HTTP status codes precisely:</strong> 400 for bad input, 401 for unauthenticated, 403 for unauthorized, 404 for not found, 422 for validation errors (FastAPI does this automatically for Pydantic errors), 409 for conflicts, 429 for rate limit, 500 for unexpected errors.</p>
+<div class="tip"><strong>Key point:</strong> FastAPI automatically returns 422 with field-level details when Pydantic validation fails — don't duplicate this with manual try/except around validation logic.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">How do you write and structure tests for a FastAPI application?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>TestClient</strong> for synchronous tests, <code>httpx.AsyncClient</code> for async test suites.</p>
+<div class="code-block">from fastapi.testclient import TestClient
+from app.main import app
+from app.core.database import get_db
+
+def override_db():
+    db = TestingSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+app.dependency_overrides[get_db] = override_db
+client = TestClient(app)
+
+def test_create_user():
+    response = client.post("/users/", json={"email": "test@test.com", "password": "secret"})
+    assert response.status_code == 201
+    assert response.json()["email"] == "test@test.com"</div>
+<p><strong>Test structure:</strong></p>
+<p>— Unit tests for service layer functions (pure Python, no HTTP)<br>
+— Integration tests for routes using TestClient with a real test DB (SQLite in-memory or Postgres test container)<br>
+— Don't test Pydantic validation extensively — it's already tested by Pydantic itself. Test your business logic.</p>
+<p><strong>Fixtures:</strong> use pytest fixtures for DB setup/teardown, test user creation, and auth tokens. A fixture that returns a logged-in client saves repetition across auth-required route tests.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What are Python decorators and how are they used in FastAPI and Django?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>A decorator is a function that takes a function and returns a modified function. Syntactic sugar for <code>func = decorator(func)</code>.</p>
+<div class="code-block">def log_time(func):
+    @wraps(func)  # preserves __name__, __doc__
+    async def wrapper(*args, **kwargs):
+        start = time.time()
+        result = await func(*args, **kwargs)
+        print(f"{func.__name__} took {time.time() - start:.2f}s")
+        return result
+    return wrapper
+
+@log_time
+async def process_document(doc_id: int): ...</div>
+<p><strong>In FastAPI:</strong> <code>@router.get()</code>, <code>@router.post()</code> are decorators that register routes. <code>@app.middleware()</code> decorates a middleware function. <code>@field_validator</code> and <code>@model_validator</code> in Pydantic models.</p>
+<p><strong>In Django:</strong> <code>@login_required</code>, <code>@permission_required</code>, <code>@cache_page</code>, <code>@csrf_exempt</code> — all view decorators. DRF uses <code>@api_view</code> to convert a function into an APIView.</p>
+<p><strong>Pitfall:</strong> Always use <code>functools.wraps(func)</code> inside a decorator — without it, the decorated function loses its original <code>__name__</code> and <code>__doc__</code>, which breaks debugging and OpenAPI docs generation in FastAPI.</p>
+</div>
+</div>
+</div>
+
+<!-- ===== CONCURRENCY ===== -->
+<div id="concurrency" class="section">
+<div class="count">10 concept-depth questions</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What is the Python GIL and what are its implications for concurrent programming?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>The Global Interpreter Lock is a mutex that allows only one thread to execute Python bytecode at a time within a single CPython process. It exists because CPython's memory management (reference counting) is not thread-safe — the GIL prevents race conditions on reference counts.</p>
+<p><strong>Implications:</strong></p>
+<p>— <strong>Threading for CPU-bound work is mostly useless</strong> — two threads don't actually run Python in parallel. You get context switching overhead without the parallelism benefit.<br>
+— <strong>Threading is fine for I/O-bound work</strong> — when a thread blocks on I/O (network, disk), it releases the GIL, letting other threads run. This is why Django's threaded WSGI works adequately.<br>
+— <strong>Multiprocessing bypasses the GIL</strong> — each process has its own interpreter and GIL. True parallel CPU execution.<br>
+— <strong>Async is GIL-unaffected</strong> — asyncio is single-threaded cooperative multitasking. Never holds the GIL waiting on I/O because it yields control instead.</p>
+<p><strong>Python 3.13 (PEP 703):</strong> experimental no-GIL build available. Not production-ready yet but signals direction.</p>
+<div class="tip"><strong>Key interview point:</strong> "For a FastAPI service, the GIL is largely irrelevant — async I/O handles concurrency without threads. The GIL matters when I need CPU parallelism, which I push to Celery workers with multiprocessing."</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">What is the event loop in Python asyncio, and how does it schedule tasks?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>The event loop is a single-threaded scheduler that manages a queue of coroutines and I/O callbacks. It runs continuously, picking up tasks that are ready to execute.</p>
+<p><strong>Execution flow:</strong></p>
+<p>1. A coroutine is scheduled with <code>asyncio.create_task()</code> or <code>await</code><br>
+2. It runs until it hits an <code>await</code> on an I/O operation<br>
+3. The loop registers the I/O with the OS (via epoll/kqueue/IOCP)<br>
+4. The loop picks up another ready coroutine<br>
+5. When the OS signals the I/O is done, the original coroutine is resumed</p>
+<div class="code-block">async def fetch_all(urls):
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch(session, url) for url in urls]
+        return await asyncio.gather(*tasks)  # all requests run concurrently</div>
+<p><strong>asyncio.gather vs asyncio.wait:</strong> gather runs all and returns results in order, raises on first exception by default. wait gives more control — you can handle first-completed or handle exceptions individually.</p>
+<p><strong>Blocking the event loop:</strong> Any synchronous code that runs for more than a few milliseconds — a slow DB query with a sync driver, a CPU computation, time.sleep() — blocks ALL other coroutines. Use <code>asyncio.run_in_executor()</code> to push blocking work to a threadpool.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">What are common caching strategies and how do you implement them in a Python API service?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Cache-aside (lazy loading)</strong> — app checks cache first; on miss, fetches from DB, writes to cache, returns. Most common pattern. Cache can become stale — handle with TTL.</p>
+<div class="code-block">async def get_user(user_id: int, redis: Redis, db):
+    cached = await redis.get(f"user:{user_id}")
+    if cached:
+        return json.loads(cached)
+    user = await db.get(User, user_id)
+    await redis.setex(f"user:{user_id}", 300, user.model_dump_json())  # 5min TTL
+    return user</div>
+<p><strong>Write-through</strong> — write to cache and DB simultaneously on every write. Cache is always fresh but every write has dual overhead. Good for read-heavy data that updates predictably.</p>
+<p><strong>Write-behind (write-back)</strong> — write to cache immediately, persist to DB asynchronously. Lower write latency, risk of data loss on crash. Used in high-write scenarios like counters.</p>
+<p><strong>Cache invalidation strategies:</strong> TTL-based (simplest), event-driven (publish invalidation events on writes), versioned keys (append version number to key, bump on write).</p>
+<p><strong>functools.lru_cache</strong> — in-process memoization for pure functions. Good for expensive computations with repeated inputs. Not distributed — each process has its own cache.</p>
+<div class="tip"><strong>Key point:</strong> Cache invalidation is the second hardest problem in CS. Always ask: what's the acceptable staleness? That determines TTL and strategy.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">What is connection pooling and why does it matter for database performance?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Opening a new DB connection is expensive — TCP handshake, auth, session setup — typically 50-100ms. A connection pool maintains a set of pre-opened connections and reuses them across requests.</p>
+<p><strong>SQLAlchemy pool settings:</strong></p>
+<div class="code-block">engine = create_async_engine(
+    DATABASE_URL,
+    pool_size=10,       # permanent connections in pool
+    max_overflow=20,    # extra connections allowed under load
+    pool_timeout=30,    # wait time before "pool exhausted" error
+    pool_recycle=1800,  # recycle connections older than 30min (avoids stale connection errors)
+)</div>
+<p><strong>Pool exhaustion</strong> — when all connections are in use and a new request needs one, it waits up to pool_timeout. Under sustained high load, this causes latency spikes. Signals the pool is sized too small or queries are holding connections too long (long transactions).</p>
+<p><strong>PgBouncer</strong> — a connection pooler that sits in front of PostgreSQL. Allows thousands of app connections to be multiplexed onto a small number of real DB connections. Critical for high-concurrency apps — PostgreSQL performs poorly with hundreds of direct connections.</p>
+<p><strong>Connection leak</strong> — a connection checked out from the pool but never returned (due to missing finally/context manager) reduces effective pool size over time. SQLAlchemy's context managers prevent this when used correctly.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What are race conditions in concurrent systems and how do you prevent them?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>A race condition is when two operations read-then-write shared state and the final result depends on which runs first. Classic example: two requests both read a wallet balance of $100, both deduct $50, both write $50 — final balance should be $50 but becomes $50 instead of $0 because neither saw the other's write.</p>
+<p><strong>Prevention strategies:</strong></p>
+<p><strong>Database-level locking:</strong></p>
+<div class="code-block"># Pessimistic lock: SELECT FOR UPDATE blocks other reads until transaction completes
+async with db.begin():
+    wallet = await db.execute(
+        select(Wallet).where(Wallet.id == id).with_for_update()
+    )
+    wallet.balance -= amount
+    
+# Optimistic lock: check version hasn't changed before committing
+UPDATE wallets SET balance = balance - :amount, version = version + 1
+WHERE id = :id AND version = :expected_version</div>
+<p><strong>Redis atomic operations:</strong> INCR, DECR, SETNX are atomic — no race conditions possible. For complex operations, Lua scripts execute atomically on the server.</p>
+<p><strong>Database atomic updates:</strong> <code>UPDATE ... SET count = count + 1</code> is atomic at the DB level — safer than read-modify-write in application code.</p>
+<p><strong>Idempotency keys:</strong> for financial operations, clients send a unique key per operation. Server stores processed keys — duplicate requests with the same key return the cached result without reprocessing.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">What is backpressure in async systems and how do you handle it?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Backpressure is when a consumer can't process data as fast as a producer sends it. Without handling, the queue grows unbounded and eventually crashes the system with memory exhaustion or timeouts.</p>
+<p><strong>In a task queue (Celery):</strong> if workers are slow, the Redis/RabbitMQ queue grows. Fix: set <code>task_acks_late=True</code> so tasks aren't acknowledged until processed, limit <code>worker_prefetch_multiplier</code> to prevent workers from grabbing tasks they can't process soon.</p>
+<p><strong>In async Python:</strong></p>
+<div class="code-block">queue = asyncio.Queue(maxsize=100)  # bounded queue
+
+async def producer():
+    await queue.put(item)  # blocks when queue is full — natural backpressure
+
+async def consumer():
+    item = await queue.get()
+    await process(item)
+    queue.task_done()</div>
+<p><strong>At the API level:</strong> rate limiting is a form of backpressure — you push the load back to the client rather than absorbing it. Return 429 with a Retry-After header so clients know when to retry.</p>
+<p><strong>Circuit breaker pattern:</strong> if a downstream service starts failing, stop sending it requests for a period rather than piling up failed requests. Libraries like <code>circuitbreaker</code> implement this for Python.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">How do you profile and identify performance bottlenecks in a Python application?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>For CPU profiling:</strong> <code>cProfile</code> (built-in) or <code>py-spy</code> (sampling profiler, attaches to a running process without code changes — critical for production profiling).</p>
+<div class="code-block">python -m cProfile -o output.prof your_script.py
+snakeviz output.prof  # visual flame graph in browser</div>
+<p><strong>For async profiling:</strong> <code>aiomonitor</code> or <code>pyinstrument</code> which understands async call stacks. Standard cProfile misrepresents async code because await points show zero time.</p>
+<p><strong>For DB query profiling:</strong> SQLAlchemy echo mode logs all SQL with timing. In Django, Django Debug Toolbar or direct EXPLAIN ANALYZE. Look for N+1 queries — the query count scales with row count instead of being constant.</p>
+<p><strong>For memory profiling:</strong> <code>tracemalloc</code> (built-in, snapshots memory allocation by line), <code>memory-profiler</code> for line-by-line memory usage, <code>objgraph</code> to find reference cycles and leak sources.</p>
+<p><strong>In production:</strong> structured timing logs (log duration of each major operation), distributed tracing with OpenTelemetry + Jaeger, APM tools like Sentry Performance or Datadog. Never fly blind in production.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What is the difference between horizontal and vertical scaling, and what limits each?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Vertical scaling</strong> — bigger machine (more CPU, RAM). Simple — no code changes. Limited by the largest available instance size and single point of failure. Effective until you hit the ceiling.</p>
+<p><strong>Horizontal scaling</strong> — more instances running in parallel behind a load balancer. No theoretical ceiling. Requires the application to be stateless — no in-memory session state, no local cache that differs per instance, no assumption about which instance handles a given request.</p>
+<p><strong>What breaks with horizontal scaling:</strong></p>
+<p>— <strong>In-memory caching:</strong> each instance has its own cache — move to Redis<br>
+— <strong>WebSocket sessions:</strong> a user's socket might connect to instance A but a message targeting them arrives at instance B — use Redis Pub/Sub adapter<br>
+— <strong>File uploads:</strong> a file written to local disk on instance A isn't visible to instance B — use S3 or equivalent<br>
+— <strong>Scheduled jobs:</strong> multiple instances all running the same cron job — use a distributed lock (Redis SETNX) or a dedicated scheduler (Celery Beat)</p>
+<p><strong>Database scaling:</strong> read replicas for read-heavy workloads. Sharding for write-heavy workloads at extreme scale. Both are complex — exhaust vertical and read replicas before going there.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">What are the patterns for handling distributed transactions and data consistency?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Distributed transactions — operations that span multiple services or databases — are one of the hardest problems in distributed systems. You can't use a single DB transaction across services.</p>
+<p><strong>Saga pattern:</strong> break the transaction into a sequence of local transactions. Each step publishes an event. If a step fails, compensating transactions undo previous steps.</p>
+<p>Example: Order service creates order → Payment service charges card → Inventory service reserves stock. If inventory fails, publish compensate events to refund and cancel.</p>
+<p><strong>Outbox pattern:</strong> instead of publishing an event directly after a DB write (which can fail independently), write the event to an outbox table in the same DB transaction. A separate process polls the outbox and publishes. Guarantees at-least-once delivery.</p>
+<div class="code-block">BEGIN;
+INSERT INTO orders (id, status) VALUES (:id, 'pending');
+INSERT INTO outbox (event_type, payload) VALUES ('order.created', :payload);
+COMMIT;
+-- Separate process: SELECT * FROM outbox WHERE published = false</div>
+<p><strong>Eventual consistency:</strong> accept that data across services won't be immediately consistent. Design UIs and business logic to handle temporary inconsistency. Use idempotency so retries don't cause duplicate operations.</p>
+<div class="tip"><strong>Key point:</strong> At CoinEarth's scale (fintech), the outbox pattern and idempotency keys are essential — a double charge is a severe user experience failure.</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What is Celery and how do you design reliable task queues with it?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Celery is a distributed task queue. Tasks are Python functions decorated with <code>@celery.task</code> — when called with <code>.delay()</code> or <code>.apply_async()</code>, they're serialized and placed in a broker (Redis or RabbitMQ). Worker processes consume and execute them.</p>
+<div class="code-block">@celery.task(
+    bind=True,
+    max_retries=3,
+    default_retry_delay=60,
+    acks_late=True,         # acknowledge only after successful execution
+    reject_on_worker_lost=True  # requeue if worker crashes mid-task
+)
+def process_document(self, doc_id: int):
+    try:
+        result = run_ocr(doc_id)
+        return result
+    except TemporaryError as e:
+        raise self.retry(exc=e, countdown=2 ** self.request.retries)  # exponential backoff</div>
+<p><strong>Reliability considerations:</strong></p>
+<p>— <code>acks_late=True</code> — task stays in queue until acknowledged after processing. If worker crashes, task is requeued.<br>
+— Idempotency — tasks must be safe to run twice. A retry should produce the same result as the first run.<br>
+— Dead letter queue — tasks that exhaust retries go to a DLQ for manual inspection, not silently dropped.<br>
+— Task routing — route heavy tasks to dedicated workers so they don't starve quick tasks.<br>
+— Monitoring — Flower (Celery's web UI) or Prometheus metrics for queue depth, task failure rates, worker throughput.</p>
+</div>
+</div>
+</div>
+
+<!-- ===== SQL ===== -->
+<div id="sql" class="section">
+<div class="count">10 concept-depth questions</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What are indexes, how do they work internally, and when should you add them?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>An index is a separate data structure (typically a B-tree) that stores a sorted copy of one or more columns with pointers to the actual rows. Instead of scanning every row (seq scan), the DB traverses the tree — O(log n) instead of O(n).</p>
+<p><strong>B-tree index:</strong> default in PostgreSQL and MySQL. Supports equality and range queries (<, >, BETWEEN, LIKE 'prefix%'). Not useful for LIKE '%suffix' — can't use the prefix to navigate the tree.</p>
+<p><strong>Hash index:</strong> O(1) lookup for equality only. Can't do range queries. Rarely needed — B-tree is fast enough for most equality cases.</p>
+<p><strong>When to add:</strong></p>
+<p>— Columns in WHERE clauses of slow queries<br>
+— Foreign key columns (joining on unindexed FKs does seq scans on the referenced table)<br>
+— Columns in ORDER BY and GROUP BY for large result sets<br>
+— Composite indexes for queries with multiple WHERE conditions — column order matters: put the most selective column first</p>
+<p><strong>When NOT to add:</strong></p>
+<p>— Every column by default — indexes slow down writes (INSERT/UPDATE/DELETE must update all affected indexes)<br>
+— Low-cardinality columns (boolean, status with 3 values) — the optimizer often prefers a seq scan anyway<br>
+— Small tables — seq scan is faster than index lookup + row fetch for small datasets</p>
+<div class="code-block">-- Composite index for a common query pattern
+CREATE INDEX idx_feedback_trainer_date 
+ON feedback(trainer_id, created_at DESC);
+
+-- Partial index: only index rows matching a condition
+CREATE INDEX idx_active_users ON users(email) WHERE active = true;</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">What does EXPLAIN ANALYZE output tell you, and how do you use it to fix slow queries?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>EXPLAIN shows the query plan the optimizer chose. EXPLAIN ANALYZE actually executes it and shows real timing.</p>
+<div class="code-block">EXPLAIN ANALYZE SELECT * FROM feedback 
+WHERE trainer_id = 5 AND created_at > NOW() - INTERVAL '30 days';</div>
+<p><strong>Key things to look for:</strong></p>
+<p>— <strong>Seq Scan on a large table</strong> — the optimizer couldn't use an index. Either no index exists, or the query is too broad to benefit. Check the WHERE clause and add a targeted index.<br>
+— <strong>Rows estimate vs actual</strong> — if estimated 10 rows but actual was 10,000, statistics are stale. Run ANALYZE to update.<br>
+— <strong>Nested Loop with large row counts</strong> — a nested loop join on a large inner table is O(n×m). Usually means a missing index on the join column.<br>
+— <strong>Hash Join</strong> — generally efficient for large equi-joins. Watch for spill to disk if hash table exceeds work_mem.<br>
+— <strong>High cost on a specific node</strong> — drill into that node. Cost is in arbitrary units but relative cost across nodes reveals the bottleneck.</p>
+<p><strong>explain.depesz.com</strong> — paste EXPLAIN ANALYZE output for a visual breakdown with color-coded slow nodes.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">What are transactions, ACID properties, and isolation levels?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>ACID:</strong></p>
+<p>— <strong>Atomicity:</strong> all operations in a transaction succeed or all are rolled back. No partial commits.<br>
+— <strong>Consistency:</strong> transaction leaves the DB in a valid state. Constraints (FK, NOT NULL, UNIQUE) are enforced.<br>
+— <strong>Isolation:</strong> concurrent transactions don't see each other's intermediate state.<br>
+— <strong>Durability:</strong> committed data survives crashes. Written to disk/WAL before acknowledging.</p>
+<p><strong>Isolation levels (PostgreSQL):</strong></p>
+<p>— <strong>Read Committed (default):</strong> each query in a transaction sees data committed before that query started. Prevents dirty reads. Allows non-repeatable reads (same query twice returns different results if another transaction committed between them).<br>
+— <strong>Repeatable Read:</strong> all queries in a transaction see data as of the transaction start. Prevents non-repeatable reads. Allows phantom reads in SQL standard — PostgreSQL prevents these too.<br>
+— <strong>Serializable:</strong> transactions behave as if executed serially. Highest consistency, lowest concurrency. Use for financial operations where read-then-write correctness is critical.</p>
+<div class="code-block">BEGIN ISOLATION LEVEL REPEATABLE READ;
+SELECT balance FROM wallets WHERE id = 1;  -- reads consistent snapshot
+UPDATE wallets SET balance = balance - 50 WHERE id = 1;
+COMMIT;</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">What are window functions and when are they more appropriate than GROUP BY?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Window functions perform calculations across a set of rows related to the current row, without collapsing rows into groups like GROUP BY does. You keep all rows and add a computed column.</p>
+<div class="code-block">-- Rank trainers by rating within their skill category
+SELECT trainer_id, skill, avg_rating,
+  RANK() OVER (PARTITION BY skill ORDER BY avg_rating DESC) as rank_in_category,
+  AVG(avg_rating) OVER (PARTITION BY skill) as category_avg,
+  LAG(avg_rating, 1) OVER (ORDER BY created_at) as previous_rating
+FROM trainer_performance;
+
+-- Running total of payments per user
+SELECT user_id, amount, created_at,
+  SUM(amount) OVER (PARTITION BY user_id ORDER BY created_at) as running_total
+FROM payments;</div>
+<p><strong>Use GROUP BY when:</strong> you need one row per group (counts, sums, averages at the aggregate level).</p>
+<p><strong>Use window functions when:</strong> you need both the row-level detail and an aggregate. Getting the top N per group is the classic window function use case — RANK() or ROW_NUMBER() with PARTITION BY, then filter WHERE rank <= N in a CTE or subquery.</p>
+<div class="code-block">-- Top 3 trainers per skill category
+WITH ranked AS (
+  SELECT *, RANK() OVER (PARTITION BY skill ORDER BY avg_rating DESC) as rk
+  FROM trainers
+)
+SELECT * FROM ranked WHERE rk <= 3;</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What are CTEs and what are the performance implications of using them?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>A Common Table Expression (WITH clause) defines a named subquery you can reference within the main query. It improves readability and avoids repeating complex subqueries.</p>
+<div class="code-block">WITH 
+active_trainers AS (
+  SELECT id, name FROM trainers WHERE active = true AND verified = true
+),
+recent_feedback AS (
+  SELECT trainer_id, AVG(rating) as avg_rating, COUNT(*) as count
+  FROM feedback WHERE created_at > NOW() - INTERVAL '90 days'
+  GROUP BY trainer_id
+)
+SELECT t.name, f.avg_rating, f.count
+FROM active_trainers t
+JOIN recent_feedback f ON f.trainer_id = t.id
+WHERE f.count >= 5
+ORDER BY f.avg_rating DESC;</div>
+<p><strong>Performance implications in PostgreSQL:</strong></p>
+<p>— Pre-PostgreSQL 12: CTEs were "optimization fences" — always materialized (executed once, results stored in memory). The planner couldn't push predicates into them.<br>
+— PostgreSQL 12+: CTEs are inlined by default (treated like subqueries, planner can optimize). Use <code>WITH ... AS MATERIALIZED</code> explicitly if you want the old behavior (when the CTE is referenced multiple times and you want it computed once).</p>
+<p><strong>Recursive CTEs</strong> — for hierarchical data (org charts, category trees, graph traversal):</p>
+<div class="code-block">WITH RECURSIVE org_tree AS (
+  SELECT id, name, manager_id, 0 as depth FROM employees WHERE manager_id IS NULL
+  UNION ALL
+  SELECT e.id, e.name, e.manager_id, ot.depth + 1
+  FROM employees e JOIN org_tree ot ON e.manager_id = ot.id
+)
+SELECT * FROM org_tree ORDER BY depth, name;</div>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">What is normalization vs denormalization, and how do you decide which to use?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p><strong>Normalization</strong> — organizing data to reduce redundancy. Each fact stored once. Updates only in one place. Achieved through normal forms (1NF → 2NF → 3NF).</p>
+<p>— Advantage: no update anomalies, smaller storage, integrity enforced by FK constraints<br>
+— Disadvantage: reads require JOINs — more complex queries, potentially slower for read-heavy workloads</p>
+<p><strong>Denormalization</strong> — intentionally adding redundancy to optimize reads. Storing a user's name in the orders table instead of joining back to users.</p>
+<p>— Advantage: fewer JOINs, simpler queries, faster reads<br>
+— Disadvantage: update anomalies (change a username, must update every order row), larger storage</p>
+<p><strong>Decision framework:</strong></p>
+<p>— Start normalized. Denormalize only when you have a measured performance problem, not upfront.<br>
+— Analytical/reporting queries are the main use case for denormalization — pre-aggregate or store redundant fields for dashboards.<br>
+— JSONB columns in PostgreSQL are a middle ground — store semi-structured data without a rigid schema, while keeping relational structure for the core entities.<br>
+— Materialized views: query a normalized schema, pre-aggregate into a materialized view, refresh on schedule. Best of both worlds for reporting.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">What are the different types of JOINs and when does each produce different results?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<div class="code-block">-- INNER JOIN: only rows with matches on both sides
+SELECT u.name, o.amount FROM users u
+INNER JOIN orders o ON o.user_id = u.id;
+-- Users with no orders are excluded
+
+-- LEFT JOIN: all rows from left, NULL for right if no match
+SELECT u.name, o.amount FROM users u
+LEFT JOIN orders o ON o.user_id = u.id;
+-- Users with no orders appear with NULL amount
+
+-- RIGHT JOIN: all rows from right (rare, usually rewrite as LEFT JOIN)
+
+-- FULL OUTER JOIN: all rows from both, NULL for missing matches
+SELECT u.name, o.amount FROM users u
+FULL OUTER JOIN orders o ON o.user_id = u.id;
+
+-- CROSS JOIN: cartesian product (every row with every row)
+-- Rarely intentional — usually a mistake. Result = n × m rows.
+
+-- SELF JOIN: joining a table to itself (hierarchies, comparisons)
+SELECT e.name, m.name as manager FROM employees e
+LEFT JOIN employees m ON m.id = e.manager_id;</div>
+<p><strong>Common mistake:</strong> filtering on a LEFT JOIN's right-side column in WHERE effectively converts it to an INNER JOIN — NULL rows are excluded by the filter. Use the condition in the ON clause instead, or filter for IS NULL / IS NOT NULL explicitly.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What is the N+1 query problem and how do you detect and fix it?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>N+1 occurs when you fetch N parent records and then issue one query per record to fetch related data — 1 + N queries instead of 2.</p>
+<div class="code-block"># N+1: 1 query for trainers + 1 query per trainer for feedback
+trainers = db.query(Trainer).all()  # 1 query
+for t in trainers:
+    print(t.feedback)  # triggers N queries (lazy loading)
+
+# Fixed with eager loading — 2 queries total
+trainers = db.query(Trainer).options(selectinload(Trainer.feedback)).all()</div>
+<p><strong>Detection:</strong> SQLAlchemy echo mode logs every query — count queries proportional to results. Django Debug Toolbar shows duplicate/similar queries. In production, slow query logs or APM tools surfacing queries that repeat with different IDs.</p>
+<p><strong>SQLAlchemy strategies:</strong></p>
+<p>— <code>joinedload</code>: single JOIN query — one round trip. Problem: duplicates parent rows for one-to-many, can be large<br>
+— <code>selectinload</code>: two queries — fetch parents, then fetch all related in one IN query. Usually the better choice for one-to-many<br>
+— <code>subqueryload</code>: similar to selectinload but uses a subquery — less common in modern SQLAlchemy</p>
+<p><strong>In raw SQL:</strong> a single JOIN fetches everything in one query. N+1 is an ORM-specific issue from lazy loading defaults.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">What are database constraints and why are they important beyond application-level validation?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Constraints are rules enforced at the database level, not just in application code. They're the last line of defense against bad data.</p>
+<p><strong>Types:</strong></p>
+<p>— <strong>NOT NULL:</strong> column must have a value. Prevents accidental nulls from bugs or missing defaults.<br>
+— <strong>UNIQUE:</strong> no duplicate values. Critical for email, username, idempotency keys. Creates an index automatically.<br>
+— <strong>PRIMARY KEY:</strong> NOT NULL + UNIQUE + clustered index.<br>
+— <strong>FOREIGN KEY:</strong> referential integrity — can't create an order for a non-existent user. Options: RESTRICT (default), CASCADE (delete orders when user deleted), SET NULL.<br>
+— <strong>CHECK:</strong> custom condition that every row must satisfy.</p>
+<div class="code-block">CREATE TABLE feedback (
+  id BIGSERIAL PRIMARY KEY,
+  trainer_id BIGINT NOT NULL REFERENCES trainers(id) ON DELETE CASCADE,
+  rating SMALLINT NOT NULL CHECK (rating BETWEEN 1 AND 5),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);</div>
+<p><strong>Why not rely on application validation alone:</strong> multiple services writing to the same DB, data migrations bypassing app logic, bugs that bypass validation, direct DB access for maintenance. Constraints prevent corruption that application code can't catch.</p>
+<p><strong>Deferred constraints:</strong> PostgreSQL allows constraints to be deferred to commit time — useful for circular references or bulk imports where intermediate states would violate constraints.</p>
+</div>
+</div>
+
+<div class="qa-card">
+<div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What is database partitioning, and when is it appropriate?</span><span class="chevron">▾</span></div>
+<div class="qa-body">
+<p>Partitioning splits a large table into smaller physical pieces (partitions) while presenting a single logical table. Queries that filter on the partition key only scan relevant partitions (partition pruning).</p>
+<p><strong>Partition strategies:</strong></p>
+<p>— <strong>Range partitioning:</strong> by date ranges. Most common for time-series data — feedback, logs, events. Old partitions can be dropped instantly (DROP TABLE is instant, DELETE on millions of rows is slow).</p>
+<div class="code-block">CREATE TABLE feedback (
+  id BIGINT, trainer_id BIGINT, rating SMALLINT, created_at DATE
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE feedback_2025_q1 PARTITION OF feedback
+  FOR VALUES FROM ('2025-01-01') TO ('2025-04-01');
+
+CREATE TABLE feedback_2025_q2 PARTITION OF feedback
+  FOR VALUES FROM ('2025-04-01') TO ('2025-07-01');</div>
+<p>— <strong>Hash partitioning:</strong> by hash of a column (e.g., user_id). Distributes rows evenly. Good for sharding read/write load across disk volumes.<br>
+— <strong>List partitioning:</strong> by discrete values (country, region). Good for geographic data or multi-tenant schemas.</p>
+<p><strong>When to use:</strong> tables with 100M+ rows where you regularly query by a date range or specific key. Not for small-medium tables — the overhead adds complexity without benefit.</p>
+<p><strong>Gotcha:</strong> indexes are local to partitions by default. Global indexes across partitions exist but have overhead. Make sure the partition key is in your most common WHERE clauses.</p>
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+function show(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+function tog(header) {
+  const body = header.nextElementSibling;
+  const open = header.classList.contains('open');
+  header.classList.toggle('open', !open);
+  body.classList.toggle('open', !open);
+}
+</script>

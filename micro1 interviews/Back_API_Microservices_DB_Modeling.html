@@ -1,0 +1,1265 @@
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .container {
+    padding: 80px 24px 120px;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    background: #0A0F1A;
+    color: #D1D5DB;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ---- ABTC NAV ---- */
+  .topic-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 64px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .topic-btn {
+    padding: 12px 28px;
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: transparent;
+    color: #9CA3AF;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s ease;
+    line-height: 1;
+  }
+
+  .topic-btn:hover {
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+  }
+
+  .topic-btn.active {
+    background: #FFFFFF;
+    color: #0A0F1A;
+    border-color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  .section {
+    display: none;
+  }
+
+  .section.active {
+    display: block;
+  }
+
+  .count {
+    font-size: 13px;
+    color: #9CA3AF;
+    margin-bottom: 32px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    font-weight: 500;
+  }
+
+  /* ---- ABTC CARDS ---- */
+  .qa-card {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+    background: #111827;
+  }
+
+  .qa-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 32px;
+    cursor: pointer;
+    background: #111827;
+    border-bottom: 1px solid transparent;
+    transition: background .15s ease;
+    user-select: none;
+  }
+
+  .qa-header:hover {
+    background: #0B1220;
+  }
+
+  .qa-header.open {
+    background: #0B1220;
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .q-num {
+    font-size: 14px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.3);
+    min-width: 32px;
+    margin-top: 4px;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+  }
+
+  .q-text {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFFFFF;
+    flex: 1;
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+  }
+
+  .chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    transition: transform .2s ease;
+    color: #9CA3AF;
+    font-size: 18px;
+    margin-top: 2px;
+  }
+
+  .qa-header.open .chevron {
+    transform: rotate(180deg);
+    color: #FFFFFF;
+  }
+
+  .qa-body {
+    padding: 0 32px 32px 84px;
+    font-size: 16px;
+    color: #D1D5DB;
+    line-height: 1.8;
+    display: none;
+    background: #0B1220;
+  }
+
+  .qa-body.open {
+    display: block;
+  }
+
+  .qa-body p {
+    margin: 0 0 16px;
+  }
+
+  .qa-body p:last-child {
+    margin: 0;
+  }
+
+  .qa-body strong {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  code {
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 13px;
+    background: #0A0F1A;
+    padding: 3px 6px;
+    border-radius: 4px;
+    color: #E5E5E5;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .code-block {
+    display: block;
+    background: #0A0F1A;
+    padding: 20px 24px;
+    border-radius: 8px;
+    font-family: "SF Mono", Monaco, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #D1D5DB;
+    margin: 24px 0;
+    white-space: pre;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .tip {
+    background: #0A0F1A;
+    border-left: 2px solid #DC2626;
+    border-radius: 0 8px 8px 0;
+    padding: 16px 20px;
+    margin-top: 24px;
+    font-size: 14px;
+    color: #9CA3AF;
+  }
+
+  .tip strong {
+    color: #FFFFFF;
+    font-weight: 600;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .container {
+      padding: 48px 20px 80px;
+    }
+
+    .qa-header {
+      padding: 24px 20px;
+    }
+
+    .q-text {
+      font-size: 20px;
+    }
+
+    .qa-body {
+      padding: 0 20px 24px 52px;
+    }
+
+    .topic-nav {
+      margin-bottom: 48px;
+    }
+  }
+</style>
+
+<div class="container">
+  <div class="topic-nav">
+    <button class="topic-btn active" onclick="show('backend')">Backend Programming</button>
+    <button class="topic-btn" onclick="show('api')">API Design & Microservices</button>
+    <button class="topic-btn" onclick="show('db')">Databases & Data Modeling</button>
+  </div>
+
+  <!-- ===== BACKEND ===== -->
+  <div id="backend" class="section active">
+    <div class="count">12 questions — production-grade backend engineering</div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What separates a
+          well-architected backend service from one that works but will collapse under load?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>A backend that works in development handles the happy path with one user and no failures. A production
+          backend handles partial failures, load spikes, bad inputs, network timeouts, and recovery — all without human
+          intervention.</p>
+        <p>The structural differences: <strong>separation of concerns</strong> — route handlers don't contain business
+          logic, business logic doesn't contain DB queries. Each layer is independently testable.
+          <strong>Statelessness</strong> — request handling doesn't depend on local memory or in-process state. This is
+          what makes horizontal scaling possible. If your service stores session state in memory, you can't add a second
+          instance.
+        </p>
+        <p><strong>Idempotency</strong> — critical for any operation that modifies data. If a client retries a payment
+          request because it got a network timeout, your service should detect it's a duplicate and not charge twice.
+          Idempotency keys solve this.</p>
+        <p><strong>Backpressure handling</strong> — if upstream sends more traffic than you can handle, you need to
+          either queue the excess or reject it fast with a clear error. Services that don't implement backpressure
+          cascade failure upstream — they slow down instead of refusing, which ties up connections and causes timeouts
+          throughout the system.</p>
+        <div class="code-block"># Idempotency key pattern — Python/FastAPI example
+          async def process_payment(payload: PaymentRequest, idempotency_key: str):
+          existing = await cache.get(f"idem:{idempotency_key}")
+          if existing:
+          return existing # return cached result, don't reprocess
+
+          result = await charge_card(payload)
+          await cache.set(f"idem:{idempotency_key}", result, ttl=86400)
+          return result</div>
+        <div class="tip"><strong>Key point:</strong> "Statelessness and idempotency are the two properties that make a
+          backend scalable and safe to retry. Everything else — caching, queues, load balancing — builds on top of
+          these."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">How do you design for
+          failure in backend systems? What patterns do you actually use?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Failures in distributed systems are not edge cases — they're the normal state. Networks drop, databases go
+          slow, third-party APIs return 500s. The question is whether failures stay contained or cascade.</p>
+        <p><strong>Circuit breaker</strong> — after N consecutive failures to a dependency, stop calling it for T
+          seconds. Return a cached response or a graceful error instead. This prevents your service from stacking up
+          thousands of waiting threads on a dead dependency. Libraries like <code>resilience4j</code> (Java) or
+          <code>pybreaker</code> (Python) implement this.
+        </p>
+        <p><strong>Retry with exponential backoff + jitter</strong> — retrying immediately on failure usually makes
+          things worse (thundering herd). Back off exponentially (1s, 2s, 4s, 8s) and add random jitter to spread the
+          retry storm across time.</p>
+        <p><strong>Timeout everywhere</strong> — no external call should be open-ended. Set connection timeout and read
+          timeout. Without read timeout, a slow DB query holds a thread indefinitely — 100 slow queries = 100 stuck
+          threads = service unavailable.</p>
+        <p><strong>Bulkhead</strong> — isolate resource pools per dependency. If your email service thread pool is
+          saturated, it shouldn't affect the checkout flow. Separate thread pools or async task queues per concern.</p>
+        <div class="code-block"># Retry with backoff — Python example (tenacity library)
+          from tenacity import retry, stop_after_attempt, wait_exponential, wait_random
+
+          @retry(
+          stop=stop_after_attempt(3),
+          wait=wait_exponential(multiplier=1, min=1, max=10) + wait_random(0, 1)
+          )
+          async def call_payment_gateway(payload):
+          return await httpx_client.post("/charge", json=payload, timeout=5.0)</div>
+        <div class="tip"><strong>Key point:</strong> "The goal isn't to prevent failures — it's to make sure a failure
+          in one place doesn't become a failure everywhere."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">What is the Half-Open
+          state in a Circuit Breaker and when do you use it?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p><strong>What it is:</strong> In a circuit breaker pattern, there are 3 states:</p>
+        <p>— <strong>Closed:</strong> Requests flow normally. If failures exceed threshold, trip to Open.<br>
+          — <strong>Open:</strong> All requests fail fast without calling the downstream service. After a timeout, move
+          to Half-Open.<br>
+          — <strong>Half-Open:</strong> Let a small number of test requests through. If they succeed, close the circuit.
+          If they fail, go back to Open.</p>
+        <p><strong>When to use it:</strong> When a downstream service was failing but might have recovered. Instead of
+          flooding it, Half-Open probes with limited traffic to check health before fully reopening.</p>
+        <p><strong>Example:</strong> Payment API was down for 5 min. Circuit is Open. After 30s timeout, Half-Open lets
+          1 request through. If it succeeds, resume normal traffic.</p>
+        <div class="tip"><strong>Key point:</strong> "The Half-Open state is the 'probing' mechanism that allows a
+          system to heal automatically without requiring a manual reset."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">How do you handle
+          authentication and authorization in a backend service? What's the difference between the two?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p><strong>Authentication</strong> is "who are you" — verifying identity. <strong>Authorization</strong> is
+          "what are you allowed to do" — verifying permissions. They're different problems and should be handled in
+          different layers.</p>
+        <p>For authentication, JWTs are the standard for stateless APIs. The token contains claims (user ID, roles,
+          expiry) signed with a secret or private key. The server verifies the signature on every request — no DB lookup
+          needed. The tradeoff: JWTs can't be invalidated before expiry. Mitigate with short expiry (15 min access
+          tokens) + refresh token rotation stored in DB. If you need instant revocation (logout everywhere, compromised
+          token), you need a token blacklist in Redis.</p>
+        <p>For authorization, Role-Based Access Control (RBAC) works for most apps — assign roles, check role on the
+          route. For finer control, Attribute-Based Access Control (ABAC) evaluates policies against attributes of the
+          user, resource, and context. A rule like "user can edit document if document.owner == user.id OR user.role ==
+          admin" is ABAC.</p>
+        <p>Where most backends get this wrong: they mix authorization logic into business logic. The correct structure
+          is a dedicated authorization layer (a guard/middleware) that runs before the handler, not inside it.</p>
+        <div class="code-block"># FastAPI dependency injection for auth + authz
+          async def require_admin(token: str = Depends(get_current_user)):
+          if token.role != "admin":
+          raise HTTPException(status_code=403, detail="Admin only")
+          return token
+
+          @router.delete("/users/{user_id}", dependencies=[Depends(require_admin)])
+          async def delete_user(user_id: int): ...</div>
+        <div class="tip"><strong>Key point:</strong> "Short-lived JWTs + refresh token rotation is the modern standard.
+          Never put sensitive data in a JWT payload — it's base64 encoded, not encrypted."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What is the
+          difference between synchronous and asynchronous processing, and when should you push work to a background
+          queue?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Synchronous processing means the HTTP request waits for the work to complete before responding. Asynchronous
+          processing means the request is accepted immediately, the work is handed to a queue, and the response is
+          returned before the work is done.</p>
+        <p>The decision rule: if the work takes more than ~500ms, is retryable, doesn't need to complete before the user
+          gets a response, or is prone to failure — put it in a queue.</p>
+        <p>Real examples: sending an email (async — user doesn't need to wait), generating a PDF report (async — could
+          take 30 seconds), charging a credit card (sync — user needs the result to proceed), sending a Slack
+          notification after signup (async — failure shouldn't block account creation).</p>
+        <p>For Python backends: Celery with Redis or RabbitMQ is the established choice for task queues. For simpler
+          needs, FastAPI's <code>BackgroundTasks</code> runs work after the response is sent — but it runs in the same
+          process, so it doesn't survive crashes. True durability requires a persistent queue.</p>
+        <div class="code-block"># Celery task — durable, retryable, monitored
+          @celery_app.task(bind=True, max_retries=3, default_retry_delay=60)
+          def send_welcome_email(self, user_id: int):
+          try:
+          user = fetch_user(user_id)
+          email_client.send(user.email, template="welcome")
+          except Exception as exc:
+          raise self.retry(exc=exc) # exponential backoff via Celery</div>
+        <div class="tip"><strong>Key point:</strong> "If you're blocking an HTTP thread for more than a second to do
+          work the user doesn't immediately need — that's a queue problem, not a code optimization problem."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">How do you approach
+          caching in backend systems, and what are the cache invalidation patterns?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>Caching is about accepting stale data in exchange for speed. The hard part isn't reading from the cache —
+          it's knowing when to invalidate it.</p>
+        <p><strong>Cache-aside (lazy loading)</strong> — the application checks cache first, fetches from DB on miss,
+          writes to cache. Most common pattern. Cache only contains what's been requested. Con: first request after
+          invalidation always hits DB.</p>
+        <p><strong>Write-through</strong> — on every write, update the cache and the DB together. Cache is always warm.
+          Con: writes are slower, cache fills with data that may never be read.</p>
+        <p><strong>Write-behind (write-back)</strong> — write to cache immediately, persist to DB asynchronously.
+          Fastest writes. Dangerous: cache crash = data loss. Only use where data loss is acceptable (analytics
+          counters, non-critical state).</p>
+        <p><strong>TTL-based invalidation</strong> — cache entries expire after a set duration. Simple but imprecise. A
+          product price cached for 10 minutes is wrong for up to 10 minutes after a change.</p>
+        <p><strong>Event-based invalidation</strong> — on a write event, explicitly delete or update affected cache
+          keys. Precise but adds coupling. Works well when write events are well-defined and infrequent.</p>
+        <div class="code-block"># Cache-aside with Redis — Python
+          async def get_user_profile(user_id: int) -> UserProfile:
+          cache_key = f"user:profile:{user_id}"
+          cached = await redis.get(cache_key)
+          if cached:
+          return UserProfile.model_validate_json(cached)
+
+          profile = await db.fetch_user_profile(user_id)
+          await redis.set(cache_key, profile.model_dump_json(), ex=300) # 5 min TTL
+          return profile
+
+          async def update_user_profile(user_id: int, data: dict):
+          await db.update_user_profile(user_id, data)
+          await redis.delete(f"user:profile:{user_id}") # invalidate on write</div>
+        <div class="tip"><strong>Key point:</strong> "Phil Karlton's famous quote — 'there are only two hard things in
+          CS: cache invalidation and naming things' — is still true. Always know what event should invalidate your cache
+          before you write the cache."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">What is concurrency
+          in the context of a backend service, and how do async I/O and threading differ?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Concurrency means handling multiple things at once — but there are two fundamentally different mechanisms
+          depending on whether the bottleneck is CPU or I/O.</p>
+        <p><strong>I/O-bound work</strong> (network calls, DB queries, file reads) — the bottleneck is waiting, not
+          computing. async/await with an event loop is the right model here. While one coroutine waits for the DB to
+          respond, the event loop runs other coroutines. You get high concurrency with a single thread. FastAPI's async
+          handlers work this way — one worker process can handle thousands of in-flight requests.</p>
+        <p><strong>CPU-bound work</strong> (image processing, ML inference, crypto) — the bottleneck is computation.
+          async/await doesn't help because the CPU is busy, not waiting. Use <code>ProcessPoolExecutor</code> to run
+          work in separate processes that bypass Python's GIL, or offload to a Celery worker.</p>
+        <p>The mistake: running blocking code (synchronous DB calls, <code>time.sleep</code>) inside an async function.
+          This blocks the entire event loop — all concurrent requests freeze until the blocking call returns.</p>
+        <div class="code-block"># WRONG — blocking call inside async function freezes event loop
+          async def get_user(user_id: int):
+          return db.execute("SELECT * FROM users WHERE id = %s", user_id) # sync!
+
+          # RIGHT — use async DB driver
+          async def get_user(user_id: int):
+          return await db.execute("SELECT * FROM users WHERE id = $1", user_id)
+
+          # RIGHT — offload CPU-bound work to thread pool
+          async def resize_image(data: bytes) -> bytes:
+          loop = asyncio.get_event_loop()
+          return await loop.run_in_executor(None, _sync_resize, data)</div>
+        <div class="tip"><strong>Key point:</strong> "Async is not magic — it only helps with I/O waits. One blocking
+          call inside an async handler can starve every concurrent request in the process."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">How do you write
+          meaningful backend tests, and what's the difference between unit, integration, and end-to-end tests in this
+          context?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>The three-layer model maps to three different questions. <strong>Unit tests</strong> ask: does this function
+          do what it should given controlled inputs? No network, no DB, no dependencies. Fast, deterministic. Good for
+          business logic — validation rules, transformation functions, edge case handling.</p>
+        <p><strong>Integration tests</strong> ask: does this component work correctly with its real dependencies? For a
+          backend, this means testing route handlers against a real DB (usually a test database or a Dockerized
+          instance). This is where most of the value is — integration tests catch the SQL query that returns wrong data,
+          the FK constraint violation you didn't expect, the ORM behavior that differs from raw SQL.</p>
+        <p><strong>End-to-end tests</strong> ask: does the whole system work? Spin up the real service and test it
+          through its API. Slower, more brittle, but catches integration failures between services. These belong in CI,
+          not in the dev inner loop.</p>
+        <p>The common mistake: mocking the DB in integration tests. If you mock the DB, you're only testing that your
+          code calls the mock correctly — you learn nothing about actual query behavior, index usage, or constraint
+          enforcement.</p>
+        <div class="code-block"># Integration test with real DB (pytest + SQLAlchemy + testcontainers)
+          @pytest.fixture
+          def db_session():
+          # uses a real PostgreSQL container via testcontainers
+          engine = create_engine(TEST_DATABASE_URL)
+          Base.metadata.create_all(engine)
+          with Session(engine) as session:
+          yield session
+          session.rollback() # clean state between tests
+
+          def test_create_user_rejects_duplicate_email(db_session):
+          create_user(db_session, email="a@b.com")
+          with pytest.raises(IntegrityError):
+          create_user(db_session, email="a@b.com") # UNIQUE constraint</div>
+        <div class="tip"><strong>Key point:</strong> "Test pyramid: many unit tests, fewer integration tests, few E2E
+          tests. But for backend data layers, integration tests that hit a real DB are worth more than any mock."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">How do you approach
+          logging, monitoring, and observability in a production backend?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Observability is the property that lets you understand what your system is doing from the outside without
+          modifying it. It has three pillars: logs, metrics, and traces. Most backends start with only logs. That's not
+          enough.</p>
+        <p><strong>Logs</strong> — structured JSON logs, not free-form strings. Structured logs can be queried,
+          filtered, and aggregated. Every log entry should include: timestamp, level, service name, request ID (for
+          tracing a request across services), and relevant context. Never log PII — user emails, payment data, auth
+          tokens.</p>
+        <p><strong>Metrics</strong> — counters, gauges, histograms. Request rate, error rate, latency (p50/p95/p99),
+          queue depth, DB pool usage. Metrics power dashboards and alerts. Prometheus + Grafana is the standard
+          self-hosted stack. <code>request_latency_p99 > 500ms</code> triggers a PagerDuty alert before users complain.
+        </p>
+        <p><strong>Distributed traces</strong> — for systems with multiple services, a trace follows a single request
+          through every service it touches, with timing for each hop. OpenTelemetry is the standard instrumentation
+          library. Without traces, you see that something is slow but you can't tell which service or which DB call is
+          responsible.</p>
+        <div class="code-block"># Structured logging with context — Python
+          import structlog
+          log = structlog.get_logger()
+
+          async def process_order(order_id: int, user_id: int):
+          log.info("order.processing_started",
+          order_id=order_id, user_id=user_id, service="order-service")
+          try:
+          result = await charge_and_fulfill(order_id)
+          log.info("order.completed", order_id=order_id, duration_ms=result.ms)
+          except PaymentError as e:
+          log.error("order.payment_failed", order_id=order_id, error=str(e))</div>
+        <div class="tip"><strong>Key point:</strong> "Logs tell you what happened. Metrics tell you how often and how
+          fast. Traces tell you where time was spent. You need all three to debug production problems without guessing."
+        </div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What are database
+          transactions, and how do you handle them correctly in a backend service?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>A transaction is a unit of work that either completes entirely or doesn't happen at all. The ACID properties
+          define what that means: Atomicity (all-or-nothing), Consistency (data stays valid), Isolation (concurrent
+          transactions don't interfere), Durability (committed data survives crashes).</p>
+        <p>In practice: if you're transferring money between two accounts, you need to debit one and credit the other in
+          a single transaction. If the credit fails after the debit, the transaction rolls back — balance is preserved.
+          Outside a transaction, you have a race condition and a potential phantom debit.</p>
+        <p><strong>Isolation levels</strong> matter in concurrent systems. Read Committed (Postgres default) prevents
+          dirty reads but allows non-repeatable reads — you read the same row twice in a transaction and get different
+          values. Serializable prevents all anomalies but is the slowest. Choose the lowest isolation level that's still
+          correct for the operation.</p>
+        <p>The backend pattern: keep transactions as short as possible. A long transaction holds locks, blocks other
+          writes, and increases the chance of a deadlock. Never do network calls (email sends, external API calls)
+          inside a transaction — a slow external call keeps your DB locks held for seconds.</p>
+        <div class="code-block"># SQLAlchemy transaction with context manager
+          async with db.begin(): # auto-commits on exit, auto-rolls back on exception
+          await db.execute(
+          "UPDATE accounts SET balance = balance - :amount WHERE id = :from_id",
+          {"amount": amount, "from_id": from_account_id}
+          )
+          await db.execute(
+          "UPDATE accounts SET balance = balance + :amount WHERE id = :to_id",
+          {"amount": amount, "to_id": to_account_id}
+          )
+          # Both updates committed atomically, or neither if an exception was raised</div>
+        <div class="tip"><strong>Key point:</strong> "Short transactions, no I/O inside them, and always handle the
+          rollback. Most data corruption bugs I've seen come from partially-applied multi-step writes outside a
+          transaction."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q11</span><span class="q-text">How do you handle
+          configuration and secrets in a backend service across environments?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Hardcoded config is the fastest path to a production incident — wrong DB connection string deployed to prod,
+          or an API key committed to git. The rule is: nothing environment-specific lives in the codebase.</p>
+        <p><strong>12-Factor App principle</strong>: store config in environment variables. For local development, a
+          <code>.env</code> file loaded by <code>python-dotenv</code> or <code>pydantic-settings</code>. For production,
+          injected by the deployment platform (Kubernetes secrets, AWS Parameter Store, Railway env vars). The code
+          reads from environment, never from files checked into git.
+        </p>
+        <p><strong>Secrets vs config</strong> are different. Config is non-sensitive (feature flags, log levels, API
+          base URLs). Secrets are sensitive (DB passwords, JWT secret keys, payment gateway keys). Secrets should go
+          through a secrets manager (AWS Secrets Manager, HashiCorp Vault, GCP Secret Manager) — not plain environment
+          variables in a CI/CD UI, which often get logged.</p>
+        <p>Validation at startup is critical: use Pydantic's <code>BaseSettings</code> to parse and validate all config
+          at import time. If a required secret is missing, the service fails immediately with a clear error — not 20
+          requests later when the code path that needs it is first hit.</p>
+        <div class="code-block"># Pydantic BaseSettings — validated config at startup
+          from pydantic_settings import BaseSettings
+
+          class Settings(BaseSettings):
+          database_url: str # required — fails fast if missing
+          jwt_secret: str
+          redis_url: str
+          log_level: str = "INFO" # optional with default
+          debug: bool = False
+
+          model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+
+          settings = Settings() # validated at module import — crashes early if invalid</div>
+        <div class="tip"><strong>Key point:</strong> "Fail fast on missing config at startup, never at runtime. A
+          service that crashes on deploy with a clear error is far better than one that starts fine and fails on the
+          first request that needs the missing value."</div>
+      </div>
+    </div>
+
+    <!-- Added: Many-to-many relationship question -->
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q12</span><span class="q-text">How do you model a
+          many-to-many relationship in SQL vs NoSQL, and what should you consider for each?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p><strong>SQL</strong>: Use a junction/bridge table with foreign keys to both tables.<br>
+          Example: <code>users</code> &lt;-&gt; <code>user_roles</code> &lt;-&gt; <code>roles</code><br>
+          Consider: Indexes on FKs, cascade deletes, query joins.</p>
+        <p><strong>NoSQL</strong>: Either embed arrays of IDs/references, or use a separate collection.<br>
+          Example MongoDB: <code>users: {role_ids: [1,2]}</code> or <code>user_roles: {user_id, role_id}</code><br>
+          Consider: Document size limits, consistency, fan-out on updates, how you'll query.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== API DESIGN & MICROSERVICES ===== -->
+  <div id="api" class="section">
+    <div class="count">10 questions — production API design and microservices architecture</div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">What makes a REST API
+          well-designed? What are the principles beyond just using HTTP verbs correctly?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Correct HTTP verb usage is the baseline. What separates a well-designed API: consistency, predictability, and
+          the ability to evolve without breaking clients.</p>
+        <p><strong>Resource-oriented URLs</strong> — model nouns, not verbs. <code>/users/123/orders</code> is correct.
+          <code>/getUserOrders?userId=123</code> is RPC in HTTP clothing. The URL represents a resource; the HTTP verb
+          represents the action on it.
+        </p>
+        <p><strong>Consistent error responses</strong> — every error should return the same shape:
+          <code>{ "error": { "code": "...", "message": "...", "details": [...] } }</code>. Clients should never need to
+          parse different error formats depending on which endpoint failed. Use standard HTTP status codes correctly:
+          400 (client did something wrong), 401 (not authenticated), 403 (authenticated but not authorized), 404
+          (resource not found), 409 (conflict — duplicate), 422 (validation failure), 500 (server fault).
+        </p>
+        <p><strong>Versioning strategy</strong> — URL versioning (<code>/v1/users</code>) is the simplest and most
+          visible. Header versioning (<code>API-Version: 2024-01</code>) is cleaner for clients but harder to test in a
+          browser. Whichever you choose, commit to it. Never make breaking changes to an existing version.</p>
+        <p><strong>Pagination, filtering, sorting</strong> — cursor-based pagination is safer than offset for large
+          datasets (offset pagination skips rows when data changes during iteration). Filtering should be query params.
+          Sorting: <code>?sort=-created_at</code> (minus = descending).</p>
+        <div class="tip"><strong>Key point:</strong> "A good API is one a developer can use correctly by intuition —
+          before reading the docs. Consistency is more important than cleverness."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">What is the
+          difference between REST, GraphQL, and gRPC? How do you choose between them?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>These are different solutions to different problems, not competing implementations of the same thing.</p>
+        <p><strong>REST</strong> — resource-oriented, HTTP-native, cacheable, stateless. Works for any client. Best
+          default for public APIs and standard CRUD services. Weakness: over-fetching (getting more fields than needed)
+          and under-fetching (needing multiple endpoints for one screen).</p>
+        <p><strong>GraphQL</strong> — client specifies exactly what data it needs. One endpoint, flexible queries.
+          Solves over/under-fetching. Great for product APIs where different clients (mobile, web, embedded) need
+          different shapes of the same data. Tradeoff: HTTP caching doesn't work out of the box (all queries hit the
+          same POST endpoint), N+1 query problems at the resolver level require DataLoader to fix, and schema design is
+          harder to get right.</p>
+        <p><strong>gRPC</strong> — binary protocol (protobuf), strongly typed contracts, bidirectional streaming,
+          extremely low latency. Best for internal service-to-service communication where performance matters and both
+          sides are under your control. Poor choice for public APIs — browser support requires a proxy layer, and
+          debugging binary payloads is harder than inspecting JSON.</p>
+        <p>Practical rule: REST for external/public APIs. GraphQL for product APIs with multiple clients with different
+          data needs. gRPC for internal microservice-to-microservice communication at scale.</p>
+        <div class="tip"><strong>Key point:</strong> "Choosing gRPC for public APIs or GraphQL for a simple CRUD service
+          is optimizing for the wrong thing. Fit the tool to the actual communication pattern."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">What is API
+          versioning, and how do you handle breaking changes without breaking existing clients?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>A breaking change is anything that causes an existing valid request to behave differently or fail. Removing a
+          field, renaming a field, changing a field's type, changing required/optional status, changing status codes —
+          all breaking. Adding a new optional field, adding a new endpoint, adding a new non-required query param —
+          non-breaking.</p>
+        <p><strong>Additive changes first</strong> — before reaching for a new version, ask if you can add without
+          breaking. Deprecate old fields in docs and keep them working while encouraging migration. Most changes that
+          feel like they need a new version don't.</p>
+        <p><strong>When you do version</strong> — maintain v1 and v2 side by side. Don't delete v1 the day v2 ships.
+          Communicate a deprecation timeline (minimum 6 months for any production API). Version at the route level
+          (<code>/v2/users</code>) so clients can migrate endpoint by endpoint rather than all at once.</p>
+        <p><strong>Contract testing</strong> — a test that runs against the actual API response and asserts the shape of
+          the response matches the documented contract. If a change would break the contract, the test catches it before
+          deploy. Pact is a well-known library for consumer-driven contract testing.</p>
+        <div class="code-block"># Deprecation header — signal to clients without breaking them
+          @router.get("/v1/users/{user_id}")
+          async def get_user_v1(user_id: int, response: Response):
+          response.headers["Deprecation"] = "true"
+          response.headers["Sunset"] = "Sat, 31 Dec 2025 23:59:59 GMT"
+          response.headers["Link"] = '/v2/users/{user_id}; rel="successor-version"'
+          return await get_user_data(user_id) # same underlying logic</div>
+        <div class="tip"><strong>Key point:</strong> "Never make breaking changes silently. A clear deprecation header +
+          sunset date gives clients a migration path. Surprise breakage destroys trust in an API."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">What is an API
+          gateway, and what responsibilities does it handle versus individual services?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>An API gateway is the single entry point for all client requests into a microservices system. It handles
+          cross-cutting concerns that would otherwise need to be duplicated in every service.</p>
+        <p><strong>What the gateway handles:</strong> authentication and token validation (so each service doesn't need
+          to), rate limiting (cap requests per client per minute), SSL termination, request routing (which request goes
+          to which service), request/response transformation (API clients speak one format, internal services another),
+          logging and correlation ID injection.</p>
+        <p><strong>What services still own:</strong> authorization (does this user have permission for this specific
+          resource — the gateway doesn't have that business context), business logic, data validation beyond basic
+          structure, and domain-specific error handling.</p>
+        <p>Common choices: Kong (open source, plugin ecosystem), AWS API Gateway (managed, tight AWS integration), nginx
+          with Lua scripts (flexible but manual). For a team just starting with microservices, a thin gateway doing auth
+          + routing + rate limiting is enough. Don't put business logic in the gateway — it becomes a deployment
+          bottleneck and a testing nightmare.</p>
+        <div class="tip"><strong>Key point:</strong> "The gateway handles the mechanical concerns of receiving traffic.
+          Business logic stays in services. The rule of thumb: if it's the same for every request regardless of domain,
+          it belongs in the gateway."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">How do microservices
+          communicate with each other — synchronous versus asynchronous patterns?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>Inter-service communication is where most microservices complexity lives. The choice between synchronous and
+          async has major consequences for resilience and coupling.</p>
+        <p><strong>Synchronous (request/response)</strong> — one service calls another and waits. REST or gRPC. Simple
+          to reason about and debug. Problem: tight temporal coupling — if Service B is slow or down, Service A is also
+          slow or down. A chain of 5 synchronous calls multiplies latency and failure probability.</p>
+        <p><strong>Asynchronous (event-driven)</strong> — Service A publishes an event to a message broker (Kafka,
+          RabbitMQ, SQS). Service B subscribes and processes when it can. Services are temporally decoupled — B being
+          slow or down doesn't affect A. Better resilience, better scalability. Cost: harder to debug, eventual
+          consistency instead of immediate consistency, and you need to handle duplicate message delivery (make
+          consumers idempotent).</p>
+        <p><strong>Saga pattern</strong> — for distributed transactions across multiple services. Instead of a two-phase
+          commit (which requires all services to be available simultaneously), each service publishes events that
+          trigger the next step. On failure, compensating transactions undo previous steps. Complex but the correct
+          pattern for long-running, multi-service workflows.</p>
+        <div class="tip"><strong>Key point:</strong> "Use synchronous calls for queries where you need an immediate
+          answer. Use async events for state changes and workflows where immediate consistency isn't required. Most
+          teams overuse REST and underuse events."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">What is rate limiting
+          and how do you implement it correctly?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Rate limiting caps how many requests a client can make in a time window. It protects your service from abuse,
+          prevents accidental DDoS from runaway clients, and enforces usage tiers in commercial APIs.</p>
+        <p>Three common algorithms: <strong>Fixed window</strong> — 100 requests per minute, counter resets at :00 each
+          minute. Simple but has a boundary spike problem — a client can fire 100 at 12:59 and 100 at 13:00, getting 200
+          in 2 seconds. <strong>Sliding window</strong> — tracks request timestamps in a log and counts within the
+          rolling last N seconds. Accurate but memory-intensive. <strong>Token bucket</strong> — a bucket fills with
+          tokens at a fixed rate. Each request consumes a token. Allows controlled bursting (if the bucket was full).
+          This is the right model for most APIs — normal traffic uses tokens as they arrive; a short burst is allowed up
+          to the bucket capacity.</p>
+        <p>Implementation: Redis with atomic operations (Lua scripts or INCR + EXPIRE). The key is
+          <code>ratelimit:{client_id}:{window}</code>. This is distributed — works across multiple service instances
+          because the state lives in Redis, not in process memory.
+        </p>
+        <div class="code-block"># Sliding window rate limit with Redis — Python
+          async def is_rate_limited(client_id: str, limit: int, window_sec: int) -> bool:
+          now = time.time()
+          window_start = now - window_sec
+          key = f"ratelimit:{client_id}"
+
+          async with redis.pipeline() as pipe:
+          pipe.zremrangebyscore(key, 0, window_start) # remove old entries
+          pipe.zadd(key, {str(now): now}) # add current timestamp
+          pipe.zcard(key) # count in window
+          pipe.expire(key, window_sec)
+          _, _, count, _ = await pipe.execute()
+
+          return count > limit</div>
+        <div class="tip"><strong>Key point:</strong> "Always return rate limit headers: X-RateLimit-Limit,
+          X-RateLimit-Remaining, X-RateLimit-Reset. Clients need this to implement backoff correctly. Silent rate
+          limiting just looks like mysterious failures."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">What is service
+          discovery in a microservices architecture, and how do services find each other?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>In a monolith, you call a function. In microservices, you call a service that's running at a network address
+          — but that address can change as instances are scaled up, replaced, or rescheduled by the orchestrator.
+          Service discovery is how services find each other dynamically.</p>
+        <p><strong>Client-side discovery</strong> — the calling service queries a service registry (Consul, Eureka) to
+          get a list of healthy instances and picks one (load balancing logic in the client). Flexible but couples each
+          service to the registry client library.</p>
+        <p><strong>Server-side discovery</strong> — the calling service sends requests to a load balancer or service
+          mesh (Kubernetes Service, Envoy, Istio). The infrastructure handles finding healthy instances. The service
+          just calls a stable DNS name. This is what Kubernetes gives you out of the box — a Service object provides a
+          stable hostname that routes to healthy pods regardless of how many pods exist or what their IPs are.</p>
+        <p>In practice: if you're on Kubernetes, you get DNS-based service discovery for free.
+          <code>http://order-service:8080</code> resolves to healthy pods without any client code. Outside Kubernetes,
+          Consul is the standard.
+        </p>
+        <p>Health checks are the foundation — service registries only route to instances that pass health checks. A
+          <code>/health</code> endpoint that checks DB connectivity, queue connectivity, and process health is not
+          optional.
+        </p>
+        <div class="tip"><strong>Key point:</strong> "On Kubernetes, service discovery is solved by the platform.
+          Understand it conceptually — it shows up in system design interviews — but don't build it yourself unless
+          you're not using an orchestrator."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What is idempotency
+          in the context of APIs, and how do you design idempotent endpoints?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>An idempotent operation produces the same result whether called once or ten times. <code>GET</code>,
+          <code>PUT</code>, and <code>DELETE</code> are idempotent by definition. <code>POST</code> is not — calling
+          <code>POST /orders</code> twice creates two orders.
+        </p>
+        <p>Why it matters: networks are unreliable. A client sends a request, gets a timeout, doesn't know if the server
+          processed it, and retries. If the operation isn't idempotent, the retry creates a duplicate — two charges, two
+          orders, two emails.</p>
+        <p><strong>Idempotency keys</strong> — the client generates a unique key per logical operation and sends it in a
+          header (<code>Idempotency-Key: uuid</code>). The server stores the key and result. On retry with the same key,
+          return the stored result without re-executing. TTL the stored key after 24-48 hours.</p>
+        <p>Design considerations: the idempotency key should be scoped to the user (one user's key shouldn't affect
+          another's). The storage must be atomic — check and store in one operation. If two identical requests arrive
+          simultaneously, only one should execute; the other should wait and receive the result.</p>
+        <div class="code-block"># Idempotency key enforcement — DB-backed
+          async def create_order(user_id: int, payload: OrderPayload, idempotency_key: str):
+          # Atomic insert — fails with unique constraint on duplicate
+          async with db.begin():
+          existing = await db.get_idempotent_result(user_id, idempotency_key)
+          if existing:
+          return existing # duplicate request — return cached result
+
+          order = await db.create_order(user_id, payload)
+          await db.store_idempotent_result(
+          user_id, idempotency_key, order, ttl_hours=48
+          )
+          return order</div>
+        <div class="tip"><strong>Key point:</strong> "Stripe's API requires idempotency keys for all POST requests. It's
+          the right design for any mutating endpoint that could be retried — payments, signups, order creation."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">How do you approach
+          API security beyond authentication? What are the common vulnerabilities?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>Authentication is one layer. A fully authenticated user can still exploit a poorly secured API.</p>
+        <p><strong>Broken Object Level Authorization (BOLA / IDOR)</strong> — the most common API vulnerability. A user
+          requests <code>GET /orders/456</code>. The server checks if the user is authenticated but not whether order
+          456 belongs to them. Fix: every resource fetch must check ownership. Never trust the ID in the URL — always
+          validate against the authenticated user's context.</p>
+        <p><strong>Mass Assignment</strong> — the client sends a JSON body and the server maps it directly to a DB
+          model. If the model has a <code>role</code> or <code>is_admin</code> field, a malicious client can
+          self-promote. Fix: use allowlisted Pydantic schemas for input — only fields in the schema can be set.</p>
+        <p><strong>Injection attacks</strong> — SQL injection via unsanitized query params, command injection via shell
+          execution. Fix: parameterized queries always (ORMs give this for free), never string-concatenate user input
+          into SQL or shell commands.</p>
+        <p><strong>Excessive data exposure</strong> — returning full DB objects including internal fields in API
+          responses. Fix: separate DB models from API response schemas. Never return raw ORM objects — serialize through
+          a Pydantic response model.</p>
+        <p><strong>Sensitive data in logs</strong> — logging request bodies that contain passwords, tokens, card
+          numbers. Fix: structured logging with explicit field allowlisting; mask or exclude sensitive fields before
+          logging.</p>
+        <div class="tip"><strong>Key point:</strong> "BOLA is consistently the top API vulnerability in OWASP's API
+          Security Top 10. Every data fetch needs an ownership check, every time. There's no way to handle it at the
+          middleware level — it's a business logic check."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">When does a monolith
+          make more sense than microservices, and what are the real costs of microservices?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Microservices are an organizational scaling solution as much as a technical one. The core benefit is that
+          independent services can be deployed, scaled, and owned by different teams without coordination. If you don't
+          have that problem — if you have one team and one deployable — microservices give you the costs without the
+          benefits.</p>
+        <p><strong>Real costs of microservices:</strong> distributed system complexity (network calls fail, need circuit
+          breakers, need service discovery), distributed tracing (you can't just look at one log, one set of metrics),
+          distributed transactions (two-phase commit or Sagas for multi-service operations), operational overhead (N
+          services = N deployments, N sets of logs, N dashboards, N health checks), latency overhead (in-process
+          function calls become network round trips).</p>
+        <p><strong>When monolith is correct:</strong> early-stage product where requirements change fast. Small team (<
+            10 engineers). Domain not yet understood — splitting too early creates the wrong service boundaries and you
+            end up with a distributed monolith (services that are tightly coupled anyway). The "modular monolith"
+            pattern — well-structured internal modules with strict interfaces — gives you most of the organizational
+            benefits without the operational cost.</p>
+            <p>The right migration path: start modular monolith → identify the seams (high-churn modules, independent
+              scaling needs, team ownership boundaries) → extract services along those seams. Don't build microservices
+              on day one.</p>
+            <div class="tip"><strong>Key point:</strong> "A distributed monolith — tightly coupled services that can't
+              be deployed independently — is the worst of both worlds. The value of microservices comes from independent
+              deployability, not from 'services' as an aesthetic choice."</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== DATABASES & DATA MODELING ===== -->
+  <div id="db" class="section">
+    <div class="count">11 questions — SQL, NoSQL, and data modeling at production depth</div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q1</span><span class="q-text">How do you decide
+          between a SQL database and a NoSQL database for a new system?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>The decision isn't "new tech vs old tech" — it's about which data model and consistency guarantee fits the
+          access pattern.</p>
+        <p>Reach for <strong>SQL (PostgreSQL)</strong> when: data has relationships (users → orders → items → products),
+          you need ACID transactions across multiple entities, queries are ad-hoc or complex (joins, aggregations,
+          window functions), and you're not sure what your access patterns will be. SQL is the most flexible starting
+          point — you can query it in any direction after the fact. PostgreSQL's JSONB column also gives you schema
+          flexibility within a relational model when you need it.</p>
+        <p>Reach for <strong>NoSQL</strong> when there's a specific data model that fits the problem better than
+          relational: <strong>Document stores (MongoDB)</strong> — hierarchical, self-contained documents with varying
+          shapes; content, product catalogs, user profiles. <strong>Key-value (Redis)</strong> — single key lookup, no
+          queries; sessions, caches, rate limiting counters. <strong>Column-family (Cassandra)</strong> — write-heavy,
+          time-series, designed for horizontal scale across many nodes; IoT data, metrics. <strong>Graph
+            (Neo4j)</strong> — highly connected data where relationships are first-class; social graphs, recommendation
+          systems.</p>
+        <p>The wrong reason to pick NoSQL: "It scales better." PostgreSQL scales to hundreds of millions of rows with
+          proper indexing and connection pooling. Most applications never need Cassandra-scale. Choose based on data
+          model fit, not premature scale concerns.</p>
+        <div class="tip"><strong>Key point:</strong> "Start with PostgreSQL. Its JSONB support handles flexible schemas,
+          and it scales further than most teams ever need. Add specialized databases when there's a specific pattern
+          that SQL genuinely can't handle well."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q2</span><span class="q-text">What is database
+          normalization, and when do you deliberately denormalize?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Normalization is the process of structuring a relational schema to reduce redundancy and ensure data
+          integrity. The forms (1NF, 2NF, 3NF) are progressively stricter rules about eliminating duplication.</p>
+        <p>In practical terms: if you store the user's email in every order row, you have a 3NF violation — updating an
+          email requires updating every order row, and if one is missed, your data is inconsistent. Normalized: store
+          email once in the users table, reference it via user_id. Now email is updated in one place.</p>
+        <p><strong>When to denormalize deliberately:</strong></p>
+        <p>Read performance — a query that joins 6 tables to build a dashboard that runs 10,000 times per day is a
+          candidate for a materialized view or a pre-computed denormalized table. The data is duplicated intentionally,
+          updated via background jobs or triggers, and read fast without joins.</p>
+        <p>Point-in-time accuracy — an order should record the product price at the time of purchase, not a foreign key
+          to the current price. When the product price changes, old orders must still show the original price. This is
+          intentional denormalization for audit integrity.</p>
+        <p>Write-heavy systems — normalized schemas can create write hot spots (one table getting all the locks).
+          Denormalized structures sometimes distribute writes better.</p>
+        <div class="tip"><strong>Key point:</strong> "Normalize to protect data integrity. Denormalize to improve read
+          performance or capture point-in-time state. Never denormalize without knowing exactly why — it creates an
+          update maintenance burden that compounds over time."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q3</span><span class="q-text">How do database
+          indexes work, and how do you choose what to index?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>An index is a separate data structure (usually a B-tree) that maps column values to row locations. Without an
+          index, a query <code>WHERE email = 'user@example.com'</code> scans every row. With an index on email, it
+          traverses the B-tree in O(log n) and jumps directly to the matching rows.</p>
+        <p><strong>What to index:</strong> columns used in WHERE clauses with high selectivity (many distinct values —
+          email, user_id are good; boolean is_active is poor). Foreign key columns — without an index on
+          <code>orders.user_id</code>, fetching a user's orders scans the entire orders table. Columns used in ORDER BY
+          and GROUP BY when the query returns large result sets.
+        </p>
+        <p><strong>Composite indexes</strong> — an index on <code>(user_id, created_at)</code> supports
+          <code>WHERE user_id = ? ORDER BY created_at DESC</code> efficiently. The leftmost prefix rule: this composite
+          index also satisfies queries on just <code>user_id</code>, but not queries on just <code>created_at</code>.
+        </p>
+        <p><strong>Index costs</strong> — every index slows down writes (the index must be updated on every INSERT,
+          UPDATE, DELETE). Don't index every column. Index the columns that appear in slow query logs. Use
+          <code>EXPLAIN ANALYZE</code> in PostgreSQL to verify an index is actually being used.
+        </p>
+        <div class="code-block">-- Check if index is used
+          EXPLAIN ANALYZE
+          SELECT * FROM orders WHERE user_id = 123 ORDER BY created_at DESC LIMIT 20;
+          -- Look for "Index Scan" vs "Seq Scan" in the output
+          -- "Seq Scan" on a large table = missing index
+
+          -- Partial index — only index active users (smaller, faster)
+          CREATE INDEX idx_users_email_active ON users(email)
+          WHERE is_active = true;</div>
+        <div class="tip"><strong>Key point:</strong> "EXPLAIN ANALYZE is the most important SQL debugging tool. Never
+          optimize indexes by guessing — read the query plan. Seq Scan on large tables is almost always a missing
+          index."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q4</span><span class="q-text">What is the CAP
+          theorem, and what does it mean in practice when choosing or configuring a database?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>CAP theorem states that a distributed data store can only guarantee two of three properties simultaneously:
+          <strong>Consistency</strong> (every read sees the latest write), <strong>Availability</strong> (every request
+          gets a response), <strong>Partition tolerance</strong> (the system continues operating despite network
+          partitions between nodes).
+        </p>
+        <p>The practical version: network partitions happen. You can't avoid P. So the real tradeoff is between C and A
+          during a partition.</p>
+        <p><strong>CP systems</strong> — favor consistency over availability during a partition. If nodes can't agree on
+          the latest value, they refuse to respond rather than returning stale data. HBase, Zookeeper, distributed
+          locks. Use when stale data causes harm — financial balances, inventory counts, leader election.</p>
+        <p><strong>AP systems</strong> — favor availability over consistency. Nodes respond with what they have even if
+          it might be stale. Cassandra, DynamoDB, CouchDB. Eventual consistency — writes propagate and converge, but
+          there's a window where different nodes see different values. Use when availability matters more than instant
+          accuracy — social feeds, product catalogs, analytics counters.</p>
+        <p>PostgreSQL with a single primary is CP — if the primary is unreachable, reads from replicas might see old
+          data, but the system can be configured to refuse those reads. With Citus (sharding) or read replicas, you
+          explicitly choose your consistency level per query.</p>
+        <div class="tip"><strong>Key point:</strong> "CAP isn't a database picker — it's a partition behavior question.
+          Most applications tolerate eventual consistency for reads but need strong consistency for writes. Design
+          accordingly."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q5</span><span class="q-text">What are database
+          migrations, and how do you manage them safely in production?</span><span class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>A migration is a versioned, repeatable change to a database schema. The alternative — applying schema changes
+          manually in production — is a recipe for inconsistency between environments and unrecoverable state after a
+          rollback.</p>
+        <p>Tools: Alembic (Python/SQLAlchemy), Flyway or Liquibase (Java), Rails migrations. The pattern: each migration
+          is a numbered file with an up and down function. <code>alembic upgrade head</code> applies all unapplied
+          migrations in order. <code>alembic downgrade -1</code> rolls back the last one.</p>
+        <p><strong>Zero-downtime migrations</strong> — naive schema changes break live traffic. Adding a NOT NULL column
+          to a large table acquires a full table lock. Renaming a column breaks in-flight queries. The safe pattern is
+          expand-contract (also called blue-green schema migration):</p>
+        <p>— <strong>Expand</strong>: add the new column as nullable. Deploy app code that writes to both old and new
+          column.<br>
+          — <strong>Backfill</strong>: populate the new column for existing rows in small batches (avoid long
+          lock-holding transactions).<br>
+          — <strong>Contract</strong>: once all rows are backfilled, add NOT NULL constraint, remove old column in a
+          subsequent migration.</p>
+        <div class="code-block"># Alembic migration — adding column safely
+          def upgrade():
+          # Step 1: add nullable (no lock on existing data)
+          op.add_column('users', sa.Column('display_name', sa.String(), nullable=True))
+
+          # Later migration — after backfill job has run
+          def upgrade():
+          # Step 2: set NOT NULL once all rows populated
+          op.alter_column('users', 'display_name', nullable=False)
+
+          # Never do this on a large live table — acquires table lock:
+          # op.add_column('users', sa.Column('name', sa.String(), nullable=False))</div>
+        <div class="tip"><strong>Key point:</strong> "Never apply migrations by hand in production. Never make breaking
+          schema changes without expand-contract. And always test the down migration — if you can't roll back, you can't
+          recover from a bad deploy."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q6</span><span class="q-text">What is the
+          difference between optimistic and pessimistic locking, and when do you use each?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>Both handle the problem of concurrent writes to the same data — two requests reading and modifying the same
+          row at the same time, with one overwriting the other's changes.</p>
+        <p><strong>Pessimistic locking</strong> — lock the row when you read it, preventing anyone else from reading or
+          modifying it until you commit. <code>SELECT ... FOR UPDATE</code> in PostgreSQL. Guarantees no conflict. Cost:
+          lock contention — other requests queue behind the lock holder. If the holder is slow, or dies mid-transaction,
+          locks can be held for a long time. Use for: bank transfers, seat reservations, inventory decrement —
+          operations where conflicts are common and the cost of a lost update is high.</p>
+        <p><strong>Optimistic locking</strong> — don't lock on read. Instead, track a version number or timestamp. At
+          write time, assert that the version hasn't changed since you read it. If it has, abort and retry. Use for:
+          content editing, profile updates — operations where conflicts are rare and the overhead of retrying is low.
+        </p>
+        <div class="code-block">-- Pessimistic: lock for update
+          BEGIN;
+          SELECT balance FROM accounts WHERE id = 1 FOR UPDATE;
+          -- no other transaction can modify this row until we COMMIT
+          UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+          COMMIT;
+
+          -- Optimistic: version check at write time
+          UPDATE products
+          SET stock = stock - 1, version = version + 1
+          WHERE id = 42 AND version = :expected_version;
+          -- If rows_affected == 0: someone else modified it first — retry</div>
+        <div class="tip"><strong>Key point:</strong> "Pessimistic is safe but slow under contention. Optimistic is fast
+          but requires retry logic. Choose based on conflict probability. For payment and inventory, always use
+          pessimistic — you can't afford a lost update."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q7</span><span class="q-text">How does MongoDB's
+          document model differ from a relational model, and when do the tradeoffs actually matter?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>MongoDB stores data as BSON documents (essentially JSON) in collections. The key difference: related data is
+          embedded in the document rather than referenced in a separate table. A blog post with its comments lives in
+          one document, not in two tables with a join.</p>
+        <p><strong>Embed vs reference</strong> is the core data modeling decision in MongoDB. Embed when: the nested
+          data is always accessed with the parent, the nested data is bounded in size, the data is owned by the parent
+          (post's comments). Reference when: the nested data is large or unbounded, the data is shared across multiple
+          documents (a user referenced by many posts), or the nested data needs to be queried independently.</p>
+        <p>The tradeoffs that actually matter in production:</p>
+        <p>— <strong>No multi-document ACID transactions (before 4.0)</strong> — MongoDB 4.0+ supports multi-document
+          transactions but with performance overhead. If your write pattern requires consistent updates across multiple
+          collections, this is a real cost.<br>
+          — <strong>Schema-less is a feature and a bug</strong> — no schema means fast iteration but data inconsistency
+          creeps in over time. Two documents in the same collection with different field names for the same concept. Use
+          schema validation (JSON Schema in MongoDB) in production.<br>
+          — <strong>No native JOINs</strong> — <code>$lookup</code> exists but is slower than a SQL join on indexed
+          columns. If your queries frequently join data across multiple collections, you've put relational data in a
+          document store.</p>
+        <div class="tip"><strong>Key point:</strong> "MongoDB's model is genuinely better when documents are
+          self-contained and access patterns are known. It becomes painful when you start doing $lookup-heavy queries —
+          that's relational data in a document store, and you'd have been better off with PostgreSQL."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q8</span><span class="q-text">What is connection
+          pooling, and why is it critical for database performance in production?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>Opening a database connection is expensive — TCP handshake, authentication, session setup. A typical
+          connection takes 20-100ms to establish. If your API handles 1,000 requests/second and opens a new DB
+          connection per request, that's 1,000 connections being created and destroyed every second. PostgreSQL's
+          max_connections defaults to 100. You've already exceeded it.</p>
+        <p>A connection pool maintains a pool of open connections that are borrowed and returned. A request grabs a
+          connection from the pool (fast — already open), does its work, and returns it. The pool holds, say, 20
+          connections serving 500 concurrent requests by multiplexing.</p>
+        <p><strong>Pool sizing</strong> — this is where teams get it wrong. More connections is not better. PostgreSQL's
+          ideal connection count is roughly <code>2 × num_CPU_cores + effective_spindle_count</code>. With 20 DB CPU
+          cores, ~40-50 connections is optimal. Above that, PostgreSQL spends more time on connection management than on
+          queries. PgBouncer in transaction mode is the standard solution — it pools at the proxy level, allowing
+          thousands of app connections to share a small number of real DB connections.</p>
+        <div class="code-block"># SQLAlchemy async pool configuration
+          engine = create_async_engine(
+          DATABASE_URL,
+          pool_size=20, # connections kept open
+          max_overflow=10, # extra connections allowed above pool_size under load
+          pool_timeout=30, # seconds to wait for a connection before error
+          pool_recycle=1800, # recycle connections after 30 min (avoids stale connections)
+          pool_pre_ping=True, # test connection health before using (avoids dead connections)
+          )</div>
+        <div class="tip"><strong>Key point:</strong> "pool_pre_ping=True prevents the 'connection reset by peer' errors
+          after a DB restart or failover. pool_recycle prevents memory leaks from long-lived connections. These two
+          settings alone eliminate a class of production database errors."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q9</span><span class="q-text">What is database
+          sharding, how does it differ from replication, and when does it become necessary?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p>These solve different problems. <strong>Replication</strong> copies data to multiple nodes for availability
+          and read scaling. All replicas have all data. Writes go to primary, reads can go to any replica. Solves: high
+          read traffic, failover. Doesn't solve: write throughput limitations, data volume exceeding single-node
+          capacity.</p>
+        <p><strong>Sharding</strong> partitions data across multiple nodes. Each shard holds a subset. A user in shard 1
+          doesn't exist in shard 2. This scales write throughput and data volume horizontally — add shards to handle
+          more data. Solves the problem replication can't.</p>
+        <p><strong>Shard key selection</strong> is critical. A bad shard key creates hot shards — one shard gets all the
+          traffic while others sit idle. <code>created_at</code> is a bad shard key because all recent writes go to the
+          latest time shard. A high-cardinality, uniformly distributed key (user_id hash, tenant_id) distributes load
+          evenly.</p>
+        <p>The operational costs are real: cross-shard queries require scatter-gather (query all shards, merge results)
+          — expensive. Cross-shard transactions are complex. Re-sharding (when you need more shards) is painful. Most
+          applications never need sharding — PostgreSQL with proper indexing, connection pooling, and read replicas
+          handles hundreds of millions of rows on a single node.</p>
+        <div class="tip"><strong>Key point:</strong> "Sharding is a last resort, not an architectural choice to make
+          upfront. Add read replicas first, optimize queries, add caching. Reach for sharding only when write volume or
+          data volume genuinely exceeds what a single primary can handle."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q10</span><span class="q-text">What are window
+          functions in SQL, and what problems do they solve that GROUP BY can't?</span><span class="chevron">▾</span>
+      </div>
+      <div class="qa-body">
+        <p>GROUP BY collapses rows — you get one row per group, losing the individual row data. Window functions compute
+          values across a set of rows related to the current row without collapsing them. You get the aggregate and the
+          original row in the same result.</p>
+        <p>The classic problem GROUP BY can't solve: "for each order, show the order value and that user's total order
+          value." GROUP BY gives you the total — you've lost the individual orders. A window function gives you both in
+          one query.</p>
+        <div class="code-block">-- For each order: order value, user's total orders, user's rank by spend
+          SELECT
+          order_id,
+          user_id,
+          amount,
+          SUM(amount) OVER (PARTITION BY user_id) AS user_total,
+          RANK() OVER (PARTITION BY user_id ORDER BY amount DESC) AS rank_in_user,
+          ROW_NUMBER() OVER (ORDER BY amount DESC) AS global_rank,
+          LAG(amount) OVER (PARTITION BY user_id ORDER BY created_at) AS prev_order_amount
+          FROM orders;
+
+          -- Running total per user (cumulative sum)
+          SELECT
+          user_id,
+          created_at,
+          amount,
+          SUM(amount) OVER (
+          PARTITION BY user_id
+          ORDER BY created_at
+          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+          ) AS running_total
+          FROM orders;</div>
+        <p>Key window functions: <code>ROW_NUMBER()</code> — unique sequential number per row in window.
+          <code>RANK()</code> — rank with gaps on ties. <code>DENSE_RANK()</code> — rank without gaps.
+          <code>LAG() / LEAD()</code> — access previous/next row's value. <code>NTILE(n)</code> — divide rows into n
+          buckets. All window functions use <code>OVER (PARTITION BY ... ORDER BY ...)</code>.
+        </p>
+        <div class="tip"><strong>Key point:</strong> "Window functions are the most powerful SQL feature that most
+          developers underuse. If you're reaching for a subquery to compare a row to its group's aggregate, a window
+          function almost certainly does it cleaner and faster."</div>
+      </div>
+    </div>
+
+    <div class="qa-card">
+      <div class="qa-header" onclick="tog(this)"><span class="q-num">Q11</span><span class="q-text">What are the top 3
+          SQL problems you see with slow DBs, and what are the first 3 things to check?</span><span
+          class="chevron">▾</span></div>
+      <div class="qa-body">
+        <p><strong>Top 3 SQL problems:</strong></p>
+        <p>1. <strong>Missing indexes / Full table scans:</strong> Query reads every row instead of using an index.<br>
+          2. <strong>N+1 queries:</strong> Code runs 1 query to get list, then 1 query per item in a loop.<br>
+          3. <strong>Lock contention / Long transactions:</strong> Transactions hold locks too long, blocking other
+          queries.</p>
+        <p><strong>First 3 things to check when DB is slow:</strong></p>
+        <p>1. <strong>Check slow query log / EXPLAIN:</strong> Find which query is slow. Run
+          <code>EXPLAIN ANALYZE</code> to see if it's using indexes or doing seq scans.<br>
+          2. <strong>Check current activity:</strong> <code>SHOW PROCESSLIST</code> in MySQL or
+          <code>pg_stat_activity</code> in Postgres. Look for blocked queries, long-running transactions.<br>
+          3. <strong>Check key metrics:</strong> CPU, I/O wait, connection count. If CPU maxed or disk 100% busy, you
+          have resource exhaustion, not just bad queries.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    event.target.classList.add('active');
+  }
+  function tog(header) {
+    const body = header.nextElementSibling;
+    const open = header.classList.contains('open');
+    header.classList.toggle('open', !open);
+    body.classList.toggle('open', !open);
+  }
+</script>
