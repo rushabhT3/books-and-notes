@@ -611,7 +611,24 @@
         transition-duration: 0.01ms !important;
       }
     }
+
+    .code-block pre {
+      margin: 0;
+      white-space: pre;
+      font-family: inherit;
+      font-size: inherit;
+      line-height: inherit;
+    }
+
+    .code-block code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-family: inherit;
+      font-size: inherit;
+    }
   </style>
+  <base target="_blank">
 </head>
 
 <body>
@@ -740,20 +757,22 @@
                   Use asymmetric keys (RS256) so the public key can be shared but the signing key stays private.</p>
                 <p><strong>Token revocation</strong> — the core problem with JWTs. Because verification is stateless, a
                   valid token stays valid until expiry even after logout. Solutions:</p>
-                <div class="code-block" data-lang="python"># 1. Short-lived access tokens (15min) + refresh tokens
-                  stored in DB
-                  # Revoke by deleting the refresh token — user must re-auth on next refresh
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># 1. Short-lived access tokens (15min) + refresh tokens
+stored in DB
+# Revoke by deleting the refresh token — user must re-auth on next refresh
 
-                  # 2. Token denylist in Redis — store revoked JTI (JWT ID claim) on logout
-                  async def logout(token: str, redis: Redis):
-                  payload = decode_token(token)
-                  ttl = payload["exp"] - int(time.time())
-                  await redis.setex(f"revoked:{payload['jti']}", ttl, "1")
+# 2. Token denylist in Redis — store revoked JTI (JWT ID claim) on logout
+async def logout(token: str, redis: Redis):
+payload = decode_token(token)
+ttl = payload["exp"] - int(time.time())
+await redis.setex(f"revoked:{payload['jti']}", ttl, "1")
 
-                  async def verify_token(token: str, redis: Redis):
-                  payload = decode_token(token)
-                  if await redis.exists(f"revoked:{payload['jti']}"):
-                  raise HTTPException(401, "Token revoked")</div>
+async def verify_token(token: str, redis: Redis):
+payload = decode_token(token)
+if await redis.exists(f"revoked:{payload['jti']}"):
+raise HTTPException(401, "Token revoked")</code></pre>
+                </div>
                 <p>The denylist approach reintroduces a DB lookup per request — you lose some of the statelessness
                   benefit, but you gain revocation. For most apps this trade-off is worth it.</p>
                 <div class="tip"><strong>Key interview point:</strong> "JWTs are stateless verification, not stateless
@@ -836,28 +855,30 @@
                 <p><strong>E2E tests</strong> — test the full system including frontend. Playwright, Cypress. Expensive,
                   flaky, slow. Keep them minimal — only critical paths (login, checkout, core CRUD flows).</p>
                 <p><strong>What a good integration test actually looks like:</strong></p>
-                <div class="code-block" data-lang="python">@pytest.fixture
-                  def auth_client(client, db_session):
-                  user = create_test_user(db_session, role="admin")
-                  token = create_access_token(user.id)
-                  client.headers["Authorization"] = f"Bearer {token}"
-                  return client, user
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">@pytest.fixture
+def auth_client(client, db_session):
+user = create_test_user(db_session, role="admin")
+token = create_access_token(user.id)
+client.headers["Authorization"] = f"Bearer {token}"
+return client, user
 
-                  def test_create_feedback_persists_to_db(auth_client, db_session):
-                  client, user = auth_client
-                  payload = {"trainer_id": 1, "rating": 4, "comment": "Good session"}
+def test_create_feedback_persists_to_db(auth_client, db_session):
+client, user = auth_client
+payload = {"trainer_id": 1, "rating": 4, "comment": "Good session"}
 
-                  response = client.post("/api/v1/feedback", json=payload)
+response = client.post("/api/v1/feedback", json=payload)
 
-                  assert response.status_code == 201
-                  data = response.json()
-                  assert data["rating"] == 4
-                  assert data["trainer_id"] == 1
+assert response.status_code == 201
+data = response.json()
+assert data["rating"] == 4
+assert data["trainer_id"] == 1
 
-                  # Verify the DB actually has the row — don't just trust the response
-                  feedback = db_session.get(Feedback, data["id"])
-                  assert feedback is not None
-                  assert feedback.user_id == user.id # check ownership was set correctly</div>
+# Verify the DB actually has the row — don't just trust the response
+feedback = db_session.get(Feedback, data["id"])
+assert feedback is not None
+assert feedback.user_id == user.id # check ownership was set correctly</code></pre>
+                </div>
                 <p>The key habit: always assert at the DB level, not just the response. The response could be
                   constructed from cached data or stale state — the DB assertion proves the write actually happened.</p>
                 <div class="tip"><strong>Key interview point:</strong> Distinguish what each test layer catches. Unit
@@ -889,29 +910,31 @@
                   <code>__call__</code> protocol. In Express (Node), it's a chain of <code>(req, res, next)</code>
                   functions.
                 </p>
-                <div class="code-block" data-lang="python">from starlette.middleware.base import BaseHTTPMiddleware
-                  import time, uuid
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from starlette.middleware.base import BaseHTTPMiddleware
+import time, uuid
 
-                  class RequestTracingMiddleware(BaseHTTPMiddleware):
-                  async def dispatch(self, request, call_next):
-                  request_id = str(uuid.uuid4())
-                  request.state.request_id = request_id
-                  start = time.monotonic()
+class RequestTracingMiddleware(BaseHTTPMiddleware):
+async def dispatch(self, request, call_next):
+request_id = str(uuid.uuid4())
+request.state.request_id = request_id
+start = time.monotonic()
 
-                  response = await call_next(request)
+response = await call_next(request)
 
-                  duration_ms = (time.monotonic() - start) * 1000
-                  response.headers["X-Request-ID"] = request_id
-                  logger.info("request", extra={
-                  "request_id": request_id,
-                  "path": request.url.path,
-                  "method": request.method,
-                  "status": response.status_code,
-                  "duration_ms": round(duration_ms, 2),
-                  })
-                  return response
+duration_ms = (time.monotonic() - start) * 1000
+response.headers["X-Request-ID"] = request_id
+logger.info("request", extra={
+"request_id": request_id,
+"path": request.url.path,
+"method": request.method,
+"status": response.status_code,
+"duration_ms": round(duration_ms, 2),
+})
+return response
 
-                  app.add_middleware(RequestTracingMiddleware)</div>
+app.add_middleware(RequestTracingMiddleware)</code></pre>
+                </div>
                 <p><strong>Right use cases:</strong> authentication (check token before handler runs), rate limiting,
                   request/response logging, CORS headers, request ID injection, response compression, global exception
                   catching, tenant identification in multi-tenant apps.</p>
@@ -949,20 +972,22 @@
                   — <strong>Single point of failure:</strong> if the instance dies, the disk and its files go with it.
                   Ephemeral containers (Kubernetes, ECS) have no persistent local storage at all.</p>
                 <p><strong>Production approach — presigned URLs:</strong></p>
-                <div class="code-block" data-lang="python"># FastAPI route — generates a presigned upload URL
-                  @router.post("/upload-url")
-                  async def get_upload_url(filename: str, content_type: str, current_user: User =
-                  Depends(get_current_user)):
-                  key = f"uploads/{current_user.id}/{uuid.uuid4()}/{filename}"
-                  url = s3_client.generate_presigned_url(
-                  "put_object",
-                  Params={"Bucket": BUCKET, "Key": key, "ContentType": content_type},
-                  ExpiresIn=300, # 5 minutes
-                  )
-                  return {"upload_url": url, "key": key}
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># FastAPI route — generates a presigned upload URL
+@router.post("/upload-url")
+async def get_upload_url(filename: str, content_type: str, current_user: User =
+Depends(get_current_user)):
+key = f"uploads/{current_user.id}/{uuid.uuid4()}/{filename}"
+url = s3_client.generate_presigned_url(
+"put_object",
+Params={"Bucket": BUCKET, "Key": key, "ContentType": content_type},
+ExpiresIn=300, # 5 minutes
+)
+return {"upload_url": url, "key": key}
 
-                  # Client uploads directly to S3 — application server never touches the bytes
-                  # After upload, client calls POST /files with the key to record metadata in DB</div>
+# Client uploads directly to S3 — application server never touches the bytes
+# After upload, client calls POST /files with the key to record metadata in DB</code></pre>
+                </div>
                 <p>This pattern offloads bandwidth from your application servers entirely. S3 handles the upload
                   directly. Your server only stores metadata.</p>
                 <p><strong>Post-upload processing:</strong> trigger a Celery task (or Lambda via S3 event) for virus
@@ -997,24 +1022,26 @@
                   business logic, which makes testing impossible without a live DB. With layers, you can unit-test
                   service functions with mocked repos, and integration-test repos against a real DB independently.</p>
                 <p><strong>Practical structure in FastAPI:</strong></p>
-                <div class="code-block" data-lang="text">app/
-                  api/routes/ # Layer 1: HTTP concerns only — parse request, call service, return response
-                  services/ # Layer 2: business logic, orchestration, validation rules
-                  repositories/ # Layer 3: all DB queries live here, returns domain models
-                  models/ # SQLAlchemy ORM models
-                  schemas/ # Pydantic request/response schemas (separate from ORM models)
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">app/
+api/routes/ # Layer 1: HTTP concerns only — parse request, call service, return response
+services/ # Layer 2: business logic, orchestration, validation rules
+repositories/ # Layer 3: all DB queries live here, returns domain models
+models/ # SQLAlchemy ORM models
+schemas/ # Pydantic request/response schemas (separate from ORM models)
 
-                  # Route: no DB calls, no business logic
-                  @router.post("/feedback", response_model=FeedbackOut, status_code=201)
-                  async def create_feedback(body: FeedbackCreate, svc: FeedbackService = Depends()):
-                  return await svc.submit_feedback(body)
+# Route: no DB calls, no business logic
+@router.post("/feedback", response_model=FeedbackOut, status_code=201)
+async def create_feedback(body: FeedbackCreate, svc: FeedbackService = Depends()):
+return await svc.submit_feedback(body)
 
-                  # Service: no HTTP concerns, no direct ORM calls
-                  class FeedbackService:
-                  async def submit_feedback(self, data: FeedbackCreate) -> Feedback:
-                  trainer = await self.trainer_repo.get_or_raise(data.trainer_id)
-                  feedback = Feedback(**data.model_dump(), submitted_at=utcnow())
-                  return await self.feedback_repo.create(feedback)</div>
+# Service: no HTTP concerns, no direct ORM calls
+class FeedbackService:
+async def submit_feedback(self, data: FeedbackCreate) -> Feedback:
+trainer = await self.trainer_repo.get_or_raise(data.trainer_id)
+feedback = Feedback(**data.model_dump(), submitted_at=utcnow())
+return await self.feedback_repo.create(feedback)</code></pre>
+                </div>
                 <p><strong>Where it becomes dogma:</strong> some teams add a Repository layer that's just a thin wrapper
                   around SQLAlchemy with no actual abstraction benefit. If you're never swapping the DB, a repository
                   that just calls <code>db.add(obj)</code> is ceremony. Add abstraction when it provides testability or
@@ -1045,17 +1072,19 @@
                   or Liquibase track which migrations have run and apply new ones in order. The alternative — manually
                   running SQL scripts — doesn't scale and can't be automated or audited.</p>
                 <p><strong>Alembic basics:</strong></p>
-                <div class="code-block" data-lang="bash"># Generate migration from ORM model changes
-                  alembic revision --autogenerate -m "add_rating_to_feedback"
+                <div class="code-block" data-lang="bash">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Generate migration from ORM model changes
+alembic revision --autogenerate -m "add_rating_to_feedback"
 
-                  # Apply all pending migrations
-                  alembic upgrade head
+# Apply all pending migrations
+alembic upgrade head
 
-                  # Roll back one step
-                  alembic downgrade -1
+# Roll back one step
+alembic downgrade -1
 
-                  # Check current state
-                  alembic current</div>
+# Check current state
+alembic current</code></pre>
+                </div>
                 <p><strong>What goes wrong in production:</strong></p>
                 <p>— <strong>Long-running ALTER TABLE:</strong> adding a NOT NULL column to a table with 50M rows takes
                   an exclusive lock for minutes. Postgres rewrites the whole table. Use a multi-step strategy: add
@@ -1094,44 +1123,48 @@
                 <p>A WebSocket is a persistent, full-duplex TCP connection established via an HTTP upgrade handshake.
                   After the upgrade, both client and server can push messages at any time — unlike HTTP which is
                   strictly request-response.</p>
-                <div class="code-block" data-lang="python">from fastapi import WebSocket
-                  from typing import dict
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from fastapi import WebSocket
+from typing import dict
 
-                  class ConnectionManager:
-                  def __init__(self):
-                  self.connections: dict[str, WebSocket] = {} # user_id -> socket
+class ConnectionManager:
+def __init__(self):
+self.connections: dict[str, WebSocket] = {} # user_id -> socket
 
-                  async def connect(self, user_id: str, ws: WebSocket):
-                  await ws.accept()
-                  self.connections[user_id] = ws
+async def connect(self, user_id: str, ws: WebSocket):
+await ws.accept()
+self.connections[user_id] = ws
 
-                  async def disconnect(self, user_id: str):
-                  self.connections.pop(user_id, None)
+async def disconnect(self, user_id: str):
+self.connections.pop(user_id, None)
 
-                  async def send_to_user(self, user_id: str, message: dict):
-                  ws = self.connections.get(user_id)
-                  if ws:
-                  await ws.send_json(message)
+async def send_to_user(self, user_id: str, message: dict):
+ws = self.connections.get(user_id)
+if ws:
+await ws.send_json(message)
 
-                  manager = ConnectionManager()
+manager = ConnectionManager()
 
-                  @router.websocket("/ws/{user_id}")
-                  async def websocket_endpoint(ws: WebSocket, user_id: str):
-                  await manager.connect(user_id, ws)
-                  try:
-                  while True:
-                  data = await ws.receive_json()
-                  await handle_message(user_id, data)
-                  except WebSocketDisconnect:
-                  await manager.disconnect(user_id)</div>
+@router.websocket("/ws/{user_id}")
+async def websocket_endpoint(ws: WebSocket, user_id: str):
+await manager.connect(user_id, ws)
+try:
+while True:
+data = await ws.receive_json()
+await handle_message(user_id, data)
+except WebSocketDisconnect:
+await manager.disconnect(user_id)</code></pre>
+                </div>
                 <p><strong>The scaling problem:</strong> the above ConnectionManager is in-process. If user A is on
                   instance 1 and sends a message to user B on instance 2, instance 1 has no connection to user B. Fix:
                   Redis Pub/Sub as the message bus.</p>
-                <div class="code-block" data-lang="python"># Instance 1 publishes event to Redis channel
-                  await redis.publish(f"user:{target_user_id}", json.dumps(message))
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Instance 1 publishes event to Redis channel
+await redis.publish(f"user:{target_user_id}", json.dumps(message))
 
-                  # Every instance subscribes to the relevant channels
-                  # When message arrives, the instance that holds the target socket delivers it</div>
+# Every instance subscribes to the relevant channels
+# When message arrives, the instance that holds the target socket delivers it</code></pre>
+                </div>
                 <p><strong>Other backend considerations:</strong> heartbeat/ping-pong to detect stale connections
                   (clients that close without sending a close frame), authentication on the upgrade handshake (not every
                   request), connection limits per instance, graceful restart — draining connections before shutdown
@@ -1162,20 +1195,22 @@
                   deployments: DB URLs, API keys, feature flags. Code should be identical across environments — only
                   config changes. This is the twelve-factor app principle and it's right.</p>
                 <p><strong>Structured config with Pydantic Settings:</strong></p>
-                <div class="code-block" data-lang="python">from pydantic_settings import BaseSettings,
-                  SettingsConfigDict
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from pydantic_settings import BaseSettings,
+SettingsConfigDict
 
-                  class Settings(BaseSettings):
-                  database_url: str
-                  redis_url: str
-                  jwt_secret: str
-                  environment: str = "development"
-                  debug: bool = False
-                  sentry_dsn: str | None = None
+class Settings(BaseSettings):
+database_url: str
+redis_url: str
+jwt_secret: str
+environment: str = "development"
+debug: bool = False
+sentry_dsn: str | None = None
 
-                  model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
-                  settings = Settings() # reads from env vars, falls back to .env in dev</div>
+settings = Settings() # reads from env vars, falls back to .env in dev</code></pre>
+                </div>
                 <p>Pydantic validates types at startup — a missing <code>DATABASE_URL</code> raises an error
                   immediately, not when the first DB call fails 2 hours into a deployment.</p>
                 <p><strong>Secrets management in production — never hardcode, never commit:</strong></p>
@@ -1277,16 +1312,18 @@
                   same instance, typically because session state is in-process. This is a code smell — it limits
                   horizontal scaling and means one instance dying breaks sessions. The correct fix is to externalize
                   session state to Redis so any instance can handle any request.</p>
-                <div class="code-block" data-lang="python"># AWS ALB sticky session — still works but creates coupling
-                  # Target group attribute: stickiness.enabled = true
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># AWS ALB sticky session — still works but creates coupling
+# Target group attribute: stickiness.enabled = true
 
-                  # Better: stateless sessions using Redis
-                  @app.middleware("http")
-                  async def session_middleware(request: Request, call_next):
-                  session_id = request.cookies.get("session_id")
-                  if session_id:
-                  request.state.session = await redis.get(f"session:{session_id}")
-                  return await call_next(request)</div>
+# Better: stateless sessions using Redis
+@app.middleware("http")
+async def session_middleware(request: Request, call_next):
+session_id = request.cookies.get("session_id")
+if session_id:
+request.state.session = await redis.get(f"session:{session_id}")
+return await call_next(request)</code></pre>
+                </div>
                 <p><strong>Health checks:</strong> load balancers probe each instance (HTTP GET /health every 30s). If
                   an instance fails, it's removed from rotation. Your health check endpoint should verify the DB
                   connection is up — a 200 from a server that can't reach its DB is worse than a 503.</p>
@@ -1331,12 +1368,14 @@
                   order).<br>
                   — The operation is fast and the client is waiting for the response.<br>
                   — Simple request-response where failure handling is straightforward.</p>
-                <div class="code-block" data-lang="python"># Async pattern: respond immediately, process in background
-                  @router.post("/reports", status_code=202)
-                  async def generate_report(params: ReportParams):
-                  job_id = str(uuid.uuid4())
-                  await celery_app.send_task("generate_report", args=[job_id, params.model_dump()])
-                  return {"job_id": job_id, "status_url": f"/reports/{job_id}/status"}</div>
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Async pattern: respond immediately, process in background
+@router.post("/reports", status_code=202)
+async def generate_report(params: ReportParams):
+job_id = str(uuid.uuid4())
+await celery_app.send_task("generate_report", args=[job_id, params.model_dump()])
+return {"job_id": job_id, "status_url": f"/reports/{job_id}/status"}</code></pre>
+                </div>
                 <div class="tip"><strong>Key interview point:</strong> "Async messaging trades latency (eventual) for
                   resilience and decoupling. Synchronous HTTP is simpler but couples availability — if the downstream
                   service is down, your request fails too."</div>
@@ -1363,29 +1402,31 @@
                   Replicas receive changes asynchronously from the primary — typically with 10ms-500ms replication lag.
                   This scales read capacity without scaling write capacity.</p>
                 <p><strong>Implementation in SQLAlchemy:</strong></p>
-                <div class="code-block" data-lang="python">from sqlalchemy.ext.asyncio import create_async_engine
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from sqlalchemy.ext.asyncio import create_async_engine
 
-                  write_engine = create_async_engine(PRIMARY_DB_URL)
-                  read_engine = create_async_engine(READ_REPLICA_URL)
+write_engine = create_async_engine(PRIMARY_DB_URL)
+read_engine = create_async_engine(READ_REPLICA_URL)
 
-                  # Use write session for mutations
-                  async def get_write_db():
-                  async with AsyncSession(write_engine) as session:
-                  yield session
+# Use write session for mutations
+async def get_write_db():
+async with AsyncSession(write_engine) as session:
+yield session
 
-                  # Use read session for queries
-                  async def get_read_db():
-                  async with AsyncSession(read_engine) as session:
-                  yield session
+# Use read session for queries
+async def get_read_db():
+async with AsyncSession(read_engine) as session:
+yield session
 
-                  # Route depends on the type of operation
-                  @router.get("/trainers")
-                  async def list_trainers(db: AsyncSession = Depends(get_read_db)):
-                  return await trainer_repo.list_all(db)
+# Route depends on the type of operation
+@router.get("/trainers")
+async def list_trainers(db: AsyncSession = Depends(get_read_db)):
+return await trainer_repo.list_all(db)
 
-                  @router.post("/trainers")
-                  async def create_trainer(data: TrainerCreate, db: AsyncSession = Depends(get_write_db)):
-                  return await trainer_repo.create(db, data)</div>
+@router.post("/trainers")
+async def create_trainer(data: TrainerCreate, db: AsyncSession = Depends(get_write_db)):
+return await trainer_repo.create(db, data)</code></pre>
+                </div>
                 <p><strong>Read-your-own-writes problem:</strong> a user updates their profile (write to primary), then
                   immediately fetches it (reads from replica). The replica hasn't caught up — they see the old data.
                   Looks like a bug. Solutions:</p>
@@ -1432,16 +1473,18 @@
                   acceptable.<br>
                   — <strong>Leaky bucket:</strong> requests drain from a queue at a fixed rate regardless of burst.
                   Enforces smooth output rate. Good for protecting downstream services with fixed capacity.</p>
-                <div class="code-block" data-lang="lua">-- Redis sliding window rate limiter with Lua atomic script
-                  -- KEYS[1] = rate limit key, ARGV[1] = window (seconds), ARGV[2] = limit
-                  local current = redis.call('INCR', KEYS[1])
-                  if current == 1 then
-                  redis.call('EXPIRE', KEYS[1], ARGV[1])
-                  end
-                  if current > tonumber(ARGV[2]) then
-                  return 0 -- blocked
-                  end
-                  return 1 -- allowed</div>
+                <div class="code-block" data-lang="lua">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">-- Redis sliding window rate limiter with Lua atomic script
+-- KEYS[1] = rate limit key, ARGV[1] = window (seconds), ARGV[2] = limit
+local current = redis.call('INCR', KEYS[1])
+if current == 1 then
+redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+if current > tonumber(ARGV[2]) then
+return 0 -- blocked
+end
+return 1 -- allowed</code></pre>
+                </div>
                 <p><strong>At scale:</strong> the rate limiter must be centralized — in-process counters don't work
                   across multiple instances. Redis with atomic operations is the standard. For very high traffic, Redis
                   Cluster or a dedicated service like envoy's rate limit service.</p>
@@ -1482,13 +1525,15 @@
                   made up of spans — each span represents one operation (HTTP call, DB query, cache lookup). Correlates
                   logs across services via trace_id. Tools: Jaeger, Zipkin, Datadog APM, OpenTelemetry (the
                   vendor-neutral instrumentation standard).</p>
-                <div class="code-block" data-lang="python">from opentelemetry import trace
-                  from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-                  from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from opentelemetry import trace
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 
-                  FastAPIInstrumentor.instrument_app(app) # auto-traces all routes
-                  SQLAlchemyInstrumentor().instrument() # auto-traces all DB queries
-                  # Every request now has spans for HTTP + DB, linked by trace_id</div>
+FastAPIInstrumentor.instrument_app(app) # auto-traces all routes
+SQLAlchemyInstrumentor().instrument() # auto-traces all DB queries
+# Every request now has spans for HTTP + DB, linked by trace_id</code></pre>
+                </div>
                 <p><strong>The golden signals (Google SRE):</strong> the four metrics that matter most for any service —
                   latency (how long requests take), traffic (request rate), errors (error rate), saturation (how full
                   your resources are). If all four are healthy, the service is healthy.</p>
@@ -1522,22 +1567,24 @@
                   (short TTL for dynamic content, long TTL for versioned builds), and API responses (carefully — only
                   truly static or slowly-changing data).</p>
                 <p><strong>Multi-layer cache strategy:</strong></p>
-                <div class="code-block" data-lang="text">Request flow:
-                  Browser cache (seconds-minutes)
-                  ↓ miss
-                  CDN edge cache (minutes-hours)
-                  ↓ miss
-                  Application cache (Redis, seconds-minutes)
-                  ↓ miss
-                  DB (source of truth)
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">Request flow:
+Browser cache (seconds-minutes)
+↓ miss
+CDN edge cache (minutes-hours)
+↓ miss
+Application cache (Redis, seconds-minutes)
+↓ miss
+DB (source of truth)
 
-                  # Cache-Control header controls browser + CDN behavior
-                  @router.get("/public/trainers/{id}")
-                  async def get_trainer(id: int):
-                  trainer = await get_cached_trainer(id)
-                  response = JSONResponse(content=trainer)
-                  response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
-                  return response</div>
+# Cache-Control header controls browser + CDN behavior
+@router.get("/public/trainers/{id}")
+async def get_trainer(id: int):
+trainer = await get_cached_trainer(id)
+response = JSONResponse(content=trainer)
+response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+return response</code></pre>
+                </div>
                 <p><strong>Cache invalidation at CDN layer:</strong> CDNs let you purge specific paths or tags.
                   Cloudflare Cache Tags let you tag all responses related to a resource (e.g., tag: trainer:42) and
                   invalidate them all when that trainer is updated. Without this, you're stuck with TTL-based staleness.
@@ -1617,14 +1664,16 @@
                 <p><strong>Circuit breaker pattern:</strong> wrap calls to external services. After N consecutive
                   failures, the circuit "opens" — calls fail immediately (fast fail) without hitting the failing
                   service. After a timeout, it "half-opens" to test if the service recovered.</p>
-                <div class="code-block" data-lang="python">from circuitbreaker import circuit
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">from circuitbreaker import circuit
 
-                  @circuit(failure_threshold=5, recovery_timeout=60)
-                  async def call_payment_service(order_id: str) -> PaymentResult:
-                  async with httpx.AsyncClient() as client:
-                  response = await client.post(PAYMENT_URL, json={"order_id": order_id})
-                  response.raise_for_status()
-                  return PaymentResult(**response.json())</div>
+@circuit(failure_threshold=5, recovery_timeout=60)
+async def call_payment_service(order_id: str) -> PaymentResult:
+async with httpx.AsyncClient() as client:
+response = await client.post(PAYMENT_URL, json={"order_id": order_id})
+response.raise_for_status()
+return PaymentResult(**response.json())</code></pre>
+                </div>
                 <p><strong>Timeouts everywhere:</strong> every external call must have a timeout. A DB query with no
                   timeout that hangs for 30 seconds holds a connection in the pool and a thread/coroutine — under load
                   this cascades into full service unavailability. Set aggressive timeouts (2-5 seconds for external
@@ -1641,15 +1690,17 @@
                 <p><strong>Retry with exponential backoff and jitter:</strong> retrying immediately after a failure
                   hammers an already struggling service. Exponential backoff spaces retries out. Jitter randomizes them
                   so all clients don't retry simultaneously.</p>
-                <div class="code-block" data-lang="python">async def retry_with_backoff(fn, max_attempts=3):
-                  for attempt in range(max_attempts):
-                  try:
-                  return await fn()
-                  except TransientError:
-                  if attempt == max_attempts - 1:
-                  raise
-                  delay = (2 ** attempt) + random.uniform(0, 1) # jitter
-                  await asyncio.sleep(delay)</div>
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">async def retry_with_backoff(fn, max_attempts=3):
+for attempt in range(max_attempts):
+try:
+return await fn()
+except TransientError:
+if attempt == max_attempts - 1:
+raise
+delay = (2 ** attempt) + random.uniform(0, 1) # jitter
+await asyncio.sleep(delay)</code></pre>
+                </div>
               </div>
             </div>
           </div>
@@ -1678,28 +1729,30 @@
                   traffic). This tells you whether you're building for 10 RPS or 500 RPS before you choose your
                   architecture.</p>
                 <p><strong>Load testing before launch:</strong></p>
-                <div class="code-block" data-lang="javascript">// k6 load test — ramps up to 100 virtual users over 5
-                  minutes
-                  import http from 'k6/http';
-                  import { sleep, check } from 'k6';
+                <div class="code-block" data-lang="javascript">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">// k6 load test — ramps up to 100 virtual users over 5
+minutes
+import http from 'k6/http';
+import { sleep, check } from 'k6';
 
-                  export const options = {
-                  stages: [
-                  { duration: '2m', target: 50 }, // ramp up
-                  { duration: '5m', target: 100 }, // sustain
-                  { duration: '2m', target: 0 }, // ramp down
-                  ],
-                  thresholds: {
-                  http_req_duration: ['p99&lt;500'], // 99% of requests under 500ms
-                  http_req_failed: ['rate&lt;0.01'], // error rate under 1%
-                  },
-                  };
+export const options = {
+stages: [
+{ duration: '2m', target: 50 }, // ramp up
+{ duration: '5m', target: 100 }, // sustain
+{ duration: '2m', target: 0 }, // ramp down
+],
+thresholds: {
+http_req_duration: ['p99&lt;500'], // 99% of requests under 500ms
+http_req_failed: ['rate&lt;0.01'], // error rate under 1%
+},
+};
 
-                  export default function () {
-                  const res = http.get('https://api.yourservice.com/trainers');
-                  check(res, { 'status 200': r => r.status === 200 });
-                  sleep(1);
-                  }</div>
+export default function () {
+const res = http.get('https://api.yourservice.com/trainers');
+check(res, { 'status 200': r => r.status === 200 });
+sleep(1);
+}</code></pre>
+                </div>
                 <p><strong>What to measure:</strong> throughput at which error rate increases (breaking point), latency
                   degradation curve (does p99 stay flat as load increases or does it balloon?), resource saturation
                   (which bottleneck appears first — CPU, memory, DB connections, I/O?), recovery behavior (does the
@@ -1753,16 +1806,18 @@
                   appropriate when deploys have regulatory review requirements or when test coverage is insufficient to
                   catch regressions.</p>
                 <p><strong>Pipeline stages in order:</strong></p>
-                <div class="code-block" data-lang="text">1. Code push triggers pipeline
-                  2. Static analysis: linting, type checking (mypy, ruff, ESLint)
-                  3. Unit tests (fast — should finish in &lt;2 minutes)
-                  4. Build artifact (Docker image, wheel, compiled binary)
-                  5. Integration tests (run against test DB, may take 5-10 min)
-                  6. Security scan (SAST, dependency audit — Snyk, Trivy, Bandit)
-                  7. Push artifact to registry (only if all above pass)
-                  8. Deploy to staging
-                  9. Smoke tests against staging
-                  10. Manual approval gate (CD) or automatic deploy (CDP) to production</div>
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">1. Code push triggers pipeline
+2. Static analysis: linting, type checking (mypy, ruff, ESLint)
+3. Unit tests (fast — should finish in &lt;2 minutes)
+4. Build artifact (Docker image, wheel, compiled binary)
+5. Integration tests (run against test DB, may take 5-10 min)
+6. Security scan (SAST, dependency audit — Snyk, Trivy, Bandit)
+7. Push artifact to registry (only if all above pass)
+8. Deploy to staging
+9. Smoke tests against staging
+10. Manual approval gate (CD) or automatic deploy (CDP) to production</code></pre>
+                </div>
                 <div class="tip"><strong>Key interview point:</strong> Fail fast — run the fastest, cheapest checks
                   first. Linting before tests, unit tests before integration tests. A pipeline that runs security scans
                   before unit tests wastes 5 minutes before finding a syntax error.</div>
@@ -1790,28 +1845,30 @@
                   makes them lightweight (seconds to start, tens of MBs vs. GBs for VMs) and portable — the same image
                   runs identically on a developer laptop, CI server, and production cluster.</p>
                 <p><strong>Production-grade Dockerfile — Python FastAPI example:</strong></p>
-                <div class="code-block" data-lang="dockerfile">FROM python:3.12-slim AS builder
-                  WORKDIR /app
-                  COPY requirements.txt .
-                  RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
+                <div class="code-block" data-lang="dockerfile">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">FROM python:3.12-slim AS builder
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
-                  FROM python:3.12-slim AS runtime
-                  # Non-root user — principle of least privilege
-                  RUN useradd -m -u 1001 appuser
-                  WORKDIR /app
+FROM python:3.12-slim AS runtime
+# Non-root user — principle of least privilege
+RUN useradd -m -u 1001 appuser
+WORKDIR /app
 
-                  # Copy only installed packages, not the full build environment
-                  COPY --from=builder /install /usr/local
-                  COPY --chown=appuser:appuser . .
+# Copy only installed packages, not the full build environment
+COPY --from=builder /install /usr/local
+COPY --chown=appuser:appuser . .
 
-                  USER appuser
+USER appuser
 
-                  # HEALTHCHECK lets the orchestrator know the app is ready
-                  HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD python -c "import httpx;
-                  httpx.get('http://localhost:8000/health').raise_for_status()"
+# HEALTHCHECK lets the orchestrator know the app is ready
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD python -c "import httpx;
+httpx.get('http://localhost:8000/health').raise_for_status()"
 
-                  EXPOSE 8000
-                  CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]</div>
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4"]</code></pre>
+                </div>
                 <p><strong>Key practices:</strong></p>
                 <p>— <strong>Multi-stage builds:</strong> separate build stage (with build tools, compilers) from
                   runtime stage. The runtime image contains only what's needed to run — no gcc, no pip, no test
@@ -1858,14 +1915,16 @@
                   Monitor error rates, latency, and business metrics. If metrics stay healthy, gradually increase the
                   percentage until 100%. If not, roll back — only a small percentage of users were affected. Best
                   practice for high-risk changes or when you want to validate on real traffic before full rollout.</p>
-                <div class="code-block" data-lang="bash"># Kubernetes canary — 90/10 traffic split via replica ratio
-                  # Old deployment: 9 replicas
-                  # New deployment: 1 replica (canary)
-                  # Load balancer distributes evenly across all 10 pods = 10% canary traffic
+                <div class="code-block" data-lang="bash">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Kubernetes canary — 90/10 traffic split via replica ratio
+# Old deployment: 9 replicas
+# New deployment: 1 replica (canary)
+# Load balancer distributes evenly across all 10 pods = 10% canary traffic
 
-                  # After validation, scale canary to 10 replicas, scale old to 0
-                  kubectl scale deployment app-canary --replicas=10
-                  kubectl scale deployment app-stable --replicas=0</div>
+# After validation, scale canary to 10 replicas, scale old to 0
+kubectl scale deployment app-canary --replicas=10
+kubectl scale deployment app-stable --replicas=0</code></pre>
+                </div>
                 <p><strong>Feature flags</strong> as a deployment strategy: deploy the code to all instances but keep
                   the feature disabled. Enable it for internal users, then a percentage, then all. Decouples code
                   deployment from feature release. Tools: LaunchDarkly, Unleash, Flagsmith (self-hosted).</p>
@@ -1910,12 +1969,14 @@
                   release branch overhead.<br>
                   — Team size doesn't dictate choice — discipline does. Trunk-based works with 50 engineers if CI is
                   strong.</p>
-                <div class="code-block" data-lang="bash"># Good commit message — imperative, specific, references ticket
-                  git commit -m "feat(feedback): add rating validation to prevent duplicate submissions (#142)
+                <div class="code-block" data-lang="bash">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Good commit message — imperative, specific, references ticket
+git commit -m "feat(feedback): add rating validation to prevent duplicate submissions (#142)
 
-                  - Adds idempotency check on (user_id, trainer_id, date)
-                  - Returns 409 Conflict if same user rates same trainer twice in a day
-                  - Adds DB unique constraint migration"</div>
+- Adds idempotency check on (user_id, trainer_id, date)
+- Returns 409 Conflict if same user rates same trainer twice in a day
+- Adds DB unique constraint migration"</code></pre>
+                </div>
                 <div class="tip"><strong>Key interview point:</strong> "Long-lived branches are the enemy of flow. The
                   longer a branch lives, the larger the merge and the higher the conflict risk. Feature flags let you
                   keep branches short without hiding incomplete work."</div>
@@ -1940,61 +2001,63 @@
               <div class="qa-content">
                 <p>A CI pipeline should give developers fast, reliable feedback. The goal: green means safe to merge,
                   red means specific failure with enough context to fix immediately.</p>
-                <div class="code-block" data-lang="yaml">name: CI
+                <div class="code-block" data-lang="yaml">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">name: CI
 
-                  on:
-                  pull_request:
-                  branches: [main]
-                  push:
-                  branches: [main]
+on:
+pull_request:
+branches: [main]
+push:
+branches: [main]
 
-                  jobs:
-                  lint-and-typecheck:
-                  runs-on: ubuntu-latest
-                  steps:
-                  - uses: actions/checkout@v4
-                  - uses: actions/setup-python@v5
-                  with: { python-version: "3.12" }
-                  - uses: actions/cache@v4
-                  with:
-                  path: ~/.cache/pip
-                  key: pip-${{ hashFiles('requirements*.txt') }}
-                  - run: pip install ruff mypy
-                  - run: ruff check .
-                  - run: mypy app/ --ignore-missing-imports
+jobs:
+lint-and-typecheck:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+with: { python-version: "3.12" }
+- uses: actions/cache@v4
+with:
+path: ~/.cache/pip
+key: pip-${{ hashFiles('requirements*.txt') }}
+- run: pip install ruff mypy
+- run: ruff check .
+- run: mypy app/ --ignore-missing-imports
 
-                  test:
-                  runs-on: ubuntu-latest
-                  services:
-                  postgres:
-                  image: postgres:16
-                  env: { POSTGRES_PASSWORD: test, POSTGRES_DB: testdb }
-                  options: >-
-                  --health-cmd pg_isready
-                  --health-interval 5s --health-timeout 5s --health-retries 5
-                  ports: ["5432:5432"]
-                  env:
-                  DATABASE_URL: postgresql+asyncpg://postgres:test@localhost/testdb
-                  steps:
-                  - uses: actions/checkout@v4
-                  - uses: actions/setup-python@v5
-                  with: { python-version: "3.12" }
-                  - uses: actions/cache@v4
-                  with:
-                  path: ~/.cache/pip
-                  key: pip-${{ hashFiles('requirements*.txt') }}
-                  - run: pip install -r requirements.txt -r requirements-dev.txt
-                  - run: alembic upgrade head
-                  - run: pytest --cov=app --cov-report=xml -q
-                  - uses: codecov/codecov-action@v4
+test:
+runs-on: ubuntu-latest
+services:
+postgres:
+image: postgres:16
+env: { POSTGRES_PASSWORD: test, POSTGRES_DB: testdb }
+options: >-
+--health-cmd pg_isready
+--health-interval 5s --health-timeout 5s --health-retries 5
+ports: ["5432:5432"]
+env:
+DATABASE_URL: postgresql+asyncpg://postgres:test@localhost/testdb
+steps:
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+with: { python-version: "3.12" }
+- uses: actions/cache@v4
+with:
+path: ~/.cache/pip
+key: pip-${{ hashFiles('requirements*.txt') }}
+- run: pip install -r requirements.txt -r requirements-dev.txt
+- run: alembic upgrade head
+- run: pytest --cov=app --cov-report=xml -q
+- uses: codecov/codecov-action@v4
 
-                  security-scan:
-                  runs-on: ubuntu-latest
-                  steps:
-                  - uses: actions/checkout@v4
-                  - run: pip install bandit safety
-                  - run: bandit -r app/ -ll # only high/critical issues
-                  - run: safety check -r requirements.txt</div>
+security-scan:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- run: pip install bandit safety
+- run: bandit -r app/ -ll # only high/critical issues
+- run: safety check -r requirements.txt</code></pre>
+                </div>
                 <p>Key decisions: lint and typecheck run in parallel with tests (separate jobs, both fail fast
                   independently). Postgres runs as a service container — real DB, not SQLite mocking. Pip cache keyed on
                   requirements hash — cache hit on most commits. Coverage uploaded to Codecov so PRs show coverage
@@ -2028,20 +2091,22 @@
                   SaaS. HCL is purpose-built and readable but is not a general-purpose language — no proper loops,
                   functions, or type system. <code>terraform plan</code> shows the diff before applying. State is stored
                   in a backend (S3 + DynamoDB for locking in AWS). Most widely adopted IaC tool.</p>
-                <div class="code-block" data-lang="hcl"># Terraform: RDS PostgreSQL instance
-                  resource "aws_db_instance" "primary" {
-                  identifier = "myapp-prod"
-                  engine = "postgres"
-                  engine_version = "16.2"
-                  instance_class = "db.t3.medium"
-                  allocated_storage = 100
-                  multi_az = true
-                  deletion_protection = true
+                <div class="code-block" data-lang="hcl">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Terraform: RDS PostgreSQL instance
+resource "aws_db_instance" "primary" {
+identifier = "myapp-prod"
+engine = "postgres"
+engine_version = "16.2"
+instance_class = "db.t3.medium"
+allocated_storage = 100
+multi_az = true
+deletion_protection = true
 
-                  db_name = "myapp"
-                  username = var.db_username
-                  password = var.db_password # use secrets manager in practice
-                  }</div>
+db_name = "myapp"
+username = var.db_username
+password = var.db_password # use secrets manager in practice
+}</code></pre>
+                </div>
                 <p><strong>Pulumi:</strong> uses real programming languages (Python, TypeScript, Go). Infrastructure is
                   code with all the tooling — proper types, imports, tests, loops. Better for dynamic infrastructure
                   (creating N identical resources based on a config value). The downside: complexity of a
@@ -2082,30 +2147,32 @@
                 <p><strong>Static analysis</strong> — deeper program analysis looking for security vulnerabilities,
                   logic errors, and code smells. Bandit (security), SonarQube, Semgrep (custom rules). Not purely
                   syntactic — understands data flow and call chains.</p>
-                <div class="code-block" data-lang="toml"># pyproject.toml — centralized tool config
-                  [tool.ruff]
-                  line-length = 100
-                  select = ["E", "F", "I", "UP", "B", "SIM"] # error, pyflakes, isort, upgrades, bugbear, simplify
-                  ignore = ["E501"]
+                <div class="code-block" data-lang="toml">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># pyproject.toml — centralized tool config
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "I", "UP", "B", "SIM"] # error, pyflakes, isort, upgrades, bugbear, simplify
+ignore = ["E501"]
 
-                  [tool.mypy]
-                  python_version = "3.12"
-                  strict = true
-                  plugins = ["pydantic.mypy"]
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
 
-                  [tool.pytest.ini_options]
-                  testpaths = ["tests"]
-                  asyncio_mode = "auto" # for pytest-asyncio
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto" # for pytest-asyncio
 
-                  # pre-commit hooks — runs checks before every commit
-                  # .pre-commit-config.yaml
-                  repos:
-                  - repo: https://github.com/astral-sh/ruff-pre-commit
-                  rev: v0.5.0
-                  hooks:
-                  - id: ruff
-                  args: [--fix]
-                  - id: ruff-format</div>
+# pre-commit hooks — runs checks before every commit
+# .pre-commit-config.yaml
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+rev: v0.5.0
+hooks:
+- id: ruff
+args: [--fix]
+- id: ruff-format</code></pre>
+                </div>
                 <p><strong>Pre-commit hooks vs. CI enforcement:</strong> pre-commit runs locally on commit — fast
                   feedback, keeps CI green. CI is the authoritative gate — it runs the same checks but can't be
                   bypassed. Both are necessary: pre-commit for developer experience, CI for enforcement.
@@ -2151,28 +2218,30 @@
                   (nginx-ingress, Traefik).<br>
                   — <strong>HorizontalPodAutoscaler:</strong> scales deployment replicas based on CPU/memory or custom
                   metrics. The traffic doubles → HPA adds pods within seconds.</p>
-                <div class="code-block" data-lang="yaml">apiVersion: apps/v1
-                  kind: Deployment
-                  metadata:
-                  name: api
-                  spec:
-                  replicas: 3
-                  selector:
-                  matchLabels: { app: api }
-                  template:
-                  metadata:
-                  labels: { app: api }
-                  spec:
-                  containers:
-                  - name: api
-                  image: ghcr.io/yourorg/api:sha-abc123 # pin to SHA, never latest
-                  ports: [{ containerPort: 8000 }]
-                  readinessProbe:
-                  httpGet: { path: /health, port: 8000 }
-                  initialDelaySeconds: 5
-                  resources:
-                  requests: { cpu: 250m, memory: 256Mi }
-                  limits: { cpu: 500m, memory: 512Mi }</div>
+                <div class="code-block" data-lang="yaml">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">apiVersion: apps/v1
+kind: Deployment
+metadata:
+name: api
+spec:
+replicas: 3
+selector:
+matchLabels: { app: api }
+template:
+metadata:
+labels: { app: api }
+spec:
+containers:
+- name: api
+image: ghcr.io/yourorg/api:sha-abc123 # pin to SHA, never latest
+ports: [{ containerPort: 8000 }]
+readinessProbe:
+httpGet: { path: /health, port: 8000 }
+initialDelaySeconds: 5
+resources:
+requests: { cpu: 250m, memory: 256Mi }
+limits: { cpu: 500m, memory: 512Mi }</code></pre>
+                </div>
                 <div class="tip"><strong>Key interview point:</strong> Resource requests and limits are critical —
                   without them, a noisy pod can starve others on the same node. Requests are what Kubernetes schedules
                   on (guaranteed), limits are the cap (throttled if exceeded).</div>
@@ -2211,22 +2280,24 @@
                   <code>pip install</code> today might give a different version than tomorrow, and a major version could
                   break your app silently.
                 </p>
-                <div class="code-block" data-lang="text"># Modern approach: uv (2024+) for fast Python package
-                  management
-                  # pyproject.toml — declarative dependency specification
-                  [project]
-                  dependencies = [
-                  "fastapi>=0.111.0,&lt;1.0.0",
-                  "sqlalchemy[asyncio]>=2.0.0,&lt;3.0.0",
-                  "pydantic>=2.7.0,&lt;3.0.0",
-                  ]
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Modern approach: uv (2024+) for fast Python package
+management
+# pyproject.toml — declarative dependency specification
+[project]
+dependencies = [
+"fastapi>=0.111.0,&lt;1.0.0",
+"sqlalchemy[asyncio]>=2.0.0,&lt;3.0.0",
+"pydantic>=2.7.0,&lt;3.0.0",
+]
 
-                  # uv.lock — auto-generated, exact pins, commit this to git
-                  # CI installs from lockfile: uv sync --frozen
+# uv.lock — auto-generated, exact pins, commit this to git
+# CI installs from lockfile: uv sync --frozen
 
-                  # Dependency auditing in CI
-                  uv run safety check # checks for known CVEs
-                  # Or GitHub Dependabot / Renovate for automated PRs when new versions release</div>
+# Dependency auditing in CI
+uv run safety check # checks for known CVEs
+# Or GitHub Dependabot / Renovate for automated PRs when new versions release</code></pre>
+                </div>
                 <p><strong>Dependabot / Renovate:</strong> automated PRs when a dependency has a new version or security
                   advisory. Set up automerge for patch-level updates with passing CI — removes manual toil from keeping
                   dependencies current.</p>
@@ -2269,26 +2340,28 @@
                   redeploy is almost always faster than a bug fix under pressure), verify the fix with metrics, declare
                   resolution.</p>
                 <p><strong>Postmortem within 48 hours:</strong></p>
-                <div class="code-block" data-lang="text">Incident: API error rate spiked to 45% for 23 minutes on
-                  2025-06-01
-                  Impact: ~4,200 failed requests, 0 data loss
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">Incident: API error rate spiked to 45% for 23 minutes on
+2025-06-01
+Impact: ~4,200 failed requests, 0 data loss
 
-                  Timeline:
-                  14:03 - Deploy v2.4.1 completed (rolling deploy finished)
-                  14:11 - Alert: error rate > 5%
-                  14:13 - On-call acknowledged, investigation started
-                  14:18 - Root cause identified: missing DB index added in migration
-                  caused full table scans under load — query time 4s avg
-                  14:21 - Decision: roll back v2.4.1 to v2.4.0
-                  14:26 - Rollback complete, error rate returned to baseline
+Timeline:
+14:03 - Deploy v2.4.1 completed (rolling deploy finished)
+14:11 - Alert: error rate > 5%
+14:13 - On-call acknowledged, investigation started
+14:18 - Root cause identified: missing DB index added in migration
+caused full table scans under load — query time 4s avg
+14:21 - Decision: roll back v2.4.1 to v2.4.0
+14:26 - Rollback complete, error rate returned to baseline
 
-                  Root cause: Migration added NOT NULL column but index was missing
-                  Contributing factor: Load test ran against empty test DB (index mattered only at scale)
+Root cause: Migration added NOT NULL column but index was missing
+Contributing factor: Load test ran against empty test DB (index mattered only at scale)
 
-                  Action items:
-                  - Add query time assertions to integration tests (EXPLAIN ANALYZE in test)
-                  - Load test with production-scale data volume before deploy
-                  - Add p99 DB query latency to deploy smoke test gates</div>
+Action items:
+- Add query time assertions to integration tests (EXPLAIN ANALYZE in test)
+- Load test with production-scale data volume before deploy
+- Add p99 DB query latency to deploy smoke test gates</code></pre>
+                </div>
                 <div class="tip"><strong>Key interview point:</strong> Blameless postmortems are a prerequisite for
                   honest ones. The goal is system improvement, not individual accountability. If engineers fear
                   punishment for incidents, they hide failures, prevent escalation, and the system never improves.</div>
@@ -2474,19 +2547,21 @@
                   the code is confusing, the documentation is a band-aid on a design problem. Confusing code with great
                   docs is still confusing code. The test: if a new engineer needs the docs to understand a function, the
                   function needs better naming, not a comment.</p>
-                <div class="code-block" data-lang="python"># Documentation in code: docstring for intent, not mechanics
-                  # Wrong — describes what the code does (reader can see that)
-                  def calculate_discount(price, tier):
-                  """Multiplies price by tier discount factor and returns result."""
+                <div class="code-block" data-lang="python">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;"># Documentation in code: docstring for intent, not mechanics
+# Wrong — describes what the code does (reader can see that)
+def calculate_discount(price, tier):
+"""Multiplies price by tier discount factor and returns result."""
 
-                  # Right — explains the why and the constraints
-                  def calculate_discount(price: Decimal, tier: str) -> Decimal:
-                  """Apply tier discount and return the final price.
+# Right — explains the why and the constraints
+def calculate_discount(price: Decimal, tier: str) -> Decimal:
+"""Apply tier discount and return the final price.
 
-                  Tier discounts are based on the 2024 pricing model (see pricing-model.md).
-                  'enterprise' tier cannot combine with promotional codes — callers must
-                  check is_promo_eligible() before applying a promo on top.
-                  """</div>
+Tier discounts are based on the 2024 pricing model (see pricing-model.md).
+'enterprise' tier cannot combine with promotional codes — callers must
+check is_promo_eligible() before applying a promo on top.
+"""</code></pre>
+                </div>
               </div>
             </div>
           </div>
@@ -2654,13 +2729,15 @@
                   transaction as updating two bank accounts simultaneously — both updates must succeed or both must
                   fail. A cache as a whiteboard next to the filing cabinet — fast to read, but may be out of date.</p>
                 <p><strong>Give options with explicit trade-offs, not a single recommendation:</strong></p>
-                <div class="code-block" data-lang="text">Option A: Fix properly — 3 weeks, eliminates the problem
-                  entirely, $12k eng cost
-                  Option B: Workaround — 3 days, reduces risk by ~70%, will need revisiting in 6 months
-                  Option C: Do nothing — $0 now, risk of a security incident with unknown impact
+                <div class="code-block" data-lang="text">
+                  <pre style="margin:0;white-space:pre;font-family:inherit;font-size:inherit;line-height:inherit;"><code style="background:transparent;color:inherit;padding:0;font-family:inherit;font-size:inherit;">Option A: Fix properly — 3 weeks, eliminates the problem
+entirely, $12k eng cost
+Option B: Workaround — 3 days, reduces risk by ~70%, will need revisiting in 6 months
+Option C: Do nothing — $0 now, risk of a security incident with unknown impact
 
-                  Recommendation: Option A given our security requirements, but if Q3 deadline is firm, Option B buys
-                  time.</div>
+Recommendation: Option A given our security requirements, but if Q3 deadline is firm, Option B buys
+time.</code></pre>
+                </div>
                 <p>This format respects the stakeholder's decision-making authority. You're the expert on what's
                   possible and what it costs. They're the expert on what the business can absorb.</p>
                 <p><strong>Acknowledge uncertainty explicitly:</strong> "My estimate is 2-3 weeks, but there's a
